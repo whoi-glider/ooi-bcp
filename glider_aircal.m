@@ -50,7 +50,7 @@ plot(G453.daten(d), G453.oxygen_saturation(d),'b.'); hold on;
     ind = find(stats_453(:,7) == 1);
 plot(stats_453(ind,6), stats_453(ind,3), 'co','markerfacecolor','c'); hold on;
     d = rem(G363.profile_index,1) == 0.5;
-plot(G363.daten(d), G363.oxygen_saturation(d),'.', 'color', nicecolor('ry'));
+plot(G363.daten(d), G363.oxygen_saturation(d),'.', 'color', 'r');
     ind = find(stats_363(:,7) == 1);
 plot(stats_363(ind,6), stats_363(ind,3), 'ro','markerfacecolor','r'); hold on;
 ylim([97 115])
