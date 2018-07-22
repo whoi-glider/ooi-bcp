@@ -17,3 +17,4 @@ G453.O2_corr = aaoptode_salpresscorr(G453.oxygen_concentration, G453.temperature
 %% Visualize data diagnostics
 glider_aircal %air calibration
 glider_updown_compare %historesis effects between up and down profiles
+glider_winklercal %compare with Winkler calibration cast values
