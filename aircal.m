@@ -1,4 +1,4 @@
-filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180722T150544.498000.nc';
+filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180813T150537.030000.nc';
 
 % constants
 mbar2atm = 1013.25;
@@ -11,10 +11,10 @@ load('latest');
 rhcorr = 1;
 % profile direction (-1 == up 1 == down)
 % choose which glider to process by commenting/uncommenting here
-%G = G363;
-%prof_dir = -1;
-G = G453;
-prof_dir = 1;
+G = G363;
+prof_dir = -1;
+% G = G453;
+% prof_dir = 1;
 % boolean flag for profile direction
 isup = prof_dir == -1;
 %%

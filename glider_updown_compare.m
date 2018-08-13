@@ -62,7 +62,7 @@ end
 %% Plot paired time intervals together
 figure(4); clf
 L = 2.5;
-M = 1;
+M = 10;
     subplot(121)
 plot(G453.oxygen_saturation(ind453pairedup), G453.depth_interp(ind453pairedup), '.', 'color', nicecolor('ry'),'markersize',M); hold on;
 plot(G453.oxygen_saturation(ind453paireddown), G453.depth_interp(ind453paireddown), '.', 'color', nicecolor('kwwkry'),'markersize',M); hold on;
