@@ -1,6 +1,6 @@
 %filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180713T150853.321000.nc';
-%filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180722T150544.498000.nc';
 filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180814T145924.485000.nc';
+
 % constants
 mbar2atm = 1013.25;
 sec2day = 60*60*24;
@@ -14,8 +14,10 @@ rhcorr = 1;
 % choose which glider to process by commenting/uncommenting here
 G = G363;
 prof_dir = -1;
+
 %G = G453;
 %prof_dir = 1;
+
 % boolean flag for profile direction
 isup = prof_dir == -1;
 %%
@@ -59,14 +61,14 @@ tsurf2 = [];
 airmeas =[];
 
 for ii = 1:np
-    
+
     %near-surface measurements from glider profile
     u = G.profile_index == ii & G.profile_direction == prof_dir & G.depth_interp < 10 & G.depth_interp > 0.5 & G.oxygen_saturation > 20;
     uts = G.profile_index == ii & G.profile_direction == prof_dir & G.depth_interp < 10 & G.depth_interp > 0.5;
     % select surface interval
     s = G.profile_index == ii-0.5+isup & ~isnan(G.oxygen_saturation) & G.depth_interp < 0.5;
 
-        
+
     t0 = find(s > 0,1);
     if ~isempty(t0)
         % time window for surface data: 90 sec < obs < 800 sec
@@ -82,15 +84,15 @@ for ii = 1:np
     else
         O2air = nan;
     end
-    
-    
+
+
     T.ml_tem(ii) = nanmean(G.temperature(uts));
     T.ml_sal(ii) = nanmean(G.salinity(uts));
-    T.ml_o2sat(ii) = nanmedian(G.oxygen_saturation(u)); 
+    T.ml_o2sat(ii) = nanmedian(G.oxygen_saturation(u));
     T.ml_daten(ii) = nanmean(G.daten(u));
     T.air_meas(ii) = quantile(O2air,qntl);
     T.air_daten(ii,1) = nanmean(G.daten(s));
-    
+
 end
 T.met_o2sat = naninterp1(met.daten,met.O2satcorr,T.air_daten);
 d = ~isnan(T.air_meas+T.ml_o2sat) & T.air_meas > 0;
