@@ -1,5 +1,6 @@
-filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180713T150853.321000.nc';
-
+%filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180713T150853.321000.nc';
+%filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180722T150544.498000.nc';
+filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180814T145924.485000.nc';
 % constants
 mbar2atm = 1013.25;
 sec2day = 60*60*24;
@@ -11,10 +12,10 @@ load('latest');
 rhcorr = 1;
 % profile direction (-1 == up 1 == down)
 % choose which glider to process by commenting/uncommenting here
-%G = G363;
-%prof_dir = -1;
-G = G453;
-prof_dir = 1;
+G = G363;
+prof_dir = -1;
+%G = G453;
+%prof_dir = 1;
 % boolean flag for profile direction
 isup = prof_dir == -1;
 %%
@@ -26,7 +27,7 @@ met.barometric_pressure = ncread(filename,'barometric_pressure'); %mbar
 met.patm = met.barometric_pressure / mbar2atm;
 met.rh = ncread(filename,'relative_humidity');
 met.water_temp = ncread(filename,'sea_surface_temperature');
-met.salinity = ncread(filename,'met_salsurf');
+met.salinity = 34.8;%ncread(filename,'met_salsurf');
 
 %% filter for surface measurements in upper 10m
 % saturated water vapor pressure
@@ -38,9 +39,7 @@ if rhcorr == 1
 else
     met.O2satcorr = 100.*(met.patm - met.SVP_S)./(1 - met.SVP_S);
 end
-%met.RH = dewp2rh(met.DEWP,met.ATMP );
-%RH = interp1(met.daten, met.RH, AS(:,1));
-%TA = interp1(met.daten,met.ATMP, AS(:,1));
+
 
 %%
 qntl = 0.32;
@@ -79,11 +78,12 @@ for ii = 1:np
         airmeas = [airmeas; G.oxygen_saturation(s)-naninterp1(met.daten,100.*(met.patm),G.daten(s))];
 
         O2air = G.oxygen_saturation(s2);
+        T.nsurf(ii) = sum(s2);
     else
         O2air = nan;
     end
     
-    T.nsurf(ii) = sum(s2);
+    
     T.ml_tem(ii) = nanmean(G.temperature(uts));
     T.ml_sal(ii) = nanmean(G.salinity(uts));
     T.ml_o2sat(ii) = nanmedian(G.oxygen_saturation(u)); 
@@ -102,7 +102,8 @@ T.air_corr = (T.air_meas-p(1).*T.ml_o2sat)./(1-p(1));
 
 ftsz = 14;
 lnw = 1;
-med_gain = median(T.met_o2sat./T.air_corr);
+med_gain = median(T.met_o2sat(~isnan(T.met_o2sat))./T.air_corr(~isnan(T.met_o2sat)));
+%med_gain = 1.8;
 figure;
 ax1 = gca;
 hold all;
