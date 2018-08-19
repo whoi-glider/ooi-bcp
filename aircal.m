@@ -1,4 +1,4 @@
-filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180813T150537.030000.nc';
+filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180819T120747.682000.nc';
 
 % constants
 mbar2atm = 1013.25;
@@ -13,8 +13,10 @@ rhcorr = 1;
 % choose which glider to process by commenting/uncommenting here
 G = G363;
 prof_dir = -1;
-% G = G453;
-% prof_dir = 1;
+
+%G = G453;
+%prof_dir = 1;
+
 % boolean flag for profile direction
 isup = prof_dir == -1;
 %%
@@ -26,7 +28,7 @@ met.barometric_pressure = ncread(filename,'barometric_pressure'); %mbar
 met.patm = met.barometric_pressure / mbar2atm;
 met.rh = ncread(filename,'relative_humidity');
 met.water_temp = ncread(filename,'sea_surface_temperature');
-met.salinity = ncread(filename,'met_salsurf');
+met.salinity = 34.8;%ncread(filename,'met_salsurf');
 
 %% filter for surface measurements in upper 10m
 % saturated water vapor pressure
@@ -38,9 +40,7 @@ if rhcorr == 1
 else
     met.O2satcorr = 100.*(met.patm - met.SVP_S)./(1 - met.SVP_S);
 end
-%met.RH = dewp2rh(met.DEWP,met.ATMP );
-%RH = interp1(met.daten, met.RH, AS(:,1));
-%TA = interp1(met.daten,met.ATMP, AS(:,1));
+
 
 %%
 qntl = 0.32;
@@ -60,14 +60,14 @@ tsurf2 = [];
 airmeas =[];
 
 for ii = 1:np
-    
+
     %near-surface measurements from glider profile
     u = G.profile_index == ii & G.profile_direction == prof_dir & G.depth_interp < 10 & G.depth_interp > 0.5 & G.oxygen_saturation > 20;
     uts = G.profile_index == ii & G.profile_direction == prof_dir & G.depth_interp < 10 & G.depth_interp > 0.5;
     % select surface interval
     s = G.profile_index == ii-0.5+isup & ~isnan(G.oxygen_saturation) & G.depth_interp < 0.5;
 
-        
+
     t0 = find(s > 0,1);
     if ~isempty(t0)
         % time window for surface data: 90 sec < obs < 800 sec
@@ -79,18 +79,19 @@ for ii = 1:np
         airmeas = [airmeas; G.oxygen_saturation(s)-naninterp1(met.daten,100.*(met.patm),G.daten(s))];
 
         O2air = G.oxygen_saturation(s2);
+        T.nsurf(ii) = sum(s2);
     else
         O2air = nan;
     end
-    
-    T.nsurf(ii) = sum(s2);
+
+
     T.ml_tem(ii) = nanmean(G.temperature(uts));
     T.ml_sal(ii) = nanmean(G.salinity(uts));
-    T.ml_o2sat(ii) = nanmedian(G.oxygen_saturation(u)); 
+    T.ml_o2sat(ii) = nanmedian(G.oxygen_saturation(u));
     T.ml_daten(ii) = nanmean(G.daten(u));
     T.air_meas(ii) = quantile(O2air,qntl);
     T.air_daten(ii,1) = nanmean(G.daten(s));
-    
+
 end
 T.met_o2sat = naninterp1(met.daten,met.O2satcorr,T.air_daten);
 d = ~isnan(T.air_meas+T.ml_o2sat) & T.air_meas > 0;
@@ -102,7 +103,8 @@ T.air_corr = (T.air_meas-p(1).*T.ml_o2sat)./(1-p(1));
 
 ftsz = 14;
 lnw = 1;
-med_gain = median(T.met_o2sat./T.air_corr);
+med_gain = median(T.met_o2sat(~isnan(T.met_o2sat))./T.air_corr(~isnan(T.met_o2sat)));
+%med_gain = 1.8;
 figure;
 ax1 = gca;
 hold all;
@@ -134,3 +136,19 @@ ax3.LineWidth = 1;
 ax3.FontSize = ftsz;
 xlabel('\DeltaO_{2,w}^{meas}');
 ylabel('\DeltaO_{2,a}^{meas}');
+<<<<<<< HEAD
+
+figure;
+plot(T.met_o2sat,T.air_corr,'.','MarkerSize',12); hold on;
+    ind = find(isnan(T.met_o2sat + T.air_corr) == 0);
+    p2 = polyfit(T.met_o2sat(ind),T.air_corr(ind),1);
+hold all;
+box on;
+ax3 = gca;
+plot(ax3.XLim,p2(1).*ax3.XLim+p2(2),'-k','LineWidth',3);
+ax3.LineWidth = 1;
+ax3.FontSize = ftsz;
+xlabel('\DeltaO_{2,w}^{met}');
+ylabel('\DeltaO_{2,w}^{mcorr}');
+
+%[rho,df,rho_sig95] = correlate(T.met_o2sat(ind),T.air_corr(ind))
