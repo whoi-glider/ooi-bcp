@@ -136,7 +136,6 @@ ax3.LineWidth = 1;
 ax3.FontSize = ftsz;
 xlabel('\DeltaO_{2,w}^{meas}');
 ylabel('\DeltaO_{2,a}^{meas}');
-<<<<<<< HEAD
 
 figure;
 plot(T.met_o2sat,T.air_corr,'.','MarkerSize',12); hold on;
