@@ -34,7 +34,10 @@ end
 figure;
 plot(T.met_o2sat,T.air_corr,'.','MarkerSize',8); hold on;
     ind_infl = find(isnan(check_infl) == 0);
+    new_points = find(T.air_daten > datenum(2018,9,4));
+    new_plot = intersect(ind_infl, new_points);
 plot(T.met_o2sat(ind_infl),T.air_corr(ind_infl),'r.','MarkerSize',15); hold on;
+plot(T.met_o2sat(new_plot),T.air_corr(new_plot),'m.','MarkerSize',18); hold on;
     ind = intersect(find(isnan(T.met_o2sat + T.air_corr) == 0), ind_infl);
     p2 = polyfit(T.met_o2sat(ind),T.air_corr(ind),1);
 hold all;
