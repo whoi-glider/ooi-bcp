@@ -1,5 +1,6 @@
-filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180814T145924.485000.nc';
-filename = 'deployment0005_GI01SUMO-SBD12-06-METBKA000-telemetered-metbk_hourly_20180608T175154.969000-20180923T203015.157000.nc';
+
+filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180920T090824.973000.nc';
+
 % constants
 mbar2atm = 1013.25;
 sec2day = 60*60*24;
@@ -11,11 +12,11 @@ load('latest');
 rhcorr = 1;
 % profile direction (-1 == up 1 == down)
 % choose which glider to process by commenting/uncommenting here
-G = G363;
-prof_dir = -1;
+% G = G363;
+% prof_dir = -1;
 
-%G = G453;
-%prof_dir = 1;
+G = G453;
+prof_dir = 1;
 
 % boolean flag for profile direction
 isup = prof_dir == -1;
@@ -137,3 +138,20 @@ ax3.LineWidth = 1;
 ax3.FontSize = ftsz;
 xlabel('\DeltaO_{2,w}^{meas}');
 ylabel('\DeltaO_{2,a}^{meas}');
+
+figure;
+    %new_points = find(T.air_daten > datenum(2018,9,4));
+plot(T.met_o2sat,T.air_corr,'.','MarkerSize',12); hold on;
+%plot(T.met_o2sat(new_points),T.air_corr(new_points),'m.','MarkerSize',18); hold on;
+    ind = find(isnan(T.met_o2sat + T.air_corr) == 0);
+    p2 = polyfit(T.met_o2sat(ind),T.air_corr(ind),1);
+hold all;
+box on;
+ax3 = gca;
+plot(ax3.XLim,p2(1).*ax3.XLim+p2(2),'-k','LineWidth',3);
+ax3.LineWidth = 1;
+ax3.FontSize = ftsz;
+xlabel('\DeltaO_{2,w}^{met}');
+ylabel('\DeltaO_{2,w}^{mcorr}');
+
+[rho,df,rho_sig95] = correlate(T.met_o2sat(ind),T.air_corr(ind))
