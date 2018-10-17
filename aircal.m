@@ -1,5 +1,5 @@
 filename = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172109.234000-20180814T145924.485000.nc';
-
+filename = 'deployment0005_GI01SUMO-SBD12-06-METBKA000-telemetered-metbk_hourly_20180608T175154.969000-20180923T203015.157000.nc';
 % constants
 mbar2atm = 1013.25;
 sec2day = 60*60*24;
@@ -58,6 +58,7 @@ T.Properties.VariableNames = vars;
 tsurf = [];
 tsurf2 = [];
 airmeas =[];
+profid = [];
 
 for ii = 1:np
 
@@ -77,7 +78,7 @@ for ii = 1:np
         % accumulates all individual air measurments
         tsurf = [tsurf; 24*60*60*(G.daten(s)-G.daten(t0))];
         airmeas = [airmeas; G.oxygen_saturation(s)-naninterp1(met.daten,100.*(met.patm),G.daten(s))];
-
+        profid = [profid; 0*G.oxygen_saturation(s)+ii-0.5+isup];
         O2air = G.oxygen_saturation(s2);
         T.nsurf(ii) = sum(s2);
     else
