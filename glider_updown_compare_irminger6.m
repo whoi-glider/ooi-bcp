@@ -1,12 +1,21 @@
 % Look at paired up and down profiles during deployment period to check for lag and resulting bias
 
 %% Plot to identify when gliders were measuring both up and down in sequence
+
+%Pull out times of aligned casts
+alignedcasts = [4,8,11];
+[~, alignedind, ~] = intersect(castmeta_irminger6.castnum, alignedcasts);
+timealigned = castmeta_irminger6.daytime(alignedind);
+
 figure(3); clf
     subplot(411)
 plot(G525.daten, G525.depth_interp, 'k.'); hold on;
 scatter(G525.daten, G525.depth_interp, [], G525.oxygen_saturation,'filled'); colorbar; caxis([85 100])
+plot(timealigned, zeros(size(timealigned)), 'r.','markersize',20); hold on;
+plot(timealigned-1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
+plot(timealigned+1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
 set(gca,'YDir','reverse'); 
-xlim([datenum(2019,8,6,12,0,0) datenum(now)])
+xlim([datenum(2019,8,6,12,0,0) datenum(2019,8,19)])
 ylim([0 1000])
 datetick('x',2,'keeplimits')
 ylabel('Depth (m)')
@@ -14,8 +23,11 @@ title('Glider 525, oxygen saturation')
     subplot(412)
 plot(G525.daten, G525.depth_interp, 'k.'); hold on;
 scatter(G525.daten, G525.depth_interp, [], G525.temperature,'filled'); colorbar; caxis([2.5 6.5])
+plot(timealigned, zeros(size(timealigned)), 'r.','markersize',20); hold on;
+plot(timealigned-1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
+plot(timealigned+1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
 set(gca,'YDir','reverse'); 
-xlim([datenum(2019,8,6,12,0,0) datenum(now)])
+xlim([datenum(2019,8,6,12,0,0) datenum(2019,8,19)])
 ylim([0 1000])
 datetick('x',2,'keeplimits')
 ylabel('Depth (m)')
@@ -32,8 +44,11 @@ title('Glider 525, temperature')
     subplot(413)
 plot(G560.daten, G560.depth_interp, 'k.'); hold on;
 scatter(G560.daten, G560.depth_interp, [], G560.oxygen_saturation,'filled'); colorbar; caxis([85 110])
+plot(timealigned, zeros(size(timealigned)), 'r.','markersize',20); hold on;
+plot(timealigned-1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
+plot(timealigned+1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
 set(gca,'YDir','reverse'); 
-xlim([datenum(2019,8,6,12,0,0) datenum(now)])
+xlim([datenum(2019,8,6,12,0,0) datenum(2019,8,19)])
 ylim([0 1000])
 datetick('x',2,'keeplimits')
 ylabel('Depth (m)')
@@ -41,8 +56,11 @@ title('Glider 560, oxygen saturation')
     subplot(414)
 plot(G560.daten, G560.depth_interp, 'k.'); hold on;
 scatter(G560.daten, G560.depth_interp, [], G560.temperature,'filled'); colorbar; caxis([2.5 6.5])
+plot(timealigned, zeros(size(timealigned)), 'r.','markersize',20); hold on;
+plot(timealigned-1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
+plot(timealigned+1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
 set(gca,'YDir','reverse'); 
-xlim([datenum(2019,8,6,12,0,0) datenum(now)])
+xlim([datenum(2019,8,6,12,0,0) datenum(2019,8,19)])
 ylim([0 1000])
 datetick('x',2,'keeplimits')
 ylabel('Depth (m)')

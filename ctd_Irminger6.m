@@ -40,6 +40,7 @@ filename= [path file]
 castnums = [3:6,8:13];
 castnames = {'C003: HYPM, no bottles', 'C004: Glider deployment, no bottles', 'C005: FLMA, no bottles', 'C006: FLMB, no bottles', 'C008: Glider cast, anchor release bottles', 'C009: SUMO/HYPM, anchor release bottles', 'C010: FLMB, anchor release bottles',...
     'C011: HYPM/SUMO/Glider', 'C012: FLMB', 'C013: FLMA'};
+latcalcs = 60; loncalcs = -39; %used for location in conversions
 %initialize cast
 cast{1} = [];
 for i = 1:length(castnums)
@@ -58,10 +59,10 @@ for i = 1:length(castnums)
     cast{castnums(i)}.Sal= ASCContinuousCTDData (:,14); %sal11: Salinity, Practical [PSU]
     cast{castnums(i)}.O2 = ASCContinuousCTDData (:,15)/(.022391); %Sbeox0ML/L converted to micromoles/L
     cast{castnums(i)}.SvCM = ASCContinuousCTDData (:,16); 
-    cast{castnums(i)}.SA = gsw_SA_from_SP(cast{castnums(i)}.Sal,cast{castnums(i)}.Pres,60,19);
+    cast{castnums(i)}.SA = gsw_SA_from_SP(cast{castnums(i)}.Sal,cast{castnums(i)}.Pres,latcalcs,loncalcs);
     cast{castnums(i)}.CT = gsw_CT_from_t(cast{castnums(i)}.SA,cast{castnums(i)}.T2,cast{castnums(i)}.Pres);
     cast{castnums(i)}.rho0 = gsw_rho(cast{castnums(i)}.SA,cast{castnums(i)}.CT,0);
-    cast{castnums(i)}.O2sol = gsw_O2sol(cast{castnums(i)}.SA,cast{castnums(i)}.CT,0,60,19);
+    cast{castnums(i)}.O2sol = gsw_O2sol(cast{castnums(i)}.SA,cast{castnums(i)}.CT,0,latcalcs,loncalcs);
     cast{castnums(i)}.O2sol2 = gsw_O2sol_SP_pt(cast{castnums(i)}.Sal,cast{castnums(i)}.T2);
     cast{castnums(i)}.aou = cast{castnums(i)}.O2sol - cast{castnums(i)}.O2 ;
     %Aanderaa processing calculations
