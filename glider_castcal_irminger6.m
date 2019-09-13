@@ -38,8 +38,8 @@ ind_oxy_G525 = find(G525_profile_summary(:,5) == 0 & G525_profile_summary(:,6) >
 ind_oxy_G560 = find(G560_profile_summary(:,5) == 0 & G560_profile_summary(:,6) > tol_profiledepth);
 
 %% Find aligned glider profiles for each CTD cast near gliders
-timetol = 0.5;
-disttol = 4;
+timetol = 0.75;
+disttol = 6;
 for i = 1:length(alignedcasts)
     ctd_time = timealigned(i);
     ctd_lat = castmeta_irminger6.lat(alignedind(i));
@@ -80,23 +80,29 @@ end
 % because of missing CTD data on GL525 at time of glider reballasting
 % calibration cast (C008)
 
+%Set values for gain corrections (need to be calculated)
+gain_560 = 1; %1.0351;
+gain_525 = 1; %1.0358;
+
 %Calculate O2 saturation for Winklers
 Winkler6.O2sol = gsw_O2sol_SP_pt(Winkler6.S, Winkler6.T);
 
 for i = 1:length(alignedcasts)
     figure; clf;
-hd = plot((cast{alignedcasts(i)}.O2corr./cast{alignedcasts(i)}.O2sol)*100, cast{alignedcasts(i)}.D, 'k.'); hold on;
+%subplot(121)
+hd = plot((cast{alignedcasts(i)}.O2corr./cast{alignedcasts(i)}.O2sol)*100, cast{alignedcasts(i)}.D, '.','color',nicecolor('kww')); hold on;
 hu = plot(cast{alignedcasts(i)}.O2corr(cast{alignedcasts(i)}.maxindex:end)./cast{alignedcasts(i)}.O2sol(cast{alignedcasts(i)}.maxindex:end)*100,...
-    cast{alignedcasts(i)}.D(cast{alignedcasts(i)}.maxindex:end), 'r.'); hold on;
+    cast{alignedcasts(i)}.D(cast{alignedcasts(i)}.maxindex:end), '.','color',nicecolor('kkw')); hold on;
+hm = plot(cast{alignedcasts(i)}.O2corr_mean./cast{alignedcasts(i)}.O2sol_mean*100, cast{alignedcasts(i)}.D_mean, 'k.'); hold on;
     indWink = find(Winkler6.cast == alignedcasts(i));
 hw = plot(Winkler6.O2_bcp(intersect(indWink, ind_bcp))./Winkler6.O2sol(intersect(indWink, ind_bcp))*100, Winkler6.depth(intersect(indWink, ind_bcp)), 'm.','markersize',15); hold on;
 for j = 1:length(cast_glider(alignedcasts(i)).G525_profile_summary(:,1))
     ind_prof = find(G525.profile_index == cast_glider(alignedcasts(i)).G525_profile_summary(j,1));
-    h525 = plot(G525.O2sat_corr(ind_prof), G525.depth_interp(ind_prof), 'b.'); hold on;
+    h525 = plot(G525.O2sat_corr(ind_prof).*gain_525, G525.depth_interp(ind_prof), 'b.'); hold on;
 end
 for j = 1:length(cast_glider(alignedcasts(i)).G560_profile_summary(:,1))
     ind_prof = find(G560.profile_index == cast_glider(alignedcasts(i)).G560_profile_summary(j,1));
-    h560 = plot(G560.O2sat_corr(ind_prof), G560.depth_interp(ind_prof), 'c.'); hold on;
+    h560 = plot(G560.O2sat_corr(ind_prof)*gain_560, G560.depth_interp(ind_prof), 'c.'); hold on;
 end
 axis ij
 ylim([0 1000])
@@ -104,6 +110,26 @@ xlabel('Oxygen % saturation')
 ylabel('Depth (m)')
 legend([hd, hu, hw, h525, h560],'CTD Downcast','CTD Upcast','Winkler O_2','GL525','GL560','location','southeast')
 title(['Irminger6 glider calibration, Cast ' num2str(alignedcasts(i))])
+
+% subplot(122)
+% hd = plot(cast{alignedcasts(i)}.T2, cast{alignedcasts(i)}.D, 'k.'); hold on;
+% hu = plot(cast{alignedcasts(i)}.T2(cast{alignedcasts(i)}.maxindex:end),...
+%     cast{alignedcasts(i)}.D(cast{alignedcasts(i)}.maxindex:end), 'r.'); hold on;
+% hm = plot(cast{alignedcasts(i)}.T2_mean, cast{alignedcasts(i)}.D_mean, 'm.'); hold on;
+% for j = 1:length(cast_glider(alignedcasts(i)).G525_profile_summary(:,1))
+%     ind_prof = find(G525.profile_index == cast_glider(alignedcasts(i)).G525_profile_summary(j,1));
+%     h525 = plot(G525.temperature(ind_prof), G525.depth_interp(ind_prof), 'b.'); hold on;
+% end
+% for j = 1:length(cast_glider(alignedcasts(i)).G560_profile_summary(:,1))
+%     ind_prof = find(G560.profile_index == cast_glider(alignedcasts(i)).G560_profile_summary(j,1));
+%     h560 = plot(G560.temperature(ind_prof), G560.depth_interp(ind_prof), 'c.'); hold on;
+% end
+% axis ij
+% ylim([0 1000])
+% xlabel('Temperature')
+% ylabel('Depth (m)')
+% legend([hd, hu, h525, h560],'CTD Downcast','CTD Upcast','GL525','GL560','location','southeast')
+% title(['Irminger6 glider calibration, Cast ' num2str(alignedcasts(i))])
 end
 
 

@@ -27,7 +27,7 @@ load castmeta_irminger6.mat
 %% Visualize data diagnostics
 ctd_Irminger6 %process all CTD cast data, and then close plot windows to move on to glider analysis
     close all
-glider_aircal_irminger6 %air calibration
+glider_aircal_irminger6 %air calibration 
 glider_updown_compare_irminger6 %historesis effects between up and down profiles
 glider_plotmap_irminger6 %plot glider locations during cruise
 glider_castcal_irminger6 %find aligned glider and CTD casts and plot together
