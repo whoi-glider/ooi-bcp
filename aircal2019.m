@@ -15,8 +15,8 @@ rhcorr = 0;
  G = G560;
  prof_dir = -1;
 
-G = G525;
-prof_dir = -1;
+%G = G525;
+%prof_dir = -1;
 
 % boolean flag for profile direction
 isup = prof_dir == -1;
@@ -74,7 +74,8 @@ for ii = 1:np
     t0 = find(s > 0,1);
     if ~isempty(t0)
         % time window for surface data: 90 sec < obs < 800 sec
-        s2 = s & G.daten - G.daten(t0) > 90/(24*60*60) & G.daten - G.daten(t0) < 800/(24*60*60);
+        twindow = [90 800]./sec2day;
+        s2 = s & G.daten - G.daten(t0) > twindow(1) & G.daten - G.daten(t0) < twindow(2);
 
 
         % accumulates all individual air measurments
@@ -87,13 +88,16 @@ for ii = 1:np
         O2air = nan;
     end
 
-
-    T.ml_tem(ii) = nanmean(G.temperature(uts));
-    T.ml_sal(ii) = nanmean(G.salinity(uts));
-    T.ml_o2sat(ii) = nanmedian(G.oxygen_saturation(u));
-    T.ml_daten(ii) = nanmean(G.daten(u));
-    T.air_meas(ii) = quantile(O2air,qntl);
-    T.air_daten(ii,1) = nanmean(G.daten(s));
+    try  
+        T.ml_tem(ii) = nanmean(G.temperature(uts));
+        T.ml_sal(ii) = nanmean(G.salinity(uts));
+        T.ml_o2sat(ii) = nanmedian(G.oxygen_saturation(u));
+        T.ml_daten(ii) = nanmean(G.daten(u));
+        T.air_meas(ii) = quantile(O2air,qntl);
+        T.air_daten(ii,1) = nanmean(G.daten(s));
+    catch
+        continue
+    end
 
 end
 %%
