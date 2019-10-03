@@ -7,6 +7,10 @@ alignedcasts = [4,8,11];
 [~, alignedind, ~] = intersect(castmeta_irminger6.castnum, alignedcasts);
 timealigned = castmeta_irminger6.daytime(alignedind);
 
+%Set beginning and end times
+begtime = datenum(2019,8,6,12,0,0);
+endtime = datenum(now); %datenum(2019,8,19);
+
 figure(3); clf
     subplot(411)
 plot(G525.daten, G525.depth_interp, 'k.'); hold on;
@@ -15,7 +19,7 @@ plot(timealigned, zeros(size(timealigned)), 'r.','markersize',20); hold on;
 plot(timealigned-1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
 plot(timealigned+1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
 set(gca,'YDir','reverse'); 
-xlim([datenum(2019,8,6,12,0,0) datenum(2019,8,19)])
+xlim([begtime endtime])
 ylim([0 1000])
 datetick('x',2,'keeplimits')
 ylabel('Depth (m)')
@@ -27,7 +31,7 @@ plot(timealigned, zeros(size(timealigned)), 'r.','markersize',20); hold on;
 plot(timealigned-1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
 plot(timealigned+1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
 set(gca,'YDir','reverse'); 
-xlim([datenum(2019,8,6,12,0,0) datenum(2019,8,19)])
+xlim([begtime endtime])
 ylim([0 1000])
 datetick('x',2,'keeplimits')
 ylabel('Depth (m)')
@@ -48,7 +52,7 @@ plot(timealigned, zeros(size(timealigned)), 'r.','markersize',20); hold on;
 plot(timealigned-1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
 plot(timealigned+1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
 set(gca,'YDir','reverse'); 
-xlim([datenum(2019,8,6,12,0,0) datenum(2019,8,19)])
+xlim([begtime endtime])
 ylim([0 1000])
 datetick('x',2,'keeplimits')
 ylabel('Depth (m)')
@@ -60,7 +64,7 @@ plot(timealigned, zeros(size(timealigned)), 'r.','markersize',20); hold on;
 plot(timealigned-1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
 plot(timealigned+1, zeros(size(timealigned)), 'r.','markersize',12); hold on;
 set(gca,'YDir','reverse'); 
-xlim([datenum(2019,8,6,12,0,0) datenum(2019,8,19)])
+xlim([begtime endtime])
 ylim([0 1000])
 datetick('x',2,'keeplimits')
 ylabel('Depth (m)')

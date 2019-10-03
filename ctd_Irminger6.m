@@ -72,6 +72,25 @@ for i = 1:length(castnums)
     cast{castnums(i)}.O2corr = aaoptode_salpresscorr(optode_uM, cast{castnums(i)}.T2, cast{castnums(i)}.Sal, cast{castnums(i)}.Pres, 0);
 end
 
+%% Calculate mean profile (combining up and down)
+for i = 1:length(castnums)
+    Plist = unique(cast{castnums(i)}.Pres);
+    for j = 1:length(Plist)
+        ind = find(cast{castnums(i)}.Pres == Plist(j));
+        cast{castnums(i)}.Pres_mean(j) = mean(cast{castnums(i)}.Pres(ind));
+        cast{castnums(i)}.T1_mean(j) = mean(cast{castnums(i)}.T1(ind));
+        cast{castnums(i)}.T2_mean(j) = mean(cast{castnums(i)}.T2(ind));
+        cast{castnums(i)}.D_mean(j) = mean(cast{castnums(i)}.D(ind));
+        cast{castnums(i)}.D_std(j) = std(cast{castnums(i)}.D(ind));
+        cast{castnums(i)}.Sal_mean(j) = mean(cast{castnums(i)}.Sal(ind));
+        cast{castnums(i)}.O2corr_mean(j) = mean(cast{castnums(i)}.O2corr(ind));
+        cast{castnums(i)}.O2corr_std(j) = std(cast{castnums(i)}.O2corr(ind));
+        cast{castnums(i)}.O2sol_mean(j) = mean(cast{castnums(i)}.O2sol(ind));
+        cast{castnums(i)}.numval(j) = length(ind);
+        clear ind
+    end
+end
+
 %% Read in Irminger-6 Winkler data
 [Winkler6_casts] = xlsread('C:/Users/palevsky/Dropbox/Irminger6/Oxygen data/Irminger6_Winkler.xlsx',2);
 Winkler6.cast = Winkler6_casts(:,1);
@@ -96,9 +115,10 @@ Winkler6.optode_align_up_std = NaN*ones(size(Winkler6.depth));
 
 for i = 1:length(castnums)
     figure(castnums(i)); clf
-%subplot(121)
+subplot(121)
 plot(cast{castnums(i)}.O2corr, cast{castnums(i)}.D, 'k.'); hold on;
 plot(cast{castnums(i)}.O2corr(cast{castnums(i)}.maxindex:end), cast{castnums(i)}.D(cast{castnums(i)}.maxindex:end), 'r.'); hold on;
+plot(cast{castnums(i)}.O2corr_mean, cast{castnums(i)}.D_mean, 'b.'); hold on;
     indWink = find(Winkler6.cast == castnums(i));
     for j = 1:length(indWink)
         indCastAlignDown = find(cast{castnums(i)}.D(1:cast{castnums(i)}.maxindex) > Winkler6.depth(indWink(j)) - tol...
@@ -116,15 +136,18 @@ plot(Winkler6.O2_dave(intersect(indWink, ind_dave)), Winkler6.depth(intersect(in
 axis ij
 xlabel('Oxygen (\muM) from Aanderaa optode')
 ylabel('Depth (m)')
-legend('Downcast','Upcast','Depth-aligned upcast point','BCP Winkler','Wellwood Winkler')
+legend('Downcast','Upcast','Down+Upcast mean','Depth-aligned upcast point','BCP Winkler','Wellwood Winkler')
 title(castnames(i))
 
-% subplot(122)
-% %plot(cast{castnums(i)}.Sal, cast{castnums(i)}.D, 'r.'); hold on; 
-% plot(gsw_pt_from_CT(cast{castnums(i)}.SA,cast{castnums(i)}.CT), cast{castnums(i)}.D, 'k.'); hold on; 
-% axis ij
-% xlabel('Potential temperature (deg C)')
-% ylabel('Depth, m')
+subplot(122)
+%plot(cast{castnums(i)}.Sal, cast{castnums(i)}.D, 'r.'); hold on; 
+%plot(gsw_pt_from_CT(cast{castnums(i)}.SA,cast{castnums(i)}.CT), cast{castnums(i)}.D, 'k.'); hold on; 
+plot(cast{castnums(i)}.T2, cast{castnums(i)}.D, 'k.'); hold on;
+plot(cast{castnums(i)}.T2(cast{castnums(i)}.maxindex:end), cast{castnums(i)}.D(cast{castnums(i)}.maxindex:end), 'r.'); hold on;
+plot(cast{castnums(i)}.T2_mean, cast{castnums(i)}.D_mean, 'b.'); hold on;
+axis ij
+xlabel('Potential temperature (deg C)')
+ylabel('Depth, m')
 end
 
 %% Plot data from both HYPM casts before pylon
