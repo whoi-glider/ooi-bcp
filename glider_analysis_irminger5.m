@@ -95,5 +95,13 @@ G363.O2sat_corr = G363.oxygen_saturation_lagcorr.*(1+G363.pressure_interp.*0.032
 G453.O2_corr = aaoptode_salpresscorr(G453.oxygen_concentration_lagcorr, G453.temperature_interp, G453.salinity_interp, G453.pressure_interp, 0);
 G453.O2sat_corr = G453.oxygen_saturation_lagcorr.*(1+G453.pressure_interp.*0.032./1000); %applies pressure but not salinity correction for saturation
 
-%%
+%% Use Winkler values to calculate initial gain corrections at the time of deployment
 glider_winklercal %compare with Winkler calibration cast values
+
+%% Apply air calibration method over entire deployment for both gliders
+
+Yr5_met = 'deployment0005_GI01SUMO-SBD12-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172154.969000-20190809T080328.237000.nc';
+rhcorr = 1; mindateplot = datenum(2018,6,1); maxdateplot = datenum(2019,6,1);
+
+[T_363, med_gain_363] = aircalfun(G363, 'Glider 363', -1, Yr5_met, mindateplot, rhcorr, mindateplot, maxdateplot);
+[T_453, med_gain_453] = aircalfun(G453, 'Glider 453', 1, Yr5_met, mindateplot, rhcorr, mindateplot, datenum(2019,2,1));
