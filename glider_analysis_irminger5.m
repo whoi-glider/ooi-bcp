@@ -105,3 +105,126 @@ rhcorr = 1; mindateplot = datenum(2018,6,1); maxdateplot = datenum(2019,6,1);
 
 [T_363, med_gain_363] = aircalfun(G363, 'Glider 363', -1, Yr5_met, mindateplot, rhcorr, mindateplot, maxdateplot);
 [T_453, med_gain_453] = aircalfun(G453, 'Glider 453', 1, Yr5_met, mindateplot, rhcorr, mindateplot, datenum(2019,2,1));
+
+%% Grid data to consistent depth intervals for each profile
+depth_grid = [0:5:1000];
+secinday = 60*60*24;
+
+%All profiles for year 5
+    G363.temperature_interp(G363.temperature_interp == 0) = NaN; %remove zero values
+scivars = [G363.temperature_interp, G363.salinity_interp, G363.O2_corr, G363.O2sat_corr...
+        G363.backscatter, G363.chlorophyll];
+[G363grid] = glider_grid(G363.daten, G363.lat_interp, G363.lon_interp, ...
+    G363.depth_interp, G363.profile_index, G363.profile_direction, ...
+    scivars,depth_grid);
+G363grid.depth_grid = depth_grid;
+
+    G453.temperature_interp(G453.temperature_interp == 0) = NaN; %remove zero values
+scivars = [G453.temperature_interp, G453.salinity_interp, G453.O2_corr, G453.O2sat_corr...
+        G453.backscatter, G453.chlorophyll];
+[G453grid] = glider_grid(G453.daten, G453.lat_interp, G453.lon_interp, ...
+    G453.depth_interp, G453.profile_index, G453.profile_direction, ...
+    scivars,depth_grid);
+G453grid.depth_grid = depth_grid;
+
+%% Plot glider data over full deployment
+    tol = 0.25; %only use profiles with at least 50% good data
+ind_data_453 = find(sum(~isnan(squeeze(G453grid.scivars(:,4,:)))) > tol*length(depth_grid));
+ind_data_363 = find(sum(~isnan(squeeze(G363grid.scivars(:,4,:)))) > tol*length(depth_grid));
+
+%% Plot map of both gliders
+
+%ind = find(Winkler_casts(:,1) >=5 & Winkler_casts(:,1) <=6);
+M = 10;
+    figure(10); clf
+plot(-G453grid.lon(ind_data_453), G453grid.lat(ind_data_453),'k.','markersize',M/2); hold on;
+plot(-G363grid.lon(ind_data_363), G363grid.lat(ind_data_363),'w.','markersize',M/2); hold on;
+scatter(-G453grid.lon(ind_data_453), G453grid.lat(ind_data_453), M, G453grid.time_start(ind_data_453)); hold on;
+scatter(-G363grid.lon(ind_data_363), G363grid.lat(ind_data_363), M, G363grid.time_start(ind_data_363)); hold on;
+%plot(Winkler_casts(ind,4), Winkler_casts(ind,3),'r.','markersize',M*2); hold on;
+
+plot(-OOImoorings.SUMO5(2), OOImoorings.SUMO5(1),'^k','markersize',M*2,'markerfacecolor','k'); hold on;
+plot(-OOImoorings.HYPM5(2), OOImoorings.HYPM5(1),'^k','markersize',M*2,'markerfacecolor','k'); hold on;
+plot(-OOImoorings.FLMA5(2), OOImoorings.FLMA5(1),'^k','markersize',M*2,'markerfacecolor','k'); hold on;
+plot(-OOImoorings.FLMB5(2), OOImoorings.FLMB5(1),'^k','markersize',M*2,'markerfacecolor','k'); hold on;
+
+%% Calculate times that each glider is in vicinity of HYPM
+tol = 5; %number of kilometers from HYPM
+
+for i = 1:length(ind_data_363)
+    dist_HYPM_363(i) = distlatlon(G363grid.lat(ind_data_363(i)), OOImoorings.HYPM5(1), ...
+        -G363grid.lon(ind_data_363(i)), -OOImoorings.HYPM5(2));
+end
+ind_HYPM_363 = ind_data_363(find(dist_HYPM_363 < tol));
+
+
+for i = 1:length(ind_data_453)
+    dist_HYPM_453(i) = distlatlon(G453grid.lat(ind_data_453(i)), OOImoorings.HYPM5(1), ...
+        -G453grid.lon(ind_data_453(i)), -OOImoorings.HYPM5(2));
+end
+ind_HYPM_453 = ind_data_453(find(dist_HYPM_453 < tol));
+
+%% Depth profiles over time
+%Adjustable parameters for plotting
+    mindepth = 0; maxdepth = 1000;
+    cints = 60; %number of contour intervals
+    C = cmocean('Dense'); %set colormap
+    C2 = cmocean('Algae'); 
+    
+%Plot for 453
+figure(1); clf
+[X,Y] = meshgrid(G453grid.time_start(ind_data_453), G453grid.depth_grid);
+cmin = 85; cmax = 110; %manually set min and max
+    cvec = [cmin:(cmax-cmin)/cints:cmax];
+contourf(X,Y,squeeze(G453grid.scivars(:,4,ind_data_453)*med_gain_453),cvec,'linecolor','none'); hold on;
+axis([min(G453grid.time_start(ind_data_453)) max(G453grid.time_start(ind_data_453)) mindepth maxdepth]); caxis([cmin cmax]);
+colormap(cmocean('Balance','pivot',100)); set(gca,'YDir','reverse'); ylabel('Depth (m)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
+plot(G453grid.time_start(ind_HYPM_453), 5*ones(size(ind_HYPM_453)), '.','markersize',15,'color',nicecolor('k'));
+datetick('x',2,'keeplimits');
+title('Glider 453 oxygen saturation', 'Fontsize', 12)
+
+%Plot for 363
+figure(2); clf
+[X,Y] = meshgrid(G363grid.time_start(ind_data_363), G363grid.depth_grid);
+cmin = 85; cmax = 110; %manually set min and max
+    cvec = [cmin:(cmax-cmin)/cints:cmax];
+contourf(X,Y,squeeze(G363grid.scivars(:,4,ind_data_363)*med_gain_363),cvec,'linecolor','none'); hold on;
+axis([min(G363grid.time_start(ind_data_363)) max(G363grid.time_start(ind_data_363)) mindepth maxdepth]); caxis([cmin cmax]);
+colormap(cmocean('Balance','pivot',100)); set(gca,'YDir','reverse'); ylabel('Depth (m)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
+plot(G363grid.time_start(ind_HYPM_363), 5*ones(size(ind_HYPM_363)), '.','markersize',15,'color',nicecolor('k'));
+datetick('x',2,'keeplimits');
+title('Glider 363 oxygen saturation', 'Fontsize', 12)
+
+%% Extract HYPM profiles aligned with each glider profile
+
+figure(10); clf
+for i = 1:length(ind_HYPM_453)
+    [minval(i), minind(i)] = min(abs(G453grid.time_start(ind_HYPM_453(i)) - Yr5_wfpgrid.time_start(Yr5_wfpgrid.ind_pair)));
+    if round((i)/10) == ((i)/10)
+        subplot(2,4,((i)/10))
+        plot(Yr5_wfpgrid.oxygen_corr(:,minind(i))*gain_hypm, Yr5_wfpgrid.depth_grid, 'k.'); hold on;
+        plot(squeeze(G453grid.scivars(:,3,ind_HYPM_453(i)))*med_gain_453, G453grid.depth_grid, 'r.'); hold on;
+        axis ij
+        xlim([260 310])
+        ylim([50 1400])
+        title(datestr(G453grid.time_start(ind_HYPM_453(i)),1))
+    end
+end
+%%
+figure(11); clf
+for i = 1:length(ind_HYPM_363)
+    [minval(i), minind(i)] = min(abs(G363grid.time_start(ind_HYPM_363(i)) - Yr5_wfpgrid.time_start(Yr5_wfpgrid.ind_pair)));
+    if round((i)/10) == ((i)/10)
+        subplot(3,4,((i)/10))
+        plot(Yr5_wfpgrid.oxygen_corr(:,minind(i))*gain_hypm, Yr5_wfpgrid.depth_grid, 'k.'); hold on;
+        plot(squeeze(G363grid.scivars(:,3,ind_HYPM_363(i)))*med_gain_363, G363grid.depth_grid, 'r.'); hold on;
+        axis ij
+        xlim([260 310])
+        ylim([50 1400])
+        title(datestr(G363grid.time_start(ind_HYPM_363(i)),1))
+    end
+end
+
+
+
+

@@ -1,5 +1,5 @@
 %% Read in calibration cast data
-[Winkler_casts] = xlsread('C:\Users\palevsky\Dropbox\Irminger5\Oxygen data\Irminger5_WinklerSamples.xlsx',2);
+[Winkler_casts, Winkler_text] = xlsread('C:\Users\palevsky\Dropbox\Irminger5\Oxygen data\Irminger5_WinklerSamples.xlsx',2);
     Winkler.depth = Winkler_casts(:,8);
     Winkler.T = Winkler_casts(:,9); %potential temp
     Winkler.S = Winkler_casts(:,10); %practical salinity
