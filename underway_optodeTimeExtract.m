@@ -1,6 +1,6 @@
 %% Read in underway Winkler samples value times and corresponding optode values
 
-[Winkler_underway, Winkler_underwayTxt] = xlsread('C:/Users/Hilary/Dropbox/Irminger5/Irminger5_WinklerSamples.xlsx',3);
+[Winkler_underway, Winkler_underwayTxt] = xlsread('C:/Users/palevsky/Dropbox/Irminger5/Oxygen data/Irminger5_WinklerSamples.xlsx',3);
 Winkler_underwayTxt = Winkler_underwayTxt(2:53,:);
 Winkler_underway = Winkler_underway(1:52,:);
 Winkler_timeUnderway(:,1) = datenum(Winkler_underwayTxt(:,3)) + Winkler_underway(:,8);
