@@ -24,6 +24,17 @@ loadWinklerIrmingerYrs1to5
 
 %% Calculate Year 1-5 gain corrections based on Winkler data
 wfp_Irminger_winklercalibration_Yrs1to5
-    
+
+%% Apply initial gain corrections to Year 1-5 data
+
+for i = 1:5
+    wfp{i}.oxygen_gaincorr = wfp{i}.oxygen * gain_hypm(i);
+    wfpgrid{i}.oxygen_gaincorr = wfpgrid{i}.O2conc * gain_hypm(i);
+    wfpgrid_therm{i}.oxygen_gaincorr = wfpgrid_therm{i}.O2conc * gain_hypm(i);
+end
+
+%% Test plots to ensure that all is calculated appropriately
+wfp_plotting
+
 %% Perform deep isotherm drift correction
-wfp_deepIsotherm_driftCorrection_Yr5 %note - still needs to be updated to make better correction for drift at depth
+%wfp_deepIsotherm_driftCorrection_Yr5 %note - still needs to be updated to make better correction for drift at depth
