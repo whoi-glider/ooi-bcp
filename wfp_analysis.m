@@ -12,7 +12,7 @@ filenames = {'deployment0001_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_
     'deployment0003_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20160712T000207-20170712T072809.nc',...
     'deployment0004_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20170807T000204-20180615T185737.nc',...
     'deployment0005_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20180610T000207-20190630T071452.nc',...
-    'deployment0006_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20190807T000205-20191231T225556.nc'};
+    'deployment0006_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20190807T000205-20200509T172910.nc'};
 
 for i = 1:6
     [wfp{i}, wfpgrid{i}, wfpgrid_therm{i}] = load_HYPM_DOSTA_fun(filenames{i}, depth_grid, therm_grid);
@@ -26,8 +26,9 @@ filenames_flord = {'deployment0001_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flo
     'deployment0005_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20180610T000207-20190630T071452.nc',...
     'deployment0006_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20190807T000205-20200509T172910.nc'};
 
+filterres = 5; %choose number of points to use in running min/max filter for backscatter spike analysis
 for i = 1:6
-    [wfp_flord{i}, wfpgrid_flord{i}] = load_HYPM_FLORD_fun(filenames_flord{i}, depth_grid);
+    [wfp_flord{i}, wfpgrid_flord{i}] = load_HYPM_FLORD_fun(filenames_flord{i}, depth_grid, filterres);
 end
 
 %% Load Winkler data for calibrations

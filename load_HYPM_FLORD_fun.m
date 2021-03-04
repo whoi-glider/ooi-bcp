@@ -1,10 +1,11 @@
-function [wfp, wfpgrid] = load_HYPM_FLORD_fun(filename_FLORD, depth_grid)
+function [wfp, wfpgrid] = load_HYPM_FLORD_fun(filename_FLORD, depth_grid, filterres)
 %Function to load OOI profiler data (based on load_HYPM_Yr5)
 % INPUTS:
 %   filename_FLORD: name of the netcdf file downloaded from OOI Data Portal
 %   (make sure this file is in the path prior to calling function)
 %   depth_grid: depths (m) on which to grid output
         % Example: depth_grid = [150:5:2600];
+%   filterres: resolution (number of points) used for spike filtering
 % OUTPUTS:
 %   (all outputs are structures with multiple variables)
 %   wfp - extracted data from filename_FLORD
@@ -28,11 +29,23 @@ function [wfp, wfpgrid] = load_HYPM_FLORD_fun(filename_FLORD, depth_grid)
 wfp.depth_flord = -gsw_z_from_p(wfp.pressure_flord,wfp.lat_flord);
 [wfp.profile_index,wfp.updown_index] = profileIndex(wfp.depth_flord);
 
+%% Calculate backscatter spikes - after Briggs et al. 2011, from Jose
+
+for u = 1:wfp.profile_index(end)
+   [profileindexindex] = find (wfp.profile_index == u);
+   minfilter = movmin (wfp.backscatter(profileindexindex), filterres);
+   minmaxfilter = movmax (minfilter, filterres);
+   wfp.filteredspikes (profileindexindex) = wfp.backscatter(profileindexindex) - minmaxfilter;
+   minfilter = movmin (wfp.chla(profileindexindex), filterres);
+   minmaxfilter = movmax (minfilter, filterres);
+   wfp.filteredchlspikes (profileindexindex) = wfp.chla(profileindexindex) - minmaxfilter;
+end
+
 %% Grid data to consistent depth intervals for each profile
 secinday = 60*60*24;
 
 %Grid on depth intervals
-scivars = [wfp.temperature_flord, wfp.pracsal_flord, wfp.backscatter, wfp.scat_total wfp.chla];
+scivars = [wfp.temperature_flord, wfp.pracsal_flord, wfp.backscatter, wfp.scat_total, wfp.chla, wfp.filteredspikes', wfp.filteredchlspikes'];
 [wfpgrid] = glider_grid(wfp.time_flord, wfp.lat_flord, wfp.lon_flord, wfp.depth_flord, wfp.profile_index, wfp.updown_index', scivars, depth_grid);
     wfpgrid.depth_grid = depth_grid;
 wfpgrid.time_start = convertTime(wfpgrid.time_start);
@@ -46,6 +59,8 @@ wfpgrid.S = squeeze(wfpgrid.scivars(:,2,:));
 wfpgrid.backscatter = squeeze(wfpgrid.scivars(:,3,:));
 wfpgrid.scat_total = squeeze(wfpgrid.scivars(:,4,:));
 wfpgrid.chla = squeeze(wfpgrid.scivars(:,5,:));
+wfpgrid.backscatter_spikes = squeeze(wfpgrid.scivars(:,6,:));
+wfpgrid.chla_spikes = squeeze(wfpgrid.scivars(:,7,:));
 wfpgrid.pdens = gsw_sigma0(wfpgrid.S,wfpgrid.T)+1000; 
 wfpgrid.press = gsw_p_from_z(repmat(-wfpgrid.depth_grid,length(wfpgrid.profile_ind),1)',...
         repmat(wfpgrid.lat,1,length(wfpgrid.depth_grid))');

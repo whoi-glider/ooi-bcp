@@ -5,13 +5,20 @@ wfpmerge.time = wfpgrid{1}.time_start(wfpgrid{1}.ind_pair);
 wfpmerge.pdens = wfpgrid{1}.pdens;
 wfpmerge.T = wfpgrid{1}.T;
 wfpmerge.S = wfpgrid{1}.S;
+wfpmerge.O2conc = wfpgrid{1}.O2conc;
 wfpmerge.oxygen_gaincorr = wfpgrid{1}.oxygen_gaincorr;
-for i = 2:5
+for i = 2:6
     wfpmerge.time = [wfpmerge.time; wfpgrid{i}.time_start(wfpgrid{i}.ind_pair)];
     wfpmerge.pdens = [wfpmerge.pdens wfpgrid{i}.pdens];
     wfpmerge.T = [wfpmerge.T wfpgrid{i}.T];
     wfpmerge.S = [wfpmerge.S wfpgrid{i}.S];
-    wfpmerge.oxygen_gaincorr = [wfpmerge.oxygen_gaincorr wfpgrid{i}.oxygen_gaincorr];
+    wfpmerge.O2conc = [wfpmerge.O2conc wfpgrid{i}.O2conc];
+    if i < 6
+        wfpmerge.oxygen_gaincorr = [wfpmerge.oxygen_gaincorr wfpgrid{i}.oxygen_gaincorr];
+    end
+    if i == 6
+        wfpmerge.oxygen_gaincorr = [wfpmerge.oxygen_gaincorr wfpgrid{i}.O2conc];
+    end
 end
 
 %Create a merged data set for the fluorometer
@@ -21,13 +28,17 @@ wfpmerge_flord.T = wfpgrid_flord{1}.T;
 wfpmerge_flord.S = wfpgrid_flord{1}.S;
 wfpmerge_flord.backscatter = wfpgrid_flord{1}.backscatter;
 wfpmerge_flord.chla = wfpgrid_flord{1}.chla;
-for i = 2:5
+wfpmerge_flord.backscatter_spikes = wfpgrid_flord{1}.backscatter_spikes;
+wfpmerge_flord.chla_spikes = wfpgrid_flord{1}.chla_spikes;
+for i = 2:6
     wfpmerge_flord.time = [wfpmerge_flord.time; wfpgrid_flord{i}.time_start];
     wfpmerge_flord.pdens = [wfpmerge_flord.pdens wfpgrid_flord{i}.pdens];
     wfpmerge_flord.T = [wfpmerge_flord.T wfpgrid_flord{i}.T];
     wfpmerge_flord.S = [wfpmerge_flord.S wfpgrid_flord{i}.S];
     wfpmerge_flord.backscatter = [wfpmerge_flord.backscatter wfpgrid_flord{i}.backscatter];
     wfpmerge_flord.chla = [wfpmerge_flord.chla wfpgrid_flord{i}.chla];
+    wfpmerge_flord.backscatter_spikes = [wfpmerge_flord.backscatter_spikes wfpgrid_flord{i}.backscatter_spikes];
+    wfpmerge_flord.chla_spikes = [wfpmerge_flord.chla_spikes wfpgrid_flord{i}.chla_spikes];
 end
 
 %% Load MLD data from Izi
@@ -85,3 +96,9 @@ axis([min(wfpmerge_flord.time) max(wfpmerge_flord.time) mindepth maxdepth - 800]
 colormap(C2); set(gca,'YDir','reverse'); ylabel('Depth (m)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
 datetick('x',2,'keeplimits');
 title('Chlorophyll concentration (\mug/L)', 'Fontsize', 12)
+%%
+figure(3); clf
+    C3 = [gray(256/4); cmocean('Matter')];
+imagesc(wfpmerge_flord.backscatter_spikes)
+colormap(C3); colorbar
+caxis([0 2E-3])
