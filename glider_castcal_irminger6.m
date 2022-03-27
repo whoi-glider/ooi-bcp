@@ -89,7 +89,7 @@ Winkler6.O2sol = gsw_O2sol_SP_pt(Winkler6.S, Winkler6.T);
 
 for i = 1:length(alignedcasts)
     figure; clf;
-%subplot(121)
+subplot(121)
 hd = plot((cast{alignedcasts(i)}.O2corr./cast{alignedcasts(i)}.O2sol)*100, cast{alignedcasts(i)}.D, '.','color',nicecolor('kww')); hold on;
 hu = plot(cast{alignedcasts(i)}.O2corr(cast{alignedcasts(i)}.maxindex:end)./cast{alignedcasts(i)}.O2sol(cast{alignedcasts(i)}.maxindex:end)*100,...
     cast{alignedcasts(i)}.D(cast{alignedcasts(i)}.maxindex:end), '.','color',nicecolor('kkw')); hold on;
@@ -111,25 +111,25 @@ ylabel('Depth (m)')
 legend([hd, hu, hw, h525, h560],'CTD Downcast','CTD Upcast','Winkler O_2','GL525','GL560','location','southeast')
 title(['Irminger6 glider calibration, Cast ' num2str(alignedcasts(i))])
 
-% subplot(122)
-% hd = plot(cast{alignedcasts(i)}.T2, cast{alignedcasts(i)}.D, 'k.'); hold on;
-% hu = plot(cast{alignedcasts(i)}.T2(cast{alignedcasts(i)}.maxindex:end),...
-%     cast{alignedcasts(i)}.D(cast{alignedcasts(i)}.maxindex:end), 'r.'); hold on;
-% hm = plot(cast{alignedcasts(i)}.T2_mean, cast{alignedcasts(i)}.D_mean, 'm.'); hold on;
-% for j = 1:length(cast_glider(alignedcasts(i)).G525_profile_summary(:,1))
-%     ind_prof = find(G525.profile_index == cast_glider(alignedcasts(i)).G525_profile_summary(j,1));
-%     h525 = plot(G525.temperature(ind_prof), G525.depth_interp(ind_prof), 'b.'); hold on;
-% end
-% for j = 1:length(cast_glider(alignedcasts(i)).G560_profile_summary(:,1))
-%     ind_prof = find(G560.profile_index == cast_glider(alignedcasts(i)).G560_profile_summary(j,1));
-%     h560 = plot(G560.temperature(ind_prof), G560.depth_interp(ind_prof), 'c.'); hold on;
-% end
-% axis ij
-% ylim([0 1000])
-% xlabel('Temperature')
-% ylabel('Depth (m)')
-% legend([hd, hu, h525, h560],'CTD Downcast','CTD Upcast','GL525','GL560','location','southeast')
-% title(['Irminger6 glider calibration, Cast ' num2str(alignedcasts(i))])
+subplot(122)
+hd = plot(cast{alignedcasts(i)}.T2, cast{alignedcasts(i)}.D, '.','color',nicecolor('kww')); hold on;
+hu = plot(cast{alignedcasts(i)}.T2(cast{alignedcasts(i)}.maxindex:end),...
+    cast{alignedcasts(i)}.D(cast{alignedcasts(i)}.maxindex:end), '.','color',nicecolor('kkw')); hold on;
+hm = plot(cast{alignedcasts(i)}.T2_mean, cast{alignedcasts(i)}.D_mean, 'k.'); hold on;
+for j = 1:length(cast_glider(alignedcasts(i)).G525_profile_summary(:,1))
+    ind_prof = find(G525.profile_index == cast_glider(alignedcasts(i)).G525_profile_summary(j,1));
+    h525 = plot(G525.temperature(ind_prof), G525.depth_interp(ind_prof), 'b.'); hold on;
+end
+for j = 1:length(cast_glider(alignedcasts(i)).G560_profile_summary(:,1))
+    ind_prof = find(G560.profile_index == cast_glider(alignedcasts(i)).G560_profile_summary(j,1));
+    h560 = plot(G560.temperature(ind_prof), G560.depth_interp(ind_prof), 'c.'); hold on;
+end
+axis ij
+ylim([0 1000])
+xlabel('Temperature')
+ylabel('Depth (m)')
+legend([hd, hu, h525, h560],'CTD Downcast','CTD Upcast','GL525','GL560','location','southeast')
+title(['Irminger6 glider calibration, Cast ' num2str(alignedcasts(i))])
 end
 
 

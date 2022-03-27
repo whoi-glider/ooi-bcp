@@ -132,7 +132,7 @@ med_gain = median(T.met_o2sat(~isnan(T.met_o2sat))./T.air_corr(~isnan(T.met_o2sa
     %set figure options
 ftsz = 14;
 lnw = 2;
-mrkr = 12;
+mrkr = 6;
 
 %Plot time series of gain data with and without splash corrections
 figure; clf
@@ -162,7 +162,7 @@ plot(T.ml_daten,T.ml_o2sat,'.-','MarkerSize',mrkr,'LineWidth',lnw,'Color',cols(1
 plot(T.air_daten,T.air_meas,'.-','MarkerSize',mrkr,'LineWidth',lnw,'Color',cols(3,:));
 plot(T.air_daten,T.air_corr,'.-','MarkerSize',mrkr,'LineWidth',lnw,'Color',cols(4,:));
 plot(T.air_daten,med_gain.*T.air_corr,'.-','MarkerSize',mrkr,'LineWidth',lnw,'Color',cols(5,:));
-plot(met.daten,met.O2satcorr,'-','LineWidth',lnw,'Color',cols(2,:));
+plot(met.daten,met.O2satcorr,'-','LineWidth',lnw,'Color','k');
 xlim([mindateplot maxdateplot])
 title([gliderstring ' air calibration: median gain = ' num2str(med_gain)]);
 ylabel('Oxygen saturation (%)')

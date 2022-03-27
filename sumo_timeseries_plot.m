@@ -96,7 +96,7 @@ for i = 1:6
     plot(sumo{i}.daten, sumo{i}.SST, 'k.'); hold on;
 end
 %plot(G453grid.time_start(1:end-100), squeeze(G453grid.scivars(2,1,1:end-100)),'g.'); hold on;
-h3 = plot(G363grid.time_start(1:end-100), squeeze(G363grid.scivars(2,1,1:end-100)),'r.')
+%h3 = plot(G363grid.time_start(1:end-100), squeeze(G363grid.scivars(2,1,1:end-100)),'r.')
 xlim([datemin datemax])
 ylabel('SST (^oC)')
 title('OOI Irminger Sea sea surface temperature')
@@ -112,11 +112,73 @@ for i = 1:6
     %plot(sumo{i}.datenO2buoy, sumo{i}.O2buoy, 'r.'); hold on;
     h2 = plot(sumo{i}.datenO2buoy(sumo{i}.nightindO2buoy), sumo{i}.O2buoy(sumo{i}.nightindO2buoy), 'k.'); hold on;
 end
-h3 = plot(G363grid.time_start(1:end-100), squeeze(G363grid.scivars(2,3,1:end-100))*med_gain_363,'r.')
+%h3 = plot(G363grid.time_start(1:end-100), squeeze(G363grid.scivars(2,3,1:end-100))*med_gain_363,'r.')
 %plot(G453grid.time_start(1:end-100), squeeze(G453grid.scivars(4,3,1:end-100))*med_gain_453,'g.')
 xlim([datemin datemax])
 ylabel('\mumol/kg')
-legend([h1 h2 h3], 'Mooring, 12 m', 'Mooring, 1 m', 'Glider, 10 m','location', 'northwest')
+%legend([h1 h2 h3], 'Mooring, 12 m', 'Mooring, 1 m', 'Glider, 10 m','location', 'northwest')
+legend([h1 h2], 'Mooring, 12 m', 'Mooring, 1 m', 'location', 'northwest')
 title('OOI Irminger Sea surface dissolved oxygen')
+datetick('x',2,'keeplimits')
+
+%%
+figure(100); clf
+
+% subplot(211)
+% for i = 1:6
+%     h1 = plot(sumo{i}.datenO2buoy, sumo{i}.O2buoy, 'r.'); hold on;
+% end
+% for i = 2:6
+%     h2 = plot(sumo{i}.datenO2nsif, sumo{i}.O2nsif, 'b.'); hold on;
+% end
+% for i = 1:6
+%     h3 = plot(sumo{i}.datenO2buoy(sumo{i}.nightindO2buoy), sumo{i}.O2buoy(sumo{i}.nightindO2buoy), '.','color',nicecolor('rk'),'markersize',5); hold on;
+% end
+% for i = 2:6
+%     h4 = plot(sumo{i}.datenO2nsif, sumo{i}.O2nsif, '.','color',nicecolor('bk'),'markersize',5); hold on;
+% end
+% xlim([datemin datemax])
+% ylabel('\mumol/kg')
+% legend([h1 h2 h3 h4], 'Buoy, 1m, all', 'NSIF, 12m, all', 'Buoy, 1m, night only', 'NSIF, 12m, night only', 'location', 'northwest')
+% title('OOI Irminger Sea Apex Surface Mooring surface dissolved oxygen, full record')
+% datetick('x',2,'keeplimits')
+subplot(211)
+
+for i = 1:6
+    h1 = plot(sumo{i}.datenO2buoy, sumo{i}.O2buoy, 'r.'); hold on;
+end
+for i = 2:6
+    h2 = plot(sumo{i}.datenO2nsif, sumo{i}.O2nsif, 'b.'); hold on;
+end
+for i = 1:6
+    h3 = plot(sumo{i}.datenO2buoy(sumo{i}.nightindO2buoy), sumo{i}.O2buoy(sumo{i}.nightindO2buoy), '.','color',nicecolor('rk'),'markersize',5); hold on;
+end
+for i = 2:6
+    h4 = plot(sumo{i}.datenO2nsif, sumo{i}.O2nsif, '.','color',nicecolor('bk'),'markersize',5); hold on;
+end
+xlim([datenum(2018,6,1) datenum(2019,8,15)])
+ylabel('\mumol/kg')
+legend([h1 h2 h3 h4], 'Buoy, 1m, all', 'NSIF, 12m, all', 'Buoy, 1m, night only', 'NSIF, 12m, night only', 'location', 'northwest')
+title('OOI Irminger Sea Apex Surface Mooring surface dissolved oxygen, 2018-2019 deployment only')
+datetick('x',2,'keeplimits')
+
+subplot(212)
+
+for i = 1:6
+    h1 = plot(sumo{i}.datenO2buoy, sumo{i}.O2buoy, 'r.'); hold on;
+end
+for i = 2:6
+    h2 = plot(sumo{i}.datenO2nsif, sumo{i}.O2nsif, 'b.'); hold on;
+end
+for i = 1:6
+    h3 = plot(sumo{i}.datenO2buoy(sumo{i}.nightindO2buoy), sumo{i}.O2buoy(sumo{i}.nightindO2buoy), '.','color',nicecolor('rk'),'markersize',5); hold on;
+end
+for i = 2:6
+    h4 = plot(sumo{i}.datenO2nsif, sumo{i}.O2nsif, '.','color',nicecolor('bk'),'markersize',5); hold on;
+end
+xlim([datenum(2018,10,1) datenum(2018,10,15)])
+ylabel('\mumol/kg')
+legend([h1 h2 h3 h4], 'Buoy, 1m, all', 'NSIF, 12m, all', 'Buoy, 1m, night only', 'NSIF, 12m, night only', 'location', 'northwest')
+%title('OOI Irminger Sea Apex Surface Mooring surface dissolved oxygen, 2018-2019 deployment only')
 datetick('x',2,'keeplimits')
 

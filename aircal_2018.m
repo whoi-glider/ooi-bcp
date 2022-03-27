@@ -1,28 +1,25 @@
-tref = datenum(2019,8,1);
+%For full year of deployment 5
 filename = 'deployment0005_GI01SUMO-SBD12-06-METBKA000-telemetered-metbk_a_dcl_instrument_20180608T172154.969000-20190809T080328.237000.nc';
-%filename = 'deployment0006_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20190805T152704.097000-20191017T001338.551000.nc';
+
 % constants
 mbar2atm = 1013.25;
 sec2day = 60*60*24;
 
 % options
 load('latest');
-%load('G363');
 % rhcorr = 1 to use observed relative humidy rhcorr = 0 to assume saturated
 % water vapor
 rhcorr = 1;
 % profile direction (-1 == up 1 == down)
 % choose which glider to process by commenting/uncommenting here
-%  G = G525; %363 %525 %G363R
-%  prof_dir = -1;
+% G = G560;
+% prof_dir = 1;
 
-G = G453; %453 %560
-prof_dir = 1;
+G = G525;
+prof_dir = -1;
 
 % boolean flag for profile direction
 isup = prof_dir == -1;
-
-mindateplot = datenum(2018,6,1); maxdateplot = datenum(now);
 %%
 
 %Pull out desired met variables
@@ -68,10 +65,9 @@ for ii = 1:np
 
     %near-surface measurements from glider profile
     u = G.profile_index == ii & G.profile_direction == prof_dir & G.depth_interp < 10 & G.depth_interp > 0.5 & G.oxygen_saturation > 20;
-    u = G.profile_index == ii & G.profile_direction == prof_dir & G.depth_interp < 14 & G.depth_interp > 10 & G.oxygen_saturation > 20;
     uts = G.profile_index == ii & G.profile_direction == prof_dir & G.depth_interp < 10 & G.depth_interp > 0.5;
     % select surface interval
-    s = G.profile_index == ii-0.5+isup & ~isnan(G.oxygen_saturation) & G.depth_interp < 0.5 & G.oxygen_saturation > 80;
+    s = G.profile_index == ii-0.5+isup & ~isnan(G.oxygen_saturation) & G.depth_interp < 0.5;
 
 
     t0 = find(s > 0,1);
@@ -99,19 +95,15 @@ for ii = 1:np
     T.air_daten(ii,1) = nanmean(G.daten(s));
 
 end
-%%
 T.met_o2sat = naninterp1(met.daten,met.O2satcorr,T.air_daten);
 d = ~isnan(T.air_meas+T.ml_o2sat) & T.air_meas > 0;
 T(~d,:) = [];
 p = polyfit(T.ml_o2sat,T.air_meas,1);
-%p(1) = 0.2;
 T.air_corr = (T.air_meas-p(1).*T.ml_o2sat)./(1-p(1));
-px = polyfit(T.ml_daten-tref,T.met_o2sat./T.air_meas,2);
-T.air_meas_corr = T.air_meas.*polyval(px,T.ml_daten-tref);
-T.ml_o2sat_corr = T.ml_o2sat.*polyval(px,T.ml_daten-tref);
+
 %% Figures
 
-ftsz = 18;
+ftsz = 14;
 lnw = 1;
 med_gain = median(T.met_o2sat(~isnan(T.met_o2sat))./T.air_corr(~isnan(T.met_o2sat)));
 %med_gain = 1.8;
@@ -130,8 +122,7 @@ plot(met.daten,met.O2satcorr,'-','LineWidth',4,'Color',cols(2,:));
 
 plot(T.air_daten,T.air_corr,'.-','MarkerSize',12,'LineWidth',2,'Color',cols(4,:));
 plot(T.air_daten,med_gain.*T.air_corr,'.-','MarkerSize',12,'LineWidth',2,'Color',cols(5,:));
-xlim([mindateplot maxdateplot])
-datetick('x',3,'keeplimits');
+datetick('x',2);
 legend('\DeltaO_{2,w}^{meas}','\DeltaO_{2,a}^{meas}','\DeltaO_{2,w}^{met}','\DeltaO_{2,w}^{mcorr}','\DeltaO_{2,w}^{gaincorr}');
 %%
 figure;
@@ -148,7 +139,6 @@ ax3.FontSize = ftsz;
 xlabel('\DeltaO_{2,w}^{meas}');
 ylabel('\DeltaO_{2,a}^{meas}');
 
-%%
 figure;
     %new_points = find(T.air_daten > datenum(2018,9,4));
 plot(T.met_o2sat,T.air_corr,'.','MarkerSize',12); hold on;
@@ -164,4 +154,4 @@ ax3.FontSize = ftsz;
 xlabel('\DeltaO_{2,w}^{met}');
 ylabel('\DeltaO_{2,w}^{mcorr}');
 
-%[rho,df,rho_sig95] = correlate(T.met_o2sat(ind),T.air_corr(ind))
+[rho,df,rho_sig95] = correlate(T.met_o2sat(ind),T.air_corr(ind))

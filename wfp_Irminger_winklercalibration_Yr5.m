@@ -1,5 +1,5 @@
 
-%% Plot locations of casts that align with SUMO/HYPM
+%% Plot locations of Year 5 casts that align with SUMO/HYPM
 load OOImooringLocations.mat
 
 ind = find(Winkler_casts(:,1) >=5 & Winkler_casts(:,1) <=6);

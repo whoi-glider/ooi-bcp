@@ -4,6 +4,7 @@
 addpath('C:/Users/palevsky/Dropbox/Irminger5/glider')
 load G363.mat %this is the recovered data file (just for 363, only glider recovered)
 load I5_final_telemetered.mat %final telemetered data for 363 and 453
+load OOImooringLocations.mat %lat-lon coordinates of each year's moorings
 
 %% Add path for functions
 addpath('C:/Users/palevsky/Dropbox/MATLAB/OOI data processing/OOI_Irminger')
@@ -132,38 +133,63 @@ G453grid.depth_grid = depth_grid;
 ind_data_453 = find(sum(~isnan(squeeze(G453grid.scivars(:,4,:)))) > tol*length(depth_grid));
 ind_data_363 = find(sum(~isnan(squeeze(G363grid.scivars(:,4,:)))) > tol*length(depth_grid));
 
-%% Plot map of both gliders
 
-%ind = find(Winkler_casts(:,1) >=5 & Winkler_casts(:,1) <=6);
-M = 10;
-    figure(10); clf
-plot(-G453grid.lon(ind_data_453), G453grid.lat(ind_data_453),'k.','markersize',M/2); hold on;
-plot(-G363grid.lon(ind_data_363), G363grid.lat(ind_data_363),'w.','markersize',M/2); hold on;
-scatter(-G453grid.lon(ind_data_453), G453grid.lat(ind_data_453), M, G453grid.time_start(ind_data_453)); hold on;
-scatter(-G363grid.lon(ind_data_363), G363grid.lat(ind_data_363), M, G363grid.time_start(ind_data_363)); hold on;
-%plot(Winkler_casts(ind,4), Winkler_casts(ind,3),'r.','markersize',M*2); hold on;
-
-plot(-OOImoorings.SUMO5(2), OOImoorings.SUMO5(1),'^k','markersize',M*2,'markerfacecolor','k'); hold on;
-plot(-OOImoorings.HYPM5(2), OOImoorings.HYPM5(1),'^k','markersize',M*2,'markerfacecolor','k'); hold on;
-plot(-OOImoorings.FLMA5(2), OOImoorings.FLMA5(1),'^k','markersize',M*2,'markerfacecolor','k'); hold on;
-plot(-OOImoorings.FLMB5(2), OOImoorings.FLMB5(1),'^k','markersize',M*2,'markerfacecolor','k'); hold on;
-
-%% Calculate times that each glider is in vicinity of HYPM
+%% Calculate times that each glider is in vicinity of HYPM and SUMO
 tol = 5; %number of kilometers from HYPM
 
 for i = 1:length(ind_data_363)
     dist_HYPM_363(i) = distlatlon(G363grid.lat(ind_data_363(i)), OOImoorings.HYPM5(1), ...
         -G363grid.lon(ind_data_363(i)), -OOImoorings.HYPM5(2));
+    dist_SUMO_363(i) = distlatlon(G363grid.lat(ind_data_363(i)), OOImoorings.SUMO5(1), ...
+        -G363grid.lon(ind_data_363(i)), -OOImoorings.SUMO5(2));
 end
 ind_HYPM_363 = ind_data_363(find(dist_HYPM_363 < tol));
+ind_SUMO_363 = ind_data_363(find(dist_SUMO_363 < tol));
 
 
 for i = 1:length(ind_data_453)
     dist_HYPM_453(i) = distlatlon(G453grid.lat(ind_data_453(i)), OOImoorings.HYPM5(1), ...
         -G453grid.lon(ind_data_453(i)), -OOImoorings.HYPM5(2));
+    dist_SUMO_453(i) = distlatlon(G453grid.lat(ind_data_453(i)), OOImoorings.SUMO5(1), ...
+        -G453grid.lon(ind_data_453(i)), -OOImoorings.SUMO5(2));
 end
 ind_HYPM_453 = ind_data_453(find(dist_HYPM_453 < tol));
+ind_SUMO_453 = ind_data_453(find(dist_SUMO_453 < tol));
 
+%% Plot map of both gliders
+
+%ind = find(Winkler_casts(:,1) >=5 & Winkler_casts(:,1) <=6);
+M = 15;
+Ftsz = 12;
+    figure(10); clf
+    ax1 = gca;
+    hold all;
+    ax1.FontSize = Ftsz;
+%scatter(-G453grid.lon(ind_data_453), G453grid.lat(ind_data_453), M, G453grid.time_start(ind_data_453), 'filled'); hold on;
+%scatter(-G363grid.lon(ind_data_363), G363grid.lat(ind_data_363), M, G363grid.time_start(ind_data_363), 'filled');
+
+h2 = plot(-G363grid.lon(ind_data_363), G363grid.lat(ind_data_363),'-','color',nicecolor('rwww')); hold on;
+h1 = plot(-G453grid.lon(ind_data_453), G453grid.lat(ind_data_453),'-','color',nicecolor('kkwww')); hold on;
+
+h5 = plot(-OOImoorings.SUMO5(2), OOImoorings.SUMO5(1),'sk','markersize',M,'markerfacecolor',nicecolor('ggk')); hold on;
+h6 = plot(-OOImoorings.HYPM5(2), OOImoorings.HYPM5(1),'dk','markersize',M,'markerfacecolor',nicecolor('rb')); hold on;
+h7 = plot(-OOImoorings.FLMA5(2), OOImoorings.FLMA5(1),'ok','markersize',M,'markerfacecolor',nicecolor('bw')); hold on;
+h8 = plot(-OOImoorings.FLMB5(2), OOImoorings.FLMB5(1),'ok','markersize',M,'markerfacecolor',nicecolor('bbbkkw')); hold on;
+
+h4 = plot(-G363grid.lon(ind_HYPM_363), G363grid.lat(ind_HYPM_363),'r.','markersize',M/3); hold on;
+plot(-G363grid.lon(ind_SUMO_363), G363grid.lat(ind_SUMO_363),'r.','markersize',M/3); hold on;
+h3 = plot(-G453grid.lon(ind_HYPM_453), G453grid.lat(ind_HYPM_453),'k.','markersize',M/3); hold on;
+plot(-G453grid.lon(ind_SUMO_453), G453grid.lat(ind_SUMO_453),'k.','markersize',M/3); hold on;
+
+xlim([39 40.1])
+ylim([59.6 60.05])
+xlabel('Longitude (^oW)','Fontsize', Ftsz)
+ylabel('Latitude (^oN)','Fontsize', Ftsz)
+box on
+legend([h1 h2 h3 h4 h5 h6 h7 h8],'Glider 453 track','Glider 363 track',...
+    'Glider 453 profiles w/in 5 km of Apex moorings', 'Glider 363 profiles w/in 5 km of Apex moorings',...
+    'Apex surface mooring', 'Apex sub-surface profiler mooring', 'Flanking mooring A', 'Flanking mooring B',...
+    'location','northeastoutside','Fontsize', Ftsz);
 %% Depth profiles over time
 %Adjustable parameters for plotting
     mindepth = 0; maxdepth = 1000;
@@ -195,14 +221,27 @@ plot(G363grid.time_start(ind_HYPM_363), 5*ones(size(ind_HYPM_363)), '.','markers
 datetick('x',2,'keeplimits');
 title('Glider 363 oxygen saturation', 'Fontsize', 12)
 
+%% Extract and process HYPM data
+wfp_analysis
+
 %% Extract HYPM profiles aligned with each glider profile
+
+%Determine part of depth grids that will overlap
+[depth_grid_overlap, inddepth_wfp, inddepth_glider] = intersect(Yr5_wfpgrid.depth_grid,G453grid.depth_grid);
 
 figure(10); clf
 for i = 1:length(ind_HYPM_453)
     [minval(i), minind(i)] = min(abs(G453grid.time_start(ind_HYPM_453(i)) - Yr5_wfpgrid.time_start(Yr5_wfpgrid.ind_pair)));
+    A = Yr5_wfpgrid.oxygen_corr(inddepth_wfp,minind(i));
+    B = squeeze(G453grid.scivars(inddepth_glider,3,ind_HYPM_453(i)));
+    wfp_to_453(i,1) = nanmean(B./A);
+    wfp_to_453(i,2) = nanmedian(B./A);
+    wfp_to_453(i,3) = nanstd(B./A);
+    wfp_to_453(i,4) = sum(~isnan(B./A));
+    wfp_to_453(i,5) = G453grid.time_start(ind_HYPM_453(i));
     if round((i)/10) == ((i)/10)
         subplot(2,4,((i)/10))
-        plot(Yr5_wfpgrid.oxygen_corr(:,minind(i))*gain_hypm, Yr5_wfpgrid.depth_grid, 'k.'); hold on;
+        plot(Yr5_wfpgrid.oxygen_corr(:,minind(i)), Yr5_wfpgrid.depth_grid, 'k.'); hold on;
         plot(squeeze(G453grid.scivars(:,3,ind_HYPM_453(i)))*med_gain_453, G453grid.depth_grid, 'r.'); hold on;
         axis ij
         xlim([260 310])
@@ -210,10 +249,17 @@ for i = 1:length(ind_HYPM_453)
         title(datestr(G453grid.time_start(ind_HYPM_453(i)),1))
     end
 end
-%%
+
 figure(11); clf
 for i = 1:length(ind_HYPM_363)
     [minval(i), minind(i)] = min(abs(G363grid.time_start(ind_HYPM_363(i)) - Yr5_wfpgrid.time_start(Yr5_wfpgrid.ind_pair)));
+    A = Yr5_wfpgrid.oxygen_corr(inddepth_wfp,minind(i));
+    B = squeeze(G363grid.scivars(inddepth_glider,3,ind_HYPM_363(i)));
+    wfp_to_363(i,1) = nanmean(B./A);
+    wfp_to_363(i,2) = nanmedian(B./A);
+    wfp_to_363(i,3) = nanstd(B./A);
+    wfp_to_363(i,4) = sum(~isnan(B./A));
+    wfp_to_363(i,5) = G363grid.time_start(ind_HYPM_363(i));
     if round((i)/10) == ((i)/10)
         subplot(3,4,((i)/10))
         plot(Yr5_wfpgrid.oxygen_corr(:,minind(i))*gain_hypm, Yr5_wfpgrid.depth_grid, 'k.'); hold on;
@@ -224,7 +270,68 @@ for i = 1:length(ind_HYPM_363)
         title(datestr(G363grid.time_start(ind_HYPM_363(i)),1))
     end
 end
+%%
+%Plot time-series of gain corrections from gliders to WFP
+%First filter criterion is standard deviation of glider/HYPM ratio for
+%given profile - use to ensure alignment
+%Second filter criterion is time (make sure time is in reasonable range)
+    ind_453 = find(wfp_to_453(:,3) < 0.085 & wfp_to_453(:,5) > 100);
+    ind_363 = find(wfp_to_363(:,3) < 0.085 & wfp_to_363(:,5) > 100);
 
+figure(12); clf
+M = 15;
+    subplot(211)
+plot(wfp_to_453(ind_453,5), wfp_to_453(ind_453,2)*med_gain_453, 'b.','markersize',M); hold on;
+plot(wfp_to_363(ind_363,5), wfp_to_363(ind_363,2)*med_gain_363, 'r.','markersize',M); hold on;
+datetick('x')
+legend('453','363')
+    subplot(212)
+A = [wfp_to_453(ind_453,2)*med_gain_453; wfp_to_363(ind_363,2)*med_gain_363];
+%histogram(A, [0.99:0.005:1.07]); hold on;
+histogram(wfp_to_453(ind_453,2)*med_gain_453, [0.99:0.005:1.07]); hold on;
+histogram(wfp_to_363(ind_363,2)*med_gain_363, [0.99:0.005:1.07]); hold on;
+legend('453','363')
 
+med_gain_wfp = nanmedian(A);
 
+%% Load Lucy's Yr1-4 processed WFP data
+load Lucy_IrmingerOOI_wfpdata.mat
 
+%% Create a merged data product to plot
+
+%Need to check the corrections to get to here
+Yr5_wfpgrid.O2sat_glidercorr = ((Yr5_wfpgrid.oxygen_corr*(med_gain_wfp))./...
+    Yr5_wfpgrid.O2equil - 1)*100;
+
+wfpmerge.O2sat_driftcorr = [wfpmerge.O2sat_driftcorr Yr5_wfpgrid.O2sat_glidercorr];
+wfpmerge.time = [wfpmerge.time; Yr5_wfpgrid.time_start(Yr5_wfpgrid.ind_pair)];
+
+%% Plot merged data
+%Adjustable parameters for plotting
+    mindepth = 5; maxdepth = 1900;
+    cints = 60; %number of contour intervals
+    C = cmocean('Dense'); %set colormap
+    C2 = cmocean('Algae'); 
+
+%Make plotting grid
+[X,Y] = meshgrid(wfpmerge.time, wfpmerge.depth_grid);
+
+figure(104); clf;
+cmin = -14; cmax = 10; %manually set min and max
+    cvec = [cmin:(cmax-cmin)/cints:cmax];
+contourf(X,Y,wfpmerge.O2sat_driftcorr,cvec,'linecolor','none'); hold on;
+
+[X,Y] = meshgrid(G363grid.time_start(ind_data_363), G363grid.depth_grid(1:45));
+contourf(X,Y,squeeze((G363grid.scivars(1:45,4,ind_data_363)*med_gain_363) - 100),cvec,'linecolor','none'); hold on;
+
+[X,Y] = meshgrid(G453grid.time_start(ind_data_453), G453grid.depth_grid(1:45));
+contourf(X,Y,squeeze((G453grid.scivars(1:45,4,ind_data_453)*med_gain_453) - 100),cvec,'linecolor','none'); hold on;
+
+axis([min(wfpmerge.time) max(wfpmerge.time) mindepth maxdepth]); caxis([cmin cmax]);
+colormap(cmocean('Balance','pivot',0)); set(gca,'YDir','reverse'); ylabel('Depth (m)', 'Fontsize', 14); hcb = colorbar; set(hcb,'location','eastoutside')
+datetick('x',2,'keeplimits');
+title('Oxygen saturation (%)', 'Fontsize', 12)
+
+%% Add in SUMO data
+addpath('C:\Users\palevsky\Dropbox\OOI Irminger Sea\OOI_downloads\THREDDS_updated\')
+sumo_timeseries_plot

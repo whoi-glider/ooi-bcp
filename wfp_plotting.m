@@ -42,7 +42,7 @@ for i = 2:6
 end
 
 %% Load MLD data from Izi
-addpath('C:/Users/palevsky/Dropbox/OOI Irminger Sea/MLDs from Izi')
+addpath('C:/Users/palevsky/Dropbox/OOI Irminger Sea/Files from Izi')
 load OOI_HYPM_ML_Feb2021.mat
 
 %% Make plots

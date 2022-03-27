@@ -8,7 +8,7 @@ alignedcasts = [4,8,11];
 timealigned = castmeta_irminger6.daytime(alignedind);
 
 %Set beginning and end times
-begtime = datenum(2019,8,6,12,0,0);
+begtime = datenum(2019,8,5,0,0,0);
 endtime = datenum(now); %datenum(2019,8,19);
 
 figure(3); clf
