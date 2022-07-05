@@ -6,15 +6,18 @@
     depth_grid = [150:5:2600];
     therm_grid = [1.1:0.05:5.6];
 
+%https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered/catalog.html
 addpath('C:/Users/palevsky/Dropbox/OOI Irminger Sea/OOI_downloads/THREDDS_updated/HYPM')
 filenames = {'deployment0001_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20140912T000208-20150812T103930.nc',...
     'deployment0002_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20150817T030206-20160628T060527.nc',...
     'deployment0003_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20160712T000207-20170712T072809.nc',...
     'deployment0004_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20170807T000204-20180615T185737.nc',...
     'deployment0005_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20180610T000207-20190630T071452.nc',...
-    'deployment0006_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20190807T000205-20200509T172910.nc'};
+    'deployment0006_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20190807T000205-20200509T172910.nc'...
+    'deployment0007_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20200825T200205-20210819T060646.nc'};
 
-for i = 1:6
+addpath('C:/Users/palevsky/Dropbox/MATLAB/OOI data processing/OOI_Irminger_students/common')
+for i = 1:7
     [wfp{i}, wfpgrid{i}, wfpgrid_therm{i}] = load_HYPM_DOSTA_fun(filenames{i}, depth_grid, therm_grid);
 end
 

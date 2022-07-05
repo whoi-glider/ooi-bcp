@@ -7,7 +7,7 @@ wfpmerge.T = wfpgrid{1}.T;
 wfpmerge.S = wfpgrid{1}.S;
 wfpmerge.O2conc = wfpgrid{1}.O2conc;
 wfpmerge.oxygen_gaincorr = wfpgrid{1}.oxygen_gaincorr;
-for i = 2:6
+for i = 2:7
     wfpmerge.time = [wfpmerge.time; wfpgrid{i}.time_start(wfpgrid{i}.ind_pair)];
     wfpmerge.pdens = [wfpmerge.pdens wfpgrid{i}.pdens];
     wfpmerge.T = [wfpmerge.T wfpgrid{i}.T];
@@ -16,7 +16,7 @@ for i = 2:6
     if i < 6
         wfpmerge.oxygen_gaincorr = [wfpmerge.oxygen_gaincorr wfpgrid{i}.oxygen_gaincorr];
     end
-    if i == 6
+    if i >= 6
         wfpmerge.oxygen_gaincorr = [wfpmerge.oxygen_gaincorr wfpgrid{i}.O2conc];
     end
 end
@@ -76,15 +76,25 @@ figure(1); clf;
 % datetick('x',2,'keeplimits');
 % title('Temperature (deg C)', 'Fontsize', 12)
 
-    %subplot(313) %Oxygen_corr concentration
-cmin = 260; cmax = 320; %manually set min and max
+subplot(211) %Oxygen_corr concentration
+cmin = 220; cmax = 320; %manually set min and max
     cvec = [cmin:(cmax-cmin)/cints:cmax];
-contourf(X,Y,wfpmerge.oxygen_gaincorr,cvec,'linecolor','none'); hold on;
-plot(dt,MLD,'k.','markersize',5); hold on;
-axis([min(wfpmerge.time) max(wfpmerge.time) mindepth maxdepth - 800]); caxis([cmin cmax]);
+contourf(X,Y,wfpmerge.O2conc,cvec,'linecolor','none'); hold on;
+%plot(dt,MLD,'k.','markersize',5); hold on;
+axis([min(wfpmerge.time) max(wfpmerge.time) mindepth maxdepth - 200]); caxis([cmin cmax]);
 colormap(C); set(gca,'YDir','reverse'); ylabel('Depth (m)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
 datetick('x',2,'keeplimits');
-title('Oxygen concentration (\mumol/kg)', 'Fontsize', 12)
+title('Oxygen concentration, uncorrected (\mumol/kg)', 'Fontsize', 12)
+
+subplot(212) %Oxygen_corr concentration
+cmin = 250; cmax = 320; %manually set min and max
+    cvec = [cmin:(cmax-cmin)/cints:cmax];
+contourf(X,Y,wfpmerge.oxygen_gaincorr,cvec,'linecolor','none'); hold on;
+%plot(dt,MLD,'k.','markersize',5); hold on;
+axis([min(wfpmerge.time) max(wfpmerge.time) mindepth maxdepth - 200]); caxis([cmin cmax]);
+colormap(C); set(gca,'YDir','reverse'); ylabel('Depth (m)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
+datetick('x',2,'keeplimits');
+title('Oxygen concentration, preliminary gain corrections in deployments 1-5 (\mumol/kg)', 'Fontsize', 12)
 %%
 figure(2); clf
     %subplot(212) %Chla
