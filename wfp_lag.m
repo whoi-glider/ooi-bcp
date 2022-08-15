@@ -3,8 +3,8 @@
 % Runs after 1st code block in wfp_analysis.m, which reads in all years of
 % WFP O2 data and passes through load_HYPM_DOSTA_fun
 
-%Make first attempt to do this just for Year 1 wfp data
-testyr = 1;
+%Make first attempt to do this just for Year 1 wfp data (now expanding to year 2)
+testyr = 2;
 
 %% Roo's version of correction, example in ws_O2tau.m for glider
 % load('Tau4330_lookup.mat','T4330');
@@ -61,7 +61,8 @@ gaps = union(tgap,pgap);
 %% Calculate tau using Gordon et al. 2020 method
 addpath(genpath('C:\Users\palevsky\Documents\GitHub\optode-response-time'))
 
-rng = [1:69, 71:112, 120:183, 201:241, 243:273, 276:351, 353:393]; %use full range now that have identified which version to go forward with - hard coded based on gaps output
+%rng = [1:69, 71:112, 120:183, 201:241, 243:273, 276:351, 353:393]; %use full range now that have identified which version to go forward with - hard coded based on gaps output
+rng = [1:89,91:382]; %set for year 2
 tref = 4; %reference temperature for tau
 zlim_depth = [300 2500];
 zlim_dens = [1027.62 1027.92]; %density bounds over which to calculate tau (~+/- 2.5 std from mean in yr1)
@@ -87,47 +88,48 @@ length(rng)
 
 %% Assess temporal variability of thickness/tau
 
-indgap = find(diff(rng) > 1);
-indnotgap = find(diff(rng) == 1);
+% indgap = find(diff(rng) > 1);
+% indnotgap = find(diff(rng) == 1);
 %Don't fill gaps because it prevents movmean plotting
 
 figure(100); clf
     smthval = 30;
 subplot(211)
 plot(wgg.mtime(rng(1:end-1),1), wgg.thicknessd,'k.'); hold on;
-plot(wgg.mtime(rng(indgap),1), wgg.thicknessd(indgap),'b.','markersize',10); hold on;
+%plot(wgg.mtime(rng(indgap),1), wgg.thicknessd(indgap),'b.','markersize',10); hold on;
 plot(wgg.mtime(rng(1:end-1),1), movmean(wgg.thicknessd,smthval),'r.'); hold on;
 plot(wgg.mtime(rng(1:end-1),1), movmean(wgg.thicknessd,smthval) + movstd(wgg.thicknessd,smthval),'r-'); hold on;
 plot(wgg.mtime(rng(1:end-1),1), movmean(wgg.thicknessd,smthval) - movstd(wgg.thicknessd,smthval),'r-'); hold on;
 datetick('x')
 ylabel('Thickness (\mum)')
-legend('Individual points','Gap data','30-pt moving mean','+/- 30-pt moving stdev')
-title('OOI Irminger WFP Year 1 lag, Gordon et al. 2020 T-dependent method calc. in density space')
+legend('Individual points','30-pt moving mean','+/- 30-pt moving stdev')
+title('OOI Irminger WFP Year 2 lag, Gordon et al. 2020 T-dependent method calc. in density space')
 
 
 subplot(212)
 plot(wgg.mtime(rng(1:end-1),1), wgg.tau_Trefd,'k.'); hold on;
-plot(wgg.mtime(rng(indgap),1), wgg.tau_Trefd(indgap),'b.','markersize',10); hold on;
+%plot(wgg.mtime(rng(indgap),1), wgg.tau_Trefd(indgap),'b.','markersize',10); hold on;
 plot(wgg.mtime(rng(1:end-1),1), movmean(wgg.tau_Trefd,smthval),'r.'); hold on;
 plot(wgg.mtime(rng(1:end-1),1), movmean(wgg.tau_Trefd,smthval) + movstd(wgg.tau_Trefd,smthval),'r-'); hold on;
 plot(wgg.mtime(rng(1:end-1),1), movmean(wgg.tau_Trefd,smthval) - movstd(wgg.tau_Trefd,smthval),'r-'); hold on;
 datetick('x')
 ylabel('\tau (s) at 4^oC')
-legend('Individual points','Gap data','30-pt moving mean','+/- 30-pt moving stdev')
+legend('Individual points','30-pt moving mean','+/- 30-pt moving stdev')
 
-%Calculate annual stats on datapoints excluding the gaps
-wgg.stats = [nanmean(wgg.thicknessd(indnotgap)) nanstd(wgg.thicknessd(indnotgap)) length(wgg.thicknessd(indnotgap));...
-    nanmean(wgg.tau_Trefd(indnotgap)) nanstd(wgg.tau_Trefd(indnotgap)) length(wgg.tau_Trefd(indnotgap))];
+% Calculate annual stats on datapoints excluding the gaps
+wgg.stats = [nanmean(wgg.thicknessd) nanstd(wgg.thicknessd) length(wgg.thicknessd);...
+    nanmean(wgg.tau_Trefd) nanstd(wgg.tau_Trefd) length(wgg.tau_Trefd)];
 wgg.stats(:,4) = wgg.stats(:,2)./sqrt(wgg.stats(:,3));
 
 
 %% Apply tau correction using version w/ temperature term & density space
+[m,n] = size(wgg.doxy);
 
 %Initialize array to hold corrected oxygen data
 wgg.doxy_lagcorr = NaN(size(wgg.doxy)); %with temperature correction (Gordon et al. 2020 version w/ Bittig add on)
 wgg.doxy_lagcorr2 = NaN(size(wgg.doxy)); %Roo's implementation, no temperature correction
 
-for i = 1:404
+for i = 1:m
     ind = ~(isnan(wgg.mtime(i,:)) | isnan(wgg.doxy(i,:)) | isnan(wgg.temp(i,:)));
     wgg.doxy_lagcorr(i,ind) = correct_oxygen_profile_wTemp(wgg.mtime(i,ind), wgg.doxy(i,ind), wgg.temp(i,ind), nanmean(wgg.thicknessd));
     wgg.doxy_lagcorr2(i,ind) = aa_deconv(wgg.mtime(i,ind), wgg.doxy(i,ind), nanmean(wgg.tau_Tref));
@@ -136,16 +138,17 @@ end
 %% Plot examples of paired up & down profiles
 smthval = 10;
 M = 4;
+int = 80;
 figure(1); clf
 for i = 1:4
     subplot(2,2,i)
-    plot(wgg.doxy(i*10,:), wgg.pres(i*10,:),'k.'); hold on;
-    plot(wgg.doxy(i*10 + 1,:), wgg.pres(i*10 + 1,:),'.'); hold on;
-    plot(movmean(wgg.doxy_lagcorr(i*10,:),smthval), wgg.pres(i*10,:),'.','color',nicecolor('kww'),'markersize',M); hold on;
-    plot(movmean(wgg.doxy_lagcorr(i*10 + 1,:),smthval), wgg.pres(i*10 + 1,:),'.','color',nicecolor('rrykkwwww'),'markersize',M); hold on;
+    plot(wgg.doxy(i*int,:), wgg.pres(i*int,:),'k.'); hold on;
+    plot(wgg.doxy(i*int + 1,:), wgg.pres(i*int + 1,:),'.'); hold on;
+    plot(movmean(wgg.doxy_lagcorr(i*int,:),smthval), wgg.pres(i*int,:),'.','color',nicecolor('kww'),'markersize',M); hold on;
+    plot(movmean(wgg.doxy_lagcorr(i*int + 1,:),smthval), wgg.pres(i*int + 1,:),'.','color',nicecolor('rrykkwwww'),'markersize',M); hold on;
     xlabel('Oxygen-L2, (\mumol/kg)')
     ylabel('dbar')
-    title(datestr(wgg.mtime(i*10 + 1,1),1))
+    title(datestr(wgg.mtime(i*int + 1,1),1))
     legend('Up','Down','location','northwest')
     axis ij
 end
@@ -153,22 +156,22 @@ end
 %% Plot RMSD for each of the 4 approaches to calculating tau
 % Tested for 1st 60 profiles in year 1
 figure(2); clf
-    subplot(221)
-plot(wgg.time_constants,wgg.rmsd,'.')
-xlabel('\tau (sec)')
-ylabel('RMSD')
-title('No T term, depth aligned')
-    subplot(222)
-plot(wgg.time_constants,wgg.rmsd,'.')
-xlabel('\tau (sec)')
-ylabel('RMSD')
-title('No T term, density aligned')
-    subplot(223)
-plot(wgg.thickness_constants,wgg.rmsdt,'.')
-xlabel('thickness (\mum)')
-ylabel('RMSD')
-title('w/ T term, depth aligned')
-    subplot(224)
+%     subplot(221)
+% plot(wgg.time_constants,wgg.rmsd,'.')
+% xlabel('\tau (sec)')
+% ylabel('RMSD')
+% title('No T term, depth aligned')
+%     subplot(222)
+% plot(wgg.time_constants,wgg.rmsd,'.')
+% xlabel('\tau (sec)')
+% ylabel('RMSD')
+% title('No T term, density aligned')
+%     subplot(223)
+% plot(wgg.thickness_constants,wgg.rmsdt,'.')
+% xlabel('thickness (\mum)')
+% ylabel('RMSD')
+% title('w/ T term, depth aligned')
+%     subplot(224)
 plot(wgg.thickness_constants,wgg.rmsdtd,'.')
 xlabel('thickness (\mum)')
 ylabel('RMSD')
@@ -180,7 +183,3 @@ figure(3); clf
 histogram(abs(v))
 title({'WFP Yr 1 velocity histogram, median = ' num2str(nanmedian(abs(v)),3)})
 xlabel('|dbar s^{-1}|')
-
-%% NEXT STEPS
-% Try actually applying the correction (correct_oxygen_profile.m)
-% Expand to include the full year - probably just do for v. w/ dens & T
