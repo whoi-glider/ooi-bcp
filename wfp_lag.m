@@ -3,8 +3,11 @@
 % Runs after 1st code block in wfp_analysis.m, which reads in all years of
 % WFP O2 data and passes through load_HYPM_DOSTA_fun
 
-% Loop over all years
-for yr = 1:2
+%% Loop over all years - note that this is very time intensive to output saved
+% Can comment out this full loop section and instead load data:
+load lagyr1to7.mat %has everything in current code version - note that years 6 and 7 only have beginning of year
+
+for yr = 1:7
 
 %% Gordon et al. 2020 version of correction
 % Format WFP output into matrices that match the required argument formats
@@ -52,21 +55,21 @@ wgg{yr}.gaps = union(wgg{yr}.tgap,wgg{yr}.pgap);
 addpath(genpath('C:\Users\palevsky\Documents\GitHub\optode-response-time'))
 
 if yr == 1
-    rng = [1:69, 71:112, 120:183, 201:241, 243:273, 276:351, 353:393];
+    wgg{yr}.rng = [1:69, 71:112, 120:183, 201:241, 243:273, 276:351, 353:393];
 elseif yr == 2
-    rng = [1:89,91:382];
+    wgg{yr}.rng = [1:89,91:382];
 elseif yr == 3
-    rng = [1:238, 242:388, 392:length(wgg{yr}.updown)];
+    wgg{yr}.rng = [1:238, 242:388, 392:length(wgg{yr}.updown)];
 elseif yr == 4
-    rng = [1:185, 188:224, 256:268, 293:362, 375:length(wgg{yr}.updown)];
+    wgg{yr}.rng = [1:185, 188:224, 256:268, 293:362, 375:length(wgg{yr}.updown)];
 elseif yr == 6
     %rng = [1:length(wgg{yr}.updown)]; rng(wgg{yr}.gaps) = NaN; rng(240:279) = NaN; rng = rng(~isnan(rng));
     %rng = [1:57, 59:93, 102:188, 209:222, 224:272, 286:327];
-    rng = [1:57];
+    wgg{yr}.rng = [1:57];
 elseif yr == 7
-    rng = [1:79];
+    wgg{yr}.rng = [1:79];
 else
-    rng = [1:length(wgg{yr}.updown)]; rng(wgg{yr}.gaps) = NaN; rng = rng(~isnan(rng));
+    wgg{yr}.rng = [1:length(wgg{yr}.updown)]; wgg{yr}.rng(wgg{yr}.gaps) = NaN; wgg{yr}.rng = wgg{yr}.rng(~isnan(wgg{yr}.rng));
 end
 tref = 4; %reference temperature for tau
 zlim_depth = [300 2500];
@@ -91,36 +94,6 @@ tic
 toc
 length(rng)
 
-%% Assess temporal variability of thickness/tau
-
-% indgap = find(diff(rng) > 1);
-% indnotgap = find(diff(rng) == 1);
-%Don't fill gaps because it prevents movmean plotting
-
-figure(100 + yr); clf
-    smthval = 30;
-subplot(211)
-plot(wgg{yr}.mtime(rng(1:end-1),1), wgg{yr}.thicknessd,'k.'); hold on;
-%plot(wgg{yr}.mtime(rng(indgap),1), wgg{yr}.thicknessd(indgap),'b.','markersize',10); hold on;
-plot(wgg{yr}.mtime(rng(1:end-1),1), movmean(wgg{yr}.thicknessd,smthval),'r.'); hold on;
-plot(wgg{yr}.mtime(rng(1:end-1),1), movmean(wgg{yr}.thicknessd,smthval) + movstd(wgg{yr}.thicknessd,smthval),'r-'); hold on;
-plot(wgg{yr}.mtime(rng(1:end-1),1), movmean(wgg{yr}.thicknessd,smthval) - movstd(wgg{yr}.thicknessd,smthval),'r-'); hold on;
-datetick('x')
-ylabel('Thickness (\mum)')
-legend('Individual points','30-pt moving mean','+/- 30-pt moving stdev')
-title(['OOI Irminger WFP Year ' num2str(yr) ' lag, Gordon et al. 2020 T-dependent method calc. in density space'])
-
-
-subplot(212)
-plot(wgg{yr}.mtime(rng(1:end-1),1), wgg{yr}.tau_Trefd,'k.'); hold on;
-%plot(wgg{yr}.mtime(rng(indgap),1), wgg{yr}.tau_Trefd(indgap),'b.','markersize',10); hold on;
-plot(wgg{yr}.mtime(rng(1:end-1),1), movmean(wgg{yr}.tau_Trefd,smthval),'r.'); hold on;
-plot(wgg{yr}.mtime(rng(1:end-1),1), movmean(wgg{yr}.tau_Trefd,smthval) + movstd(wgg{yr}.tau_Trefd,smthval),'r-'); hold on;
-plot(wgg{yr}.mtime(rng(1:end-1),1), movmean(wgg{yr}.tau_Trefd,smthval) - movstd(wgg{yr}.tau_Trefd,smthval),'r-'); hold on;
-datetick('x')
-ylabel('\tau (s) at 4^oC')
-legend('Individual points','30-pt moving mean','+/- 30-pt moving stdev')
-
 % Calculate annual stats on datapoints excluding the gaps
 wgg{yr}.stats = [nanmean(wgg{yr}.thicknessd) nanstd(wgg{yr}.thicknessd) length(wgg{yr}.thicknessd);...
     nanmean(wgg{yr}.tau_Trefd) nanstd(wgg{yr}.tau_Trefd) length(wgg{yr}.tau_Trefd)];
@@ -142,8 +115,56 @@ end
 
 end
 
+%% Assess temporal variability of thickness/tau
+
+% indgap = find(diff(rng) > 1);
+% indnotgap = find(diff(rng) == 1);
+%Don't fill gaps because it prevents movmean plotting
+
+figure(100); clf
+    smthval = 60;
+subplot(211)
+for yr = 1:7
+plot(wgg{yr}.mtime(wgg{yr}.rng(1:end-1),1), wgg{yr}.thicknessd,'k.'); hold on;
+plot(wgg{yr}.mtime(wgg{yr}.rng(1:end-1),1), movmean(wgg{yr}.thicknessd,smthval),'r.'); hold on;
+end
+xlim([datenum(2014,8,15) datenum(2021,1,1)])
+ylim([0 120])
+datetick('x','keeplimits')
+ylabel('Thickness (\mum)')
+legend('Individual points','60-pt moving mean')
+title(['OOI Irminger WFP lag, Gordon et al. 2020 T-dependent method calc. in density space'])
+
+subplot(212)
+for yr = 1:7
+plot(wgg{yr}.mtime(wgg{yr}.rng(1:end-1),1), wgg{yr}.tau_Trefd,'k.'); hold on;
+plot(wgg{yr}.mtime(wgg{yr}.rng(1:end-1),1), movmean(wgg{yr}.tau_Trefd,smthval),'r.'); hold on;
+end
+xlim([datenum(2014,8,15) datenum(2021,1,1)])
+ylim([0 80])
+datetick('x','keeplimits')
+ylabel('\tau (s) at 4^oC')
+legend('Individual points','60-pt moving mean')
+title(['OOI Irminger WFP lag, Gordon et al. 2020 T-dependent method calc. in density space'])
+
+%% Check lag-corr output
+
+%Check for outliers/range test
+figure(101); clf
+for yr = 1:7
+    A = wgg{yr}.doxy_lagcorr(:);
+    histogram(A); hold on;
+    r(yr,1) = nanmean(A) - 4*nanstd(A);
+    r(yr,2) = nanmean(A) + 4*nanstd(A);
+    r(yr,3) = length(find(A < r(yr,1)));
+    r(yr,4) = length(find(A > r(yr,2)));
+end
+xlim([220 320])
+legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7')
+title('Histogram all OOI Irminger WFP L2-oxygen, lag corrected only')
+
 %% Plot examples of paired up & down profiles
-smthval = 10;
+smthval = 1;
 M = 4;
 int = 80;
 yr = 6;
