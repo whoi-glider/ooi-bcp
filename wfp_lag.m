@@ -5,7 +5,7 @@
 
 %% Loop over all years - note that this is very time intensive to output saved
 % Can comment out this full loop section and instead load data:
-load lagyr1to7.mat %has everything in current code version - note that years 6 and 7 only have beginning of year
+%load lagyr1to7.mat %has everything in current code version - note that years 6 and 7 only have beginning of year
 
 for yr = 1:7
 
@@ -17,6 +17,12 @@ tol = 50; %only use profiles with at least 50 points
 
 numprofiles = max(wfp{yr}.profile_index);
     wgg{yr}.mtime = NaN(numprofiles,2000);
+    wgg{yr}.lon = NaN(numprofiles,2000);
+    wgg{yr}.lat = NaN(numprofiles,2000);
+    wgg{yr}.SA = NaN(numprofiles,2000);
+    wgg{yr}.CT = NaN(numprofiles,2000);
+    wgg{yr}.depth = NaN(numprofiles,2000);
+    wgg{yr}.pracsal = NaN(numprofiles,2000);
     wgg{yr}.pres = NaN(numprofiles,2000);
     wgg{yr}.doxy = NaN(numprofiles,2000);
     wgg{yr}.temp = NaN(numprofiles,2000);
@@ -26,6 +32,12 @@ for i = 1:numprofiles
     indp = find(wfp{yr}.profile_index == i);
     if length(indp) > tol
         wgg{yr}.mtime(i,1:length(indp)) = wfp{yr}.time_dosta_mat(indp);
+        wgg{yr}.lon(i,1:length(indp)) = wfp{yr}.lon_dosta(indp);
+        wgg{yr}.lat(i,1:length(indp)) = wfp{yr}.lat_dosta(indp);
+        wgg{yr}.SA(i,1:length(indp)) = wfp{yr}.SA_dosta(indp);
+        wgg{yr}.CT(i,1:length(indp)) = wfp{yr}.CT_dosta(indp);
+        wgg{yr}.depth(i,1:length(indp)) = wfp{yr}.depth_dosta(indp);
+        wgg{yr}.pracsal(i,1:length(indp)) = wfp{yr}.pracsal_dosta(indp);
         wgg{yr}.pres(i,1:length(indp)) = wfp{yr}.pressure_dosta(indp);
         wgg{yr}.doxy(i,1:length(indp)) = wfp{yr}.oxygen(indp);
         wgg{yr}.temp(i,1:length(indp)) = wfp{yr}.temperature_dosta(indp);
@@ -39,11 +51,18 @@ end
 %% Cut out rows and columns of all NaNs
 ind_good = find(~all(isnan(wgg{yr}.doxy')) & ~isnan(wgg{yr}.updown)' == 1); %includes > tol pts and has up/down index
     wgg{yr}.mtime = wgg{yr}.mtime(ind_good,~all(isnan(wgg{yr}.doxy)));
+    wgg{yr}.lon = wgg{yr}.lon(ind_good,~all(isnan(wgg{yr}.doxy)));
+    wgg{yr}.lat = wgg{yr}.lat(ind_good,~all(isnan(wgg{yr}.doxy)));
+    wgg{yr}.SA = wgg{yr}.SA(ind_good,~all(isnan(wgg{yr}.doxy)));
+    wgg{yr}.CT = wgg{yr}.CT(ind_good,~all(isnan(wgg{yr}.doxy)));
+    wgg{yr}.depth = wgg{yr}.depth(ind_good,~all(isnan(wgg{yr}.doxy)));
+    wgg{yr}.pracsal = wgg{yr}.pracsal(ind_good,~all(isnan(wgg{yr}.doxy)));
     wgg{yr}.pres = wgg{yr}.pres(ind_good,~all(isnan(wgg{yr}.doxy)));
     wgg{yr}.doxy = wgg{yr}.doxy(ind_good,~all(isnan(wgg{yr}.doxy)));
     wgg{yr}.temp = wgg{yr}.temp(ind_good,~all(isnan(wgg{yr}.doxy)));
     wgg{yr}.pdens = wgg{yr}.pdens(ind_good,~all(isnan(wgg{yr}.doxy)));
     wgg{yr}.updown = wgg{yr}.updown(ind_good);
+   
     
 %% Identify gaps in continuous paired profile sampling
     ttol = 2; %tolerance for gap between profiles, in days
@@ -64,10 +83,10 @@ elseif yr == 4
     wgg{yr}.rng = [1:185, 188:224, 256:268, 293:362, 375:length(wgg{yr}.updown)];
 elseif yr == 6
     %rng = [1:length(wgg{yr}.updown)]; rng(wgg{yr}.gaps) = NaN; rng(240:279) = NaN; rng = rng(~isnan(rng));
-    %rng = [1:57, 59:93, 102:188, 209:222, 224:272, 286:327];
-    wgg{yr}.rng = [1:57];
+    wgg{yr}.rng = [1:57, 59:93, 102:188, 209:222, 224:272, 286:327];
+    %wgg{yr}.rng = [1:57];
 elseif yr == 7
-    wgg{yr}.rng = [1:79];
+    wgg{yr}.rng = [1:78, 97:148, 176:189, 208:215, 227:238, 249:256, 286:293, 318:327, 391:400, 444:451, 490:499];
 else
     wgg{yr}.rng = [1:length(wgg{yr}.updown)]; wgg{yr}.rng(wgg{yr}.gaps) = NaN; wgg{yr}.rng = wgg{yr}.rng(~isnan(wgg{yr}.rng));
 end
@@ -89,10 +108,10 @@ zres = 0.0005;
 
 %Version with temperature term, also in density space
 tic
-[wgg{yr}.thicknessd, wgg{yr}.tau_Trefd, wgg{yr}.thickness_constants, wgg{yr}.rmsdtd] = calculate_tau_wTemp( wgg{yr}.mtime(rng,:), wgg{yr}.pdens(rng,:), wgg{yr}.doxy(rng,:), wgg{yr}.temp(rng,:),...
+[wgg{yr}.thicknessd, wgg{yr}.tau_Trefd, wgg{yr}.thickness_constants, wgg{yr}.rmsdtd] = calculate_tau_wTemp( wgg{yr}.mtime(wgg{yr}.rng,:), wgg{yr}.pdens(wgg{yr}.rng,:), wgg{yr}.doxy(wgg{yr}.rng,:), wgg{yr}.temp(wgg{yr}.rng,:),...
     'zlim',zlim_dens, 'zres', zres, 'tref', tref);
 toc
-length(rng)
+length(wgg{yr}.rng)
 
 % Calculate annual stats on datapoints excluding the gaps
 wgg{yr}.stats = [nanmean(wgg{yr}.thicknessd) nanstd(wgg{yr}.thicknessd) length(wgg{yr}.thicknessd);...
@@ -147,21 +166,6 @@ ylabel('\tau (s) at 4^oC')
 legend('Individual points','60-pt moving mean')
 title(['OOI Irminger WFP lag, Gordon et al. 2020 T-dependent method calc. in density space'])
 
-%% Check lag-corr output
-
-%Check for outliers/range test
-figure(101); clf
-for yr = 1:7
-    A = wgg{yr}.doxy_lagcorr(:);
-    histogram(A); hold on;
-    r(yr,1) = nanmean(A) - 4*nanstd(A);
-    r(yr,2) = nanmean(A) + 4*nanstd(A);
-    r(yr,3) = length(find(A < r(yr,1)));
-    r(yr,4) = length(find(A > r(yr,2)));
-end
-xlim([220 320])
-legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7')
-title('Histogram all OOI Irminger WFP L2-oxygen, lag corrected only')
 
 %% Plot examples of paired up & down profiles
 smthval = 1;
@@ -212,4 +216,5 @@ title('w/ T term, density aligned')
 % histogram(abs(v))
 % title({'WFP Yr 1 velocity histogram, median = ' num2str(nanmedian(abs(v)),3)})
 % xlabel('|dbar s^{-1}|')
+
 
