@@ -7,7 +7,7 @@
 % Can comment out this full loop section and instead load data:
 %load lagyr1to7.mat %has everything in current code version - note that years 6 and 7 only have beginning of year
 
-for yr = 1:7
+for yr = 1:8
 
 %% Gordon et al. 2020 version of correction
 % Format WFP output into matrices that match the required argument formats
@@ -81,12 +81,6 @@ elseif yr == 3
     wgg{yr}.rng = [1:238, 242:388, 392:length(wgg{yr}.updown)];
 elseif yr == 4
     wgg{yr}.rng = [1:185, 188:224, 256:268, 293:362, 375:length(wgg{yr}.updown)];
-elseif yr == 6
-    %rng = [1:length(wgg{yr}.updown)]; rng(wgg{yr}.gaps) = NaN; rng(240:279) = NaN; rng = rng(~isnan(rng));
-    wgg{yr}.rng = [1:57, 59:93, 102:188, 209:222, 224:272, 286:327];
-    %wgg{yr}.rng = [1:57];
-elseif yr == 7
-    wgg{yr}.rng = [1:78, 97:148, 176:189, 208:215, 227:238, 249:256, 286:293, 318:327, 391:400, 444:451, 490:499];
 else
     wgg{yr}.rng = [1:length(wgg{yr}.updown)]; wgg{yr}.rng(wgg{yr}.gaps) = NaN; wgg{yr}.rng = wgg{yr}.rng(~isnan(wgg{yr}.rng));
 end
@@ -143,11 +137,12 @@ end
 figure(100); clf
     smthval = 60;
 subplot(211)
-for yr = 1:7
-plot(wgg{yr}.mtime(wgg{yr}.rng(1:end-1),1), wgg{yr}.thicknessd,'k.'); hold on;
-plot(wgg{yr}.mtime(wgg{yr}.rng(1:end-1),1), movmean(wgg{yr}.thicknessd,smthval),'r.'); hold on;
+for yr = 1:8
+    ind = find(isnan(wgg{yr}.thicknessd) == 0);
+plot(wgg{yr}.mtime(wgg{yr}.rng(ind),1), wgg{yr}.thicknessd(ind),'k.'); hold on;
+plot(wgg{yr}.mtime(wgg{yr}.rng(ind),1), movmean(wgg{yr}.thicknessd(ind),smthval),'r.'); hold on;
 end
-xlim([datenum(2014,8,15) datenum(2021,1,1)])
+xlim([datenum(2014,8,15) datenum(2022,8,1)])
 ylim([0 120])
 datetick('x','keeplimits')
 ylabel('Thickness (\mum)')
@@ -155,11 +150,12 @@ legend('Individual points','60-pt moving mean')
 title(['OOI Irminger WFP lag, Gordon et al. 2020 T-dependent method calc. in density space'])
 
 subplot(212)
-for yr = 1:7
-plot(wgg{yr}.mtime(wgg{yr}.rng(1:end-1),1), wgg{yr}.tau_Trefd,'k.'); hold on;
-plot(wgg{yr}.mtime(wgg{yr}.rng(1:end-1),1), movmean(wgg{yr}.tau_Trefd,smthval),'r.'); hold on;
+for yr = 1:8
+    ind = find(isnan(wgg{yr}.tau_Trefd) == 0);
+plot(wgg{yr}.mtime(wgg{yr}.rng(ind),1), wgg{yr}.tau_Trefd(ind),'k.'); hold on;
+plot(wgg{yr}.mtime(wgg{yr}.rng(ind),1), movmean(wgg{yr}.tau_Trefd(ind),smthval),'r.'); hold on;
 end
-xlim([datenum(2014,8,15) datenum(2021,1,1)])
+xlim([datenum(2014,8,15) datenum(2022,8,1)])
 ylim([0 80])
 datetick('x','keeplimits')
 ylabel('\tau (s) at 4^oC')

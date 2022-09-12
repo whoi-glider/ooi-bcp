@@ -14,15 +14,16 @@ filenames = {'deployment0001_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_
     'deployment0004_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20170807T000204-20180615T185737.nc',...
     'deployment0005_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20180610T000207-20190630T071452.nc',...
     'deployment0006_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20190807T000205-20200509T172910.nc'...
-    'deployment0007_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20200825T200205-20210819T060646.nc'};
+    'deployment0007_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20200825T200205-20210819T060646.nc'...
+    'deployment0008_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20210820T000204-20220710T045503.nc'};
 
 addpath('C:/Users/palevsky/Dropbox/MATLAB/OOI data processing/OOI_Irminger_students/common')
-for i = 1:7
+for i = 1:8
     [wfp{i}, wfpgrid{i}, wfpgrid_therm{i}] = load_HYPM_DOSTA_fun(filenames{i}, depth_grid, therm_grid);
 end
 
 %% Lag correction
-load lagyr1to7.mat %output from wfp_lag.mat
+load lagyr1to8.mat %output from wfp_lag.mat
 
 %% Initial look at lag-corrected data
 
@@ -45,7 +46,7 @@ colorbar
 %% Calculate depth intervals of data
 
 figure(201); clf
-for yr = 1:7
+for yr = 1:8
     A = abs(diff(wgg{yr}.pres'));
     histogram(A(:)); hold on;
     a(yr) = nanmean(A(:));
@@ -56,7 +57,7 @@ end
 
 %Check for outliers/range test
 figure(101); clf
-for yr = 1:7
+for yr = 1:8
     A = wgg{yr}.doxy_lagcorr(:);
     histogram(A); hold on;
     r(yr,1) = nanmean(A) - 4*nanstd(A);
@@ -65,32 +66,32 @@ for yr = 1:7
     r(yr,4) = length(find(A > r(yr,2)));
 end
 xlim([220 320])
-legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7')
+legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8')
 title('Histogram all OOI Irminger WFP L2-oxygen, lag corrected only')
 
 
 % Check for spikess
 figure(100); clf
 subplot(311)
-for yr = 1:7
+for yr = 1:8
     A = diff(wgg{yr}.doxy_lagcorr');
     histogram((A(:))); hold on;
 end
 xlim([-4 4])
-legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7')
+legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8')
 title('Histogram of paired sample difference, all OOI Irminger WFP L2-oxygen, lag corrected only')
 
 subplot(312)
-for yr = 1:7
+for yr = 1:8
     A = diff(wgg{yr}.temp');
     histogram((A(:))); hold on;
 end
 xlim([-0.05 0.05])
-legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7')
+legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8')
 title('Histogram of paired sample difference, all OOI Irminger temperature')
 
 subplot(313)
-for yr = 1:7
+for yr = 1:8
     A = diff(wgg{yr}.pracsal');
     histogram((A(:))); hold on;
 end
