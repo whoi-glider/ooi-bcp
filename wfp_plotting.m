@@ -54,7 +54,7 @@ wggmerge.CT = wgg{1}.CT_grid;
 wggmerge.pdens = wgg{1}.pdens_grid;
 wggmerge.doxy_lagcorr = wgg{1}.doxy_lagcorr_grid;
 
-for yr = 2:7
+for yr = 2:8
     wggmerge.time = [wggmerge.time; wgg{yr}.time_start];
     wggmerge.duration = [wggmerge.duration; wgg{yr}.duration];
     wggmerge.lat = [wggmerge.lat; wgg{yr}.lat_profile];
@@ -67,23 +67,47 @@ for yr = 2:7
     wggmerge.doxy_lagcorr = [wggmerge.doxy_lagcorr wgg{yr}.doxy_lagcorr_grid];
 end
 
+%% Initial look at lag-corrected, gridded data
+
+figure(4); clf
+imagesc(wggmerge.doxy_lagcorr); caxis([240 300]); colorbar
+
 %% Load MLD data from Izi
+%Note that these are outdated - need to switch to newer MLD data
 addpath('C:/Users/palevsky/Dropbox/OOI Irminger Sea/Files from Izi')
 load OOI_HYPM_ML_Feb2021.mat
 
-%% Make plots
+%% Scatter plot with subset of data
+profilerng = [1:5:3371];
+sz = 1;
+C = cmocean('Dense'); %set colormap
 
-%Adjustable parameters for plotting
-    mindepth = 150; maxdepth = 2600;
-    cints = 60; %number of contour intervals
-    C = cmocean('Dense'); %set colormap
-    C2 = cmocean('Algae'); 
+doxy_scat = wggmerge.doxy_lagcorr(:,profilerng);
+[X,Y] = meshgrid(wggmerge.time(profilerng), depth_grid);
 
-%Make plotting grid
-[X,Y] = meshgrid(wggmerge.time, depth_grid);
-%[X2,Y2] = meshgrid(wfpmerge_flord.time, depth_grid);
+figure(5); clf
+scatter(X(:),Y(:),5,doxy_scat(:),'filled'); hold on;
+plot(dt,MLD,'k.','markersize',5); hold on;
+axis ij; axis tight
+colormap(C); ylabel('Depth (m)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
+datetick('x',2,'keeplimits');
+title('Oxygen concentration, lag corrected (\mumol/kg)', 'Fontsize', 12)
 
-figure(1); clf;
+
+%% Make contour plots
+%Note that contouring doesn't make optimal use of all data points
+
+% %Adjustable parameters for plotting
+%     mindepth = 150; maxdepth = 2600;
+%     cints = 60; %number of contour intervals
+%     C = cmocean('Dense'); %set colormap
+%     C2 = cmocean('Algae'); 
+% 
+% %Make plotting grid
+% [X,Y] = meshgrid(wggmerge.time, depth_grid);
+% %[X2,Y2] = meshgrid(wfpmerge_flord.time, depth_grid);
+
+% figure(1); clf;
 %     subplot(311) %Density
 % cmin = 27.5; cmax = 27.8; %manually set min and max
 %     cvec = [cmin:(cmax-cmin)/cints:cmax];
@@ -113,19 +137,14 @@ figure(1); clf;
 % title('Oxygen concentration, uncorrected (\mumol/kg)', 'Fontsize', 12)
 
 %subplot(313) %Oxygen_corr concentration
-cmin = 220; cmax = 320; %manually set min and max
-    cvec = [cmin:(cmax-cmin)/cints:cmax];
-contourf(X,Y,wggmerge.doxy_lagcorr,cvec,'linecolor','none'); hold on;
-%plot(dt,MLD,'k.','markersize',5); hold on;
-axis([min(wggmerge.time) max(wggmerge.time) mindepth maxdepth - 200]); caxis([cmin cmax]);
-colormap(C); set(gca,'YDir','reverse'); ylabel('Depth (m)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
-datetick('x',2,'keeplimits');
-title('Oxygen concentration, lag corrected (\mumol/kg)', 'Fontsize', 12)
-%%
-figure(2); clf
-imagesc(wggmerge.doxy_lagcorr);
-caxis([cmin cmax]); colormap(C);
-
+% cmin = 220; cmax = 320; %manually set min and max
+%     cvec = [cmin:(cmax-cmin)/cints:cmax];
+% contourf(X,Y,wggmerge.doxy_lagcorr,cvec,'linecolor','none'); hold on;
+% %plot(dt,MLD,'k.','markersize',5); hold on;
+% axis([min(wggmerge.time) max(wggmerge.time) mindepth maxdepth - 200]); caxis([cmin cmax]);
+% colormap(C); set(gca,'YDir','reverse'); ylabel('Depth (m)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
+% datetick('x',2,'keeplimits');
+% title('Oxygen concentration, lag corrected (\mumol/kg)', 'Fontsize', 12)
 
 
 % figure(2); clf

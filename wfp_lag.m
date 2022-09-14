@@ -4,8 +4,7 @@
 % WFP O2 data and passes through load_HYPM_DOSTA_fun
 
 %% Loop over all years - note that this is very time intensive to output saved
-% Can comment out this full loop section and instead load data:
-%load lagyr1to7.mat %has everything in current code version - note that years 6 and 7 only have beginning of year
+%output is lagyr1to8.mat
 
 for yr = 1:8
 

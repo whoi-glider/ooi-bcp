@@ -3,6 +3,12 @@
 %now have separate scripts for each step modeled on Lucy's thesis pipeline
 
 %% Load oxygen data from all deployments and interpolate onto even grid
+%This step reads in the THREDDS Gold Copy data from all cruises, unpacks
+%variables, identifies profile numbers, and then grids paired up/down
+%profiles. Currently only the unpacking and profile id steps (in "wfp"
+%outputs are used going forward and the gridded structures (wfpgrid and
+%wfpgrid_therm) are not used.
+
     depth_grid = [150:5:2600];
     therm_grid = [1.1:0.05:5.6];
 
@@ -22,41 +28,41 @@ for i = 1:8
     [wfp{i}, wfpgrid{i}, wfpgrid_therm{i}] = load_HYPM_DOSTA_fun(filenames{i}, depth_grid, therm_grid);
 end
 
+%% Read in fluorometer data
+% filenames_flord = {'deployment0001_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20140912T000208-20150812T103930.nc',...
+%     'deployment0002_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20150817T030206-20160628T060527.nc',...
+%     'deployment0003_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20160712T000207-20170712T072809.nc',...
+%     'deployment0004_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20170807T000204-20180615T185737.nc',...
+%     'deployment0005_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20180610T000207-20190630T071452.nc',...
+%     'deployment0006_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20190807T000205-20200509T172910.nc'};
+% 
+% filterres = 5; %choose number of points to use in running min/max filter for backscatter spike analysis
+% for i = 1:6
+%     [wfp_flord{i}, wfpgrid_flord{i}] = load_HYPM_FLORD_fun(filenames_flord{i}, depth_grid, filterres);
+% end
+
 %% Lag correction
-load lagyr1to8.mat %output from wfp_lag.mat
-
-%% Initial look at lag-corrected data
-
-profilerng = [1:327];
-yr = 6;
-
-xscat = wgg{yr}.mtime(profilerng,:);
-yscat = wgg{yr}.pres(profilerng,:);
-doxy_scat = wgg{yr}.doxy_lagcorr(profilerng,:);
-
-figure(200); clf
-scatter(xscat(:),yscat(:),[],doxy_scat(:),'filled')
-datetick('x')
-axis ij
-colorbar
-
-%Note that there is indeed good data to be salvaged that doesn't show up in
-%paired profiles!
+%wfp_lag.m %this takes a long time to run, so output is saved
+load lagyr1to8.mat %"wgg" output from wfp_lag.m
 
 %% Calculate depth intervals of data
 
-figure(201); clf
-for yr = 1:8
+figure(1); clf
+for yr = [8,7,6,5,4,3,2,1]
     A = abs(diff(wgg{yr}.pres'));
     histogram(A(:)); hold on;
     a(yr) = nanmean(A(:));
     b(yr) = nanstd(A(:));
 end
+xlim([0 4.5])
+legend('Year 8','Year 7','Year 6', 'Year 5', 'Year 4', 'Year 3', 'Year 2','Year 1')
+title('Histogram all depth intervals in raw WFP measurements')
+xlabel('Presure (dbar)')
 
 %% Check lag-corr output for outliers
 
 %Check for outliers/range test
-figure(101); clf
+figure(2); clf
 for yr = 1:8
     A = wgg{yr}.doxy_lagcorr(:);
     histogram(A); hold on;
@@ -71,7 +77,7 @@ title('Histogram all OOI Irminger WFP L2-oxygen, lag corrected only')
 
 
 % Check for spikess
-figure(100); clf
+figure(3); clf
 subplot(311)
 for yr = 1:8
     A = diff(wgg{yr}.doxy_lagcorr');
@@ -96,7 +102,7 @@ for yr = 1:8
     histogram((A(:))); hold on;
 end
 xlim([-0.01 0.01])
-legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7')
+legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8')
 title('Histogram of paired sample difference, all OOI Irminger salinity')
 
 %% Flag outlier/spike samples
@@ -107,7 +113,7 @@ tempspike = 0.05;
 salspike = 0.005;
 c = 0; %counter to keep track of # datapoints flagged
 
-for yr = 1:7
+for yr = 1:8
 
     %Number of profiles
     num_profiles = length(wgg{yr}.updown);
@@ -131,7 +137,7 @@ for yr = 1:7
         end
         c = c + length(find(wgg{yr}.flag(i,:) > 0));
     end
-    %c
+    c
 end
  
 
@@ -142,7 +148,7 @@ end
 depth_grid = [150:1:2600];
 S = 5; %points to smooth over
 
-for yr = 1:7
+for yr = 1:8
 
     %Number of profile indices
     num_profiles = length(wgg{yr}.updown);
@@ -174,44 +180,25 @@ for yr = 1:7
     
 end
 
-%%
-mergetoplot = [wgg{1}.doxy_lagcorr_grid wgg{2}.doxy_lagcorr_grid wgg{3}.doxy_lagcorr_grid wgg{4}.doxy_lagcorr_grid...
-    wgg{5}.doxy_lagcorr_grid wgg{6}.doxy_lagcorr_grid wgg{7}.doxy_lagcorr_grid];
 
-figure(3); clf
-imagesc(mergetoplot); caxis([240 300]); colorbar
-
-
-%% Read in fluorometer data
-% filenames_flord = {'deployment0001_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20140912T000208-20150812T103930.nc',...
-%     'deployment0002_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20150817T030206-20160628T060527.nc',...
-%     'deployment0003_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20160712T000207-20170712T072809.nc',...
-%     'deployment0004_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20170807T000204-20180615T185737.nc',...
-%     'deployment0005_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20180610T000207-20190630T071452.nc',...
-%     'deployment0006_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20190807T000205-20200509T172910.nc'};
+% %% Load Winkler data for calibrations
+% addpath('C:/Users/palevsky/Dropbox/Wellesley/OOI_Irminger_students/CruiseData_Yrs1to4')
+% loadWinklerIrmingerYrs1to5
 % 
-% filterres = 5; %choose number of points to use in running min/max filter for backscatter spike analysis
-% for i = 1:6
-%     [wfp_flord{i}, wfpgrid_flord{i}] = load_HYPM_FLORD_fun(filenames_flord{i}, depth_grid, filterres);
+% %% Calculate Year 1-5 gain corrections based on Winkler data
+% wfp_Irminger_winklercalibration_Yrs1to5
+% 
+% %% Apply initial gain corrections to Year 1-5 data
+% 
+% for i = 1:5
+%     wfp{i}.oxygen_gaincorr = wfp{i}.oxygen * gain_hypm(i);
+%     wfpgrid{i}.oxygen_gaincorr = wfpgrid{i}.O2conc * gain_hypm(i);
+%     wfpgrid_therm{i}.oxygen_gaincorr = wfpgrid_therm{i}.O2conc * gain_hypm(i);
 % end
-
-%% Load Winkler data for calibrations
-addpath('C:/Users/palevsky/Dropbox/Wellesley/OOI_Irminger_students/CruiseData_Yrs1to4')
-loadWinklerIrmingerYrs1to5
-
-%% Calculate Year 1-5 gain corrections based on Winkler data
-wfp_Irminger_winklercalibration_Yrs1to5
-
-%% Apply initial gain corrections to Year 1-5 data
-
-for i = 1:5
-    wfp{i}.oxygen_gaincorr = wfp{i}.oxygen * gain_hypm(i);
-    wfpgrid{i}.oxygen_gaincorr = wfpgrid{i}.O2conc * gain_hypm(i);
-    wfpgrid_therm{i}.oxygen_gaincorr = wfpgrid_therm{i}.O2conc * gain_hypm(i);
-end
 
 %% Test plots to ensure that all is calculated appropriately
 wfp_plotting
 
 %% Perform deep isotherm drift correction
 %wfp_deepIsotherm_driftCorrection_Yr5 %note - still needs to be updated to make better correction for drift at depth
+
