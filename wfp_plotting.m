@@ -53,6 +53,7 @@ wggmerge.SA = wgg{1}.SA_grid;
 wggmerge.CT = wgg{1}.CT_grid;
 wggmerge.pdens = wgg{1}.pdens_grid;
 wggmerge.doxy_lagcorr = wgg{1}.doxy_lagcorr_grid;
+wggmerge.deploy_yr = ones(length(wgg{1}.time_start),1);
 
 for yr = 2:8
     wggmerge.time = [wggmerge.time; wgg{yr}.time_start];
@@ -65,6 +66,7 @@ for yr = 2:8
     wggmerge.CT = [wggmerge.CT wgg{yr}.CT_grid];
     wggmerge.pdens = [wggmerge.pdens wgg{yr}.pdens_grid];
     wggmerge.doxy_lagcorr = [wggmerge.doxy_lagcorr wgg{yr}.doxy_lagcorr_grid];
+    wggmerge.deploy_yr = [wggmerge.deploy_yr; yr*ones(length(wgg{yr}.time_start),1)];
 end
 
 %% Initial look at lag-corrected, gridded data

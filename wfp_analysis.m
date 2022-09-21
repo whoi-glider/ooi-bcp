@@ -180,6 +180,15 @@ for yr = 1:8
     
 end
 
+%% Test plots to ensure that all is calculated appropriately
+wfp_plotting
+
+%% Extract location of HYPM in each year
+for yr = 1:8
+    HYPMlat(yr) = nanmean(wgg{yr}.lat_profile);
+    HYPMlon(yr) = nanmean(wgg{yr}.lon_profile);
+end
+
 
 % %% Load Winkler data for calibrations
 % addpath('C:/Users/palevsky/Dropbox/Wellesley/OOI_Irminger_students/CruiseData_Yrs1to4')
@@ -195,9 +204,6 @@ end
 %     wfpgrid{i}.oxygen_gaincorr = wfpgrid{i}.O2conc * gain_hypm(i);
 %     wfpgrid_therm{i}.oxygen_gaincorr = wfpgrid_therm{i}.O2conc * gain_hypm(i);
 % end
-
-%% Test plots to ensure that all is calculated appropriately
-wfp_plotting
 
 %% Perform deep isotherm drift correction
 %wfp_deepIsotherm_driftCorrection_Yr5 %note - still needs to be updated to make better correction for drift at depth
