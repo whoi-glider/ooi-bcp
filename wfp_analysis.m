@@ -145,7 +145,7 @@ end
 
 %Select depth resolution and smoothing - current setting is 1 m resolution
 %w/ 5-m smoothing
-depth_grid = [150:1:2600];
+pres_grid = [150:1:2600];
 S = 5; %points to smooth over
 
 for yr = 1:8
@@ -157,21 +157,21 @@ for yr = 1:8
     wgg{yr}.duration = NaN*ones(num_profiles,1);
     wgg{yr}.lat_profile = NaN*ones(num_profiles,1);
     wgg{yr}.lon_profile = NaN*ones(num_profiles,1);
-    wgg{yr}.doxy_lagcorr_grid = NaN*ones(length(depth_grid),num_profiles);
-    wgg{yr}.SA_grid = NaN*ones(length(depth_grid),num_profiles);
-    wgg{yr}.CT_grid = NaN*ones(length(depth_grid),num_profiles);
-    wgg{yr}.pracsal_grid = NaN*ones(length(depth_grid),num_profiles);
-    wgg{yr}.temp_grid = NaN*ones(length(depth_grid),num_profiles);
-    wgg{yr}.pdens_grid = NaN*ones(length(depth_grid),num_profiles);
+    wgg{yr}.doxy_lagcorr_grid = NaN*ones(length(pres_grid),num_profiles);
+    wgg{yr}.SA_grid = NaN*ones(length(pres_grid),num_profiles);
+    wgg{yr}.CT_grid = NaN*ones(length(pres_grid),num_profiles);
+    wgg{yr}.pracsal_grid = NaN*ones(length(pres_grid),num_profiles);
+    wgg{yr}.temp_grid = NaN*ones(length(pres_grid),num_profiles);
+    wgg{yr}.pdens_grid = NaN*ones(length(pres_grid),num_profiles);
 
     for i = 1:num_profiles
-        ind = find(~isnan(wgg{yr}.depth(i,:)) & ~isnan(wgg{yr}.doxy_lagcorr(i,:)) & wgg{yr}.flag(i,:) == 0); %no nan values for depth or oxygen and no range or spike flags
-        wgg{yr}.doxy_lagcorr_grid(:,i) = movmean(interp1(wgg{yr}.depth(i,ind), wgg{yr}.doxy_lagcorr(i,ind), depth_grid),S);
-        wgg{yr}.SA_grid(:,i) = movmean(interp1(wgg{yr}.depth(i,ind), wgg{yr}.SA(i,ind), depth_grid),S);
-        wgg{yr}.CT_grid(:,i) = movmean(interp1(wgg{yr}.depth(i,ind), wgg{yr}.CT(i,ind), depth_grid),S);
-        wgg{yr}.pracsal_grid(:,i) = movmean(interp1(wgg{yr}.depth(i,ind), wgg{yr}.pracsal(i,ind), depth_grid),S);
-        wgg{yr}.temp_grid(:,i) = movmean(interp1(wgg{yr}.depth(i,ind), wgg{yr}.temp(i,ind), depth_grid),S);
-        wgg{yr}.pdens_grid(:,i) = movmean(interp1(wgg{yr}.depth(i,ind), wgg{yr}.pdens(i,ind), depth_grid),S);
+        ind = find(~isnan(wgg{yr}.pres(i,:)) & ~isnan(wgg{yr}.doxy_lagcorr(i,:)) & wgg{yr}.flag(i,:) == 0); %no nan values for depth or oxygen and no range or spike flags
+        wgg{yr}.doxy_lagcorr_grid(:,i) = movmean(interp1(wgg{yr}.pres(i,ind), wgg{yr}.doxy_lagcorr(i,ind), pres_grid),S);
+        wgg{yr}.SA_grid(:,i) = movmean(interp1(wgg{yr}.pres(i,ind), wgg{yr}.SA(i,ind), pres_grid),S);
+        wgg{yr}.CT_grid(:,i) = movmean(interp1(wgg{yr}.pres(i,ind), wgg{yr}.CT(i,ind), pres_grid),S);
+        wgg{yr}.pracsal_grid(:,i) = movmean(interp1(wgg{yr}.pres(i,ind), wgg{yr}.pracsal(i,ind), pres_grid),S);
+        wgg{yr}.temp_grid(:,i) = movmean(interp1(wgg{yr}.pres(i,ind), wgg{yr}.temp(i,ind), pres_grid),S);
+        wgg{yr}.pdens_grid(:,i) = movmean(interp1(wgg{yr}.pres(i,ind), wgg{yr}.pdens(i,ind), pres_grid),S);
         wgg{yr}.time_start(i) = nanmin(wgg{yr}.mtime(i,:));
         wgg{yr}.duration(i) = nanmax(wgg{yr}.mtime(i,:)) - nanmin(wgg{yr}.mtime(i,:));
         wgg{yr}.lat_profile(i) = nanmean(wgg{yr}.lat(i,:));

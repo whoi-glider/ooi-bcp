@@ -85,13 +85,13 @@ sz = 1;
 C = cmocean('Dense'); %set colormap
 
 doxy_scat = wggmerge.doxy_lagcorr(:,profilerng);
-[X,Y] = meshgrid(wggmerge.time(profilerng), depth_grid);
+[X,Y] = meshgrid(wggmerge.time(profilerng), pres_grid);
 
 figure(5); clf
 scatter(X(:),Y(:),5,doxy_scat(:),'filled'); hold on;
 plot(dt,MLD,'k.','markersize',5); hold on;
 axis ij; axis tight
-colormap(C); ylabel('Depth (m)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
+colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
 datetick('x',2,'keeplimits');
 title('Oxygen concentration, lag corrected (\mumol/kg)', 'Fontsize', 12)
 
