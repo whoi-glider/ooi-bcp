@@ -180,6 +180,37 @@ for yr = 1:8
     
 end
 
+%% Grid on isotherms
+
+%Select depth resolution and smoothing - current setting is 1 m resolution
+%w/ 5-m smoothing
+pt_grid = [1.5:0.02:5]; %Izi did 1.5-2.9 at intervals of 0.1, as potential temperature
+S = 5; %points to smooth over
+
+for yr = 1:8
+    
+    %Calculate potential temperature
+    wgg{yr}.ptemp = gsw_pt0_from_t(wgg{yr}.SA,wgg{yr}.temp,wgg{yr}.pres);
+
+    %Initialize arrays to hold regridded data
+    num_profiles = length(wgg{yr}.updown);
+    wgg{yr}.doxy_lagcorr_ptgrid = NaN*ones(length(pt_grid),num_profiles);
+    wgg{yr}.SA_ptgrid = NaN*ones(length(pt_grid),num_profiles);
+    wgg{yr}.pracsal_ptgrid = NaN*ones(length(pt_grid),num_profiles);
+    wgg{yr}.pres_ptgrid = NaN*ones(length(pt_grid),num_profiles);
+    wgg{yr}.temp_ptgrid = NaN*ones(length(pt_grid),num_profiles);
+
+    for i = 1:num_profiles
+        ind = find(~isnan(wgg{yr}.pres(i,:)) & ~isnan(wgg{yr}.doxy_lagcorr(i,:)) & wgg{yr}.flag(i,:) == 0); %no nan values for depth or oxygen and no range or spike flags
+        wgg{yr}.doxy_lagcorr_ptgrid(:,i) = movmean(interp1(wgg{yr}.ptemp(i,ind), wgg{yr}.doxy_lagcorr(i,ind), pt_grid),S);
+        wgg{yr}.SA_ptgrid(:,i) = movmean(interp1(wgg{yr}.ptemp(i,ind), wgg{yr}.SA(i,ind), pt_grid),S);
+        wgg{yr}.pracsal_ptgrid(:,i) = movmean(interp1(wgg{yr}.ptemp(i,ind), wgg{yr}.pracsal(i,ind), pt_grid),S);
+        wgg{yr}.pracsal_ptgrid(:,i) = movmean(interp1(wgg{yr}.ptemp(i,ind), wgg{yr}.pracsal(i,ind), pt_grid),S);
+        wgg{yr}.temp_ptgrid(:,i) = movmean(interp1(wgg{yr}.ptemp(i,ind), wgg{yr}.temp(i,ind), pt_grid),S);
+    end
+    
+end
+
 %% Test plots to ensure that all is calculated appropriately
 wfp_plotting
 
@@ -189,6 +220,8 @@ for yr = 1:8
     HYPMlon(yr) = nanmean(wgg{yr}.lon_profile);
 end
 
+%% Gain corrections with cruise data processed by Kristen
+cruise_oxygen
 
 % %% Load Winkler data for calibrations
 % addpath('C:/Users/palevsky/Dropbox/Wellesley/OOI_Irminger_students/CruiseData_Yrs1to4')
