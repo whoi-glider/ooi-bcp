@@ -2,6 +2,8 @@
 %Note: completely modified from original version written in Sept. 2018 to
 %now have separate scripts for each step modeled on Lucy's thesis pipeline
 
+addpath('C:/Users/palevsky/Dropbox/MATLAB/OOI data processing/OOI_Irminger')
+
 %% Load oxygen data from all deployments and interpolate onto even grid
 %This step reads in the THREDDS Gold Copy data from all cruises, unpacks
 %variables, identifies profile numbers, and then grids paired up/down
@@ -199,14 +201,16 @@ for yr = 1:8
     wgg{yr}.pracsal_ptgrid = NaN*ones(length(pt_grid),num_profiles);
     wgg{yr}.pres_ptgrid = NaN*ones(length(pt_grid),num_profiles);
     wgg{yr}.temp_ptgrid = NaN*ones(length(pt_grid),num_profiles);
+    wgg{yr}.pdens_ptgrid = NaN*ones(length(pt_grid),num_profiles);
 
     for i = 1:num_profiles
         ind = find(~isnan(wgg{yr}.pres(i,:)) & ~isnan(wgg{yr}.doxy_lagcorr(i,:)) & wgg{yr}.flag(i,:) == 0); %no nan values for depth or oxygen and no range or spike flags
         wgg{yr}.doxy_lagcorr_ptgrid(:,i) = movmean(interp1(wgg{yr}.ptemp(i,ind), wgg{yr}.doxy_lagcorr(i,ind), pt_grid),S);
         wgg{yr}.SA_ptgrid(:,i) = movmean(interp1(wgg{yr}.ptemp(i,ind), wgg{yr}.SA(i,ind), pt_grid),S);
         wgg{yr}.pracsal_ptgrid(:,i) = movmean(interp1(wgg{yr}.ptemp(i,ind), wgg{yr}.pracsal(i,ind), pt_grid),S);
-        wgg{yr}.pracsal_ptgrid(:,i) = movmean(interp1(wgg{yr}.ptemp(i,ind), wgg{yr}.pracsal(i,ind), pt_grid),S);
+        wgg{yr}.pres_ptgrid(:,i) = movmean(interp1(wgg{yr}.ptemp(i,ind), wgg{yr}.pres(i,ind), pt_grid),S);
         wgg{yr}.temp_ptgrid(:,i) = movmean(interp1(wgg{yr}.ptemp(i,ind), wgg{yr}.temp(i,ind), pt_grid),S);
+        wgg{yr}.pdens_ptgrid(:,i) = movmean(interp1(wgg{yr}.ptemp(i,ind), wgg{yr}.pdens(i,ind), pt_grid),S);
     end
     
 end
@@ -222,6 +226,9 @@ end
 
 %% Gain corrections with cruise data processed by Kristen
 cruise_oxygen
+
+%% Analysis on deep isotherms
+wfp_deepisotherms
 
 % %% Load Winkler data for calibrations
 % addpath('C:/Users/palevsky/Dropbox/Wellesley/OOI_Irminger_students/CruiseData_Yrs1to4')

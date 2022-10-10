@@ -21,6 +21,7 @@ wggmerge.SA_pt = wgg{1}.SA_ptgrid;
 wggmerge.pracsal_pt = wgg{1}.pracsal_ptgrid;
 wggmerge.pres_pt = wgg{1}.pres_ptgrid;
 wggmerge.temp_pt = wgg{1}.temp_ptgrid;
+wggmerge.pdens_pt = wgg{1}.pdens_ptgrid;
 
 for yr = 2:8
     wggmerge.time = [wggmerge.time; wgg{yr}.time_start];
@@ -39,6 +40,7 @@ for yr = 2:8
     wggmerge.pracsal_pt = [wggmerge.pracsal_pt wgg{yr}.pracsal_ptgrid];
     wggmerge.pres_pt = [wggmerge.pres_pt wgg{yr}.pres_ptgrid];
     wggmerge.temp_pt = [wggmerge.temp_pt wgg{yr}.temp_ptgrid];
+    wggmerge.pdens_pt = [wggmerge.pdens_pt wgg{yr}.pdens_ptgrid];
 end
 
 %% Initial look at lag-corrected, gridded data
