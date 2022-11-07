@@ -95,7 +95,7 @@ castsum{4} = castsum_yr4;
 castsum{5} = castsum_yr5;
 
 %% Loop over data from all years
-for yr = 1:5
+for yr = 1:4
     castsumyr = castsum{yr};
     castlistyr = castlist{yr};
     
@@ -105,13 +105,13 @@ for yr = 1:5
         if i < 17 %set for subplot max
         subplot(4,4,i)
             btlid = find(btlsum{yr}.Cast == i);
-        plot(castsumyr{i}.sbeox0mL_L*mltoumol, castsumyr{i}.pm, 'k-'); hold on;
+        plot(castsumyr{i}.DOcorr_umolkg, castsumyr{i}.pm, 'k-'); hold on;
         if length(btlid) > 0
-            plot(btlsum{yr}.Winkler_mLL(btlid)*mltoumol, btlsum{yr}.PrDM(btlid), 'ro'); hold on;
-            btlsum{yr}.CTD_Oxygen_mLL_corr(btlid) = interp1(castsumyr{i}.pm, castsumyr{i}.sbeox0mL_L, btlsum{yr}.PrDM(btlid));
+            plot(btlsum{yr}.Winkler_umolkg(btlid), btlsum{yr}.PrDM(btlid), 'ro'); hold on;
+            %btlsum{yr}.CTD_Oxygen_mLL_corr(btlid) = interp1(castsumyr{i}.pm, castsumyr{i}.sbeox0mL_L, btlsum{yr}.PrDM(btlid));  removed line because Kristen now calculates interpolated DOcorr_umolkg in bottle files
         end
         axis ij
-        xlabel('SBE43 calibrated O_2, \mumol/L')
+        xlabel('SBE43 calibrated O_2, \mumol/kg')
         ylabel('Pressure (db)')
         end
     end
@@ -120,26 +120,26 @@ for yr = 1:5
 
     %Regression plot
     figure(100*yr + 1); clf
-    scatter(btlsum{yr}.Winkler_mLL*mltoumol, btlsum{yr}.CTD_Oxygen_mLL_corr*mltoumol, [], btlsum{yr}.PrDM, 'filled'); hold on;
+    scatter(btlsum{yr}.Winkler_umolkg, btlsum{yr}.DOcorr_umolkg, [], btlsum{yr}.PrDM, 'filled'); hold on;
     plot([140:350],[140:350],'k--')
     c = colorbar; ylabel(c, 'Depth (m)')
     axis([140 345 140 345])
-    xlabel('Winkler oxygen, \mumol/L'); ylabel('Calibrated SBE43 oxygen, \mumol/L')
+    xlabel('Winkler oxygen, \mumol/L'); ylabel('Calibrated SBE43 oxygen, \mumol/kg')
 
     %Calculate uncertainty from residuals
-    U = nanmean(abs(btlsum{yr}.Winkler_mLL - btlsum{yr}.CTD_Oxygen_mLL_corr))*mltoumol;
+    U = nanmean(abs(btlsum{yr}.Winkler_umolkg - btlsum{yr}.DOcorr_umolkg));
         deep_cutoff = 200; %subset deep values only
         deep = find(btlsum{yr}.PrDM > deep_cutoff);
-    U_deep = nanmean(abs(btlsum{yr}.Winkler_mLL(deep) - btlsum{yr}.CTD_Oxygen_mLL_corr(deep)))*mltoumol;  
+    U_deep = nanmean(abs(btlsum{yr}.Winkler_umolkg(deep) - btlsum{yr}.DOcorr_umolkg(deep)));  
 
     %Plot residuals
     figure(100*yr + 2); clf
-    plot(btlsum{yr}.PrDM, (btlsum{yr}.Winkler_mLL - btlsum{yr}.CTD_Oxygen_mLL_corr)*mltoumol, 'k.'); hold on;
+    plot(btlsum{yr}.PrDM, (btlsum{yr}.Winkler_umolkg - btlsum{yr}.DOcorr_umolkg), 'k.'); hold on;
     plot([0 3000], 0*[0 3000], 'k--')
-    ylabel('Residual, Winkler - SBE O_2, \mumol/L')
+    ylabel('Residual, Winkler - SBE O_2, \mumol/kg')
     xlabel('Pressure (db)')
-    text(500, 4, ['Mean residual = ' num2str(U) ' \mumol/L'])
-    text(500, 3.4, ['Mean residual > ' num2str(deep_cutoff) 'm = ' num2str(U_deep) ' \mumol/L'])
+    text(500, 4, ['Mean residual = ' num2str(U) ' \mumol/kg'])
+    text(500, 3.4, ['Mean residual > ' num2str(deep_cutoff) 'm = ' num2str(U_deep) ' \mumol/kg'])
 
 end
 
@@ -169,14 +169,14 @@ h6 = plot(-OOImoorings.HYPM5(2), OOImoorings.HYPM5(1),'dk','markersize',M,'marke
 h7 = plot(-OOImoorings.FLMA5(2), OOImoorings.FLMA5(1),'ok','markersize',M,'markerfacecolor',nicecolor('bw')); hold on;
 h8 = plot(-OOImoorings.FLMB5(2), OOImoorings.FLMB5(1),'ok','markersize',M,'markerfacecolor',nicecolor('bbbkkw')); hold on;
 
-for yr = 1:5
+for yr = 1:4
     castsumyr = castsum{yr};
     castlistyr = castlist{yr};
     ind = find(casts.year == yr);
     for i = castlistyr
         lat(i) = nanmean(castsumyr{i}.lat);
         lon(i) = nanmean(castsumyr{i}.lon);
-        numWinkl(i) = length(find(btlsum{yr}.Cast == i & isnan(btlsum{yr}.Winkler_mLL) == 0));
+        numWinkl(i) = length(find(btlsum{yr}.Cast == i & isnan(btlsum{yr}.Winkler_umolkg) == 0));
         HYPMdist(i) = distlatlon(HYPMlat(yr), lat(i), HYPMlon(yr), lon(i));
         time(i) = datenum(castsumyr{i}.instrumentheaders.SystemUTC);
     end
@@ -193,9 +193,9 @@ ylim([59.6 60.05])
 xlabel('Longitude (^oW)','Fontsize', Ftsz)
 ylabel('Latitude (^oN)','Fontsize', Ftsz)
 box on
-legend([h5 h6 h7 h8 leg{1} leg{2} leg{3} leg{4} leg{5}],...
+legend([h5 h6 h7 h8 leg{1} leg{2} leg{3} leg{4}],...
     'Apex surface mooring', 'Apex sub-surface profiler mooring', 'Flanking mooring A', 'Flanking mooring B',...
-    'Year 1 casts', 'Year 2 casts', 'Year 3 casts', 'Year 4 casts', 'Year 5 casts',...
+    'Year 1 casts', 'Year 2 casts', 'Year 3 casts', 'Year 4 casts',...
     'location','northeastoutside','Fontsize', Ftsz);
 
 %% Extract cruise SBE43 and Winkler data aligned with HYPM
@@ -209,7 +209,7 @@ for i = 1:length(ind)
     subplot(4,3,i)
     castyr = castsum{casts.year(ind(i))};
     %Interpolate the SBE43 profile onto the HYPM depth grid
-    SBE_interp = interp1(castyr{casts.castnum(ind(i))}.pm, castyr{casts.castnum(ind(i))}.sbeox0mL_L*mltoumol, pres_grid);
+    SBE_interp = interp1(castyr{casts.castnum(ind(i))}.pm, castyr{casts.castnum(ind(i))}.DOcorr_umolkg.*castyr{casts.castnum(ind(i))}.prho/1000, pres_grid); %umol/L
     %Extract the corresponding HYPM data
     indHYPM = find(abs(wggmerge.time - casts.time(ind(i))) < tol_time);
     for j = 1:length(indHYPM)
@@ -230,7 +230,7 @@ for i = 1:length(ind)
     end
     %Plot the SBE43 profile and Winkler data
     castyr = castsum{casts.year(ind(i))};
-    plot(castyr{casts.castnum(ind(i))}.sbeox0mL_L*mltoumol, castyr{casts.castnum(ind(i))}.pm, 'k-','linewidth',1.5); hold on;
+    plot(castyr{casts.castnum(ind(i))}.DOcorr_umolkg.*castyr{casts.castnum(ind(i))}.prho/1000, castyr{casts.castnum(ind(i))}.pm, 'k-','linewidth',1.5); hold on;
     if casts.numWinkl(ind(i)) > 0
         btlsumyr = btlsum{casts.year(ind(i))};
         indbtl = find(btlsumyr.Cast == casts.castnum(ind(i)));
@@ -249,7 +249,7 @@ tol_time = 1.5;
 minnumpts = 500; %number of points in HYPM profile if usable for comparison
 
 figure(100); clf
-for yr = [1,2,3,5];
+for yr = [1,2,3];
     
 subplot(3,2,yr)
 
@@ -267,7 +267,7 @@ castyr = castsum{yr};
 ind = find(casts.year == yr & casts.castnum == cast);
 
     %Interpolate the SBE43 profile onto the HYPM depth grid
-    SBE_interp = interp1(castyr{casts.castnum(ind)}.pm, castyr{casts.castnum(ind)}.sbeox0mL_L*mltoumol, pres_grid);
+    SBE_interp = interp1(castyr{casts.castnum(ind)}.pm, castyr{casts.castnum(ind)}.DOcorr_umolkg.*castyr{casts.castnum(ind)}.prho/1000, pres_grid);
     %Extract the corresponding HYPM data
     indHYPM = find(abs(wggmerge.time - casts.time(ind)) < tol_time & wggmerge.deploy_yr == yr);
     for j = 1:length(indHYPM)
@@ -292,7 +292,7 @@ ind = find(casts.year == yr & casts.castnum == cast);
         plot(HYPMprofile_O2umolL*gain_yr(yr,1), pres_grid, '-', 'color', colorlist(yr,:)); hold on; 
     end
     %Plot the SBE43 profile and Winkler data
-    plot(castyr{casts.castnum(ind)}.sbeox0mL_L*mltoumol, castyr{casts.castnum(ind)}.pm, 'k-','linewidth',1.5); hold on;
+    plot(castyr{casts.castnum(ind)}.DOcorr_umolkg.*castyr{casts.castnum(ind)}.prho/1000, castyr{casts.castnum(ind)}.pm, 'k-','linewidth',1.5); hold on;
     if casts.numWinkl(ind) > 0
         btlsumyr = btlsum{casts.year(ind)};
         indbtl = find(btlsumyr.Cast == casts.castnum(ind));
@@ -307,54 +307,54 @@ ind = find(casts.year == yr & casts.castnum == cast);
 
 end
 
-%Plot year 4 as a special case with no SBE data
-yr = 4; cast = 8;
-subplot(3,2,yr)
-
-%Extract bottle IDs of Winkler samples
-indbtl = find(btlsum{4}.Cast == cast);
-
-%Extract the corresponding HYPM data
-    indHYPM = find(abs(wggmerge.time - datenum(btlsum{4}.Date(indbtl(1))) < tol_time) & wggmerge.deploy_yr == yr);
-    for j = 1:length(indHYPM)
-        if sum(~isnan(wggmerge.doxy_lagcorr(:,indHYPM(j)))) > minnumpts
-            HYPMprofile_O2umolL = wggmerge.doxy_lagcorr(:,indHYPM(j)).*wggmerge.pdens(:,indHYPM(j))/1000; %divide by potential density to convert to umol/L - will need to recalc b/c salinity issue
-            plot(HYPMprofile_O2umolL, pres_grid, '-', 'color', colorlist(yr,:)*0.6); hold on; 
-            %Calculate gain correction
-            HYPM_interp = interp1(pres_grid, HYPMprofile_O2umolL, btlsum{4}.PrDM(indbtl));
-            gain = btlsum{4}.Winkler_mLL(indbtl)*mltoumol./HYPM_interp;
-            gainm(j) = nanmean(gain);
-            gains(j) = nanstd(gain);
-        else
-            gainm(j) = NaN; gains(j) = NaN;
-        end
-    end
-    gain_yr(yr,1) = nanmean(gainm);
-    gain_yr(yr,2) = nanstd(gainm);
-    clear gainm gains
-    
-    %Replot with the corrected data
-    for j = 1:length(indHYPM)
-        HYPMprofile_O2umolL = wggmerge.doxy_lagcorr(:,indHYPM(j)).*wggmerge.pdens(:,indHYPM(j))/1000; %divide by potential density to convert to umol/L - will need to recalc b/c salinity issue
-        plot(HYPMprofile_O2umolL*gain_yr(yr,1), pres_grid, '-', 'color', colorlist(yr,:)); hold on; 
-    end
-    
-    %Plot the Winkler data
-    plot(btlsum{4}.Winkler_mLL(indbtl)*mltoumol, btlsum{4}.PrDM(indbtl), 'bo','markerfacecolor','b'); hold on;
-
-    %Plot cleanup
-    axis ij
-    axis([250 320 0 2700])
-    title(['Year ' num2str(yr) ', Cast ' num2str(cast) ', ' datestr(btlsum{4}.Date(indbtl(1)),1)])
-    xlabel('Oxygen, \mumol/L','Fontsize',8)
-    ylabel('Pressure (db)','Fontsize',8)
+% %Plot year 4 as a special case with no SBE data
+% yr = 4; cast = 8;
+% subplot(3,2,yr)
+% 
+% %Extract bottle IDs of Winkler samples
+% indbtl = find(btlsum{4}.Cast == cast);
+% 
+% %Extract the corresponding HYPM data
+%     indHYPM = find(abs(wggmerge.time - datenum(btlsum{4}.Date(indbtl(1))) < tol_time) & wggmerge.deploy_yr == yr);
+%     for j = 1:length(indHYPM)
+%         if sum(~isnan(wggmerge.doxy_lagcorr(:,indHYPM(j)))) > minnumpts
+%             HYPMprofile_O2umolL = wggmerge.doxy_lagcorr(:,indHYPM(j)).*wggmerge.pdens(:,indHYPM(j))/1000; %divide by potential density to convert to umol/L - will need to recalc b/c salinity issue
+%             plot(HYPMprofile_O2umolL, pres_grid, '-', 'color', colorlist(yr,:)*0.6); hold on; 
+%             %Calculate gain correction
+%             HYPM_interp = interp1(pres_grid, HYPMprofile_O2umolL, btlsum{4}.PrDM(indbtl));
+%             gain = btlsum{4}.Winkler_mLL(indbtl)*mltoumol./HYPM_interp;
+%             gainm(j) = nanmean(gain);
+%             gains(j) = nanstd(gain);
+%         else
+%             gainm(j) = NaN; gains(j) = NaN;
+%         end
+%     end
+%     gain_yr(yr,1) = nanmean(gainm);
+%     gain_yr(yr,2) = nanstd(gainm);
+%     clear gainm gains
+%     
+%     %Replot with the corrected data
+%     for j = 1:length(indHYPM)
+%         HYPMprofile_O2umolL = wggmerge.doxy_lagcorr(:,indHYPM(j)).*wggmerge.pdens(:,indHYPM(j))/1000; %divide by potential density to convert to umol/L - will need to recalc b/c salinity issue
+%         plot(HYPMprofile_O2umolL*gain_yr(yr,1), pres_grid, '-', 'color', colorlist(yr,:)); hold on; 
+%     end
+%     
+%     %Plot the Winkler data
+%     plot(btlsum{4}.Winkler_mLL(indbtl)*mltoumol, btlsum{4}.PrDM(indbtl), 'bo','markerfacecolor','b'); hold on;
+% 
+%     %Plot cleanup
+%     axis ij
+%     axis([250 320 0 2700])
+%     title(['Year ' num2str(yr) ', Cast ' num2str(cast) ', ' datestr(btlsum{4}.Date(indbtl(1)),1)])
+%     xlabel('Oxygen, \mumol/L','Fontsize',8)
+%     ylabel('Pressure (db)','Fontsize',8)
     
 %% Approach of applying best initial gain correction for each year - plotted via temperature
 tol_time = 1.5;
 minnumpts = 500; %number of points in HYPM profile if usable for comparison
 
 figure(101); clf
-for yr = [1,2,3,5];
+for yr = [1,2,3];
     
 subplot(3,2,yr)
 
@@ -371,12 +371,19 @@ end
 castyr = castsum{yr};
 ind = find(casts.year == yr & casts.castnum == cast);
 
+%Pull out relevant cast information to save for later use
+castalign{yr}.castnum = cast;
+idc = find(casts.year == yr & casts.castnum == cast);
+castalign{yr}.time = casts.time(idc);
+
     %Interpolate the SBE43 profile onto the HYPM depth grid
-        %convert from measured to potential temperature - note this is not
-        %final b/c don't have salinity from CTD casts
-        dummyS = 34.9; %use in conversions from in situ to potential temp while missing actual S
-    CTD_pt = gsw_pt0_from_t(dummyS*ones(length(castyr{casts.castnum(ind)}.t090C),1), castyr{casts.castnum(ind)}.t090C, castyr{casts.castnum(ind)}.pm);
-    SBE_interp = interp1(CTD_pt, castyr{casts.castnum(ind)}.sbeox0mL_L*mltoumol, pt_grid);
+        %convert from measured to potential temperature - note this is
+        %calculating salinity straight from conductivity, no check with
+        %bottle salts
+    CTD_SP = gsw_SP_from_C(castyr{casts.castnum(ind)}.c0mScm, castyr{casts.castnum(ind)}.t090C, castyr{casts.castnum(ind)}.pm);
+    [castalign{yr}.CTD_SA,~] = gsw_SA_from_SP(CTD_SP, castyr{casts.castnum(ind)}.pm, castyr{casts.castnum(ind)}.lon, castyr{casts.castnum(ind)}.lat);
+    castalign{yr}.CTD_pt = gsw_pt0_from_t(castalign{yr}.CTD_SA, castyr{casts.castnum(ind)}.t090C, castyr{casts.castnum(ind)}.pm);
+    castalign{yr}.SBE_interp = interp1(castalign{yr}.CTD_pt, castyr{casts.castnum(ind)}.DOcorr_umolkg.*castyr{casts.castnum(ind)}.prho/1000, pt_grid);
     %Extract the corresponding HYPM data
     indHYPM = find(abs(wggmerge.time - casts.time(ind)) < tol_time & wggmerge.deploy_yr == yr);
     for j = 1:length(indHYPM)
@@ -384,7 +391,7 @@ ind = find(casts.year == yr & casts.castnum == cast);
             HYPMprofile_O2umolL = wggmerge.doxy_lagcorr_pt(:,indHYPM(j)).*wggmerge.pdens_pt(:,indHYPM(j))/1000; %divide by potential density to convert to umol/L - will need to recalc b/c salinity issue
             plot(HYPMprofile_O2umolL, pt_grid, '-', 'color', colorlist(yr,:)*0.6); hold on; 
             %Calculate gain correction
-            gain = SBE_interp'./HYPMprofile_O2umolL;
+            gain = castalign{yr}.SBE_interp'./HYPMprofile_O2umolL;
             gainm(j) = nanmean(gain);
             gains(j) = nanstd(gain);
         else
@@ -401,62 +408,64 @@ ind = find(casts.year == yr & casts.castnum == cast);
         plot(HYPMprofile_O2umolL*gain_yr_pt(yr,1), pt_grid, '-', 'color', colorlist(yr,:)); hold on; 
     end
     %Plot the SBE43 profile and Winkler data
-    plot(castyr{casts.castnum(ind)}.sbeox0mL_L*mltoumol, CTD_pt, 'k-','linewidth',1.5); hold on;
+    plot(castyr{casts.castnum(ind)}.DOcorr_umolkg.*castyr{casts.castnum(ind)}.prho/1000, castalign{yr}.CTD_pt, 'k-','linewidth',1.5); hold on;
     if casts.numWinkl(ind) > 0
         btlsumyr = btlsum{casts.year(ind)};
         indbtl = find(btlsumyr.Cast == casts.castnum(ind));
-        bottle_pt = gsw_pt0_from_t(dummyS*ones(length(indbtl),1), btlsumyr.T090C(indbtl), btlsumyr.PrDM(indbtl));
+        bottle_SP = gsw_SP_from_C(btlsumyr.C0mS_cm(indbtl), btlsumyr.T090C(indbtl), btlsumyr.PrDM(indbtl));
+        [bottle_SA,~] = gsw_SA_from_SP(bottle_SP, btlsumyr.PrDM(indbtl), btlsumyr.Longitude(indbtl), btlsumyr.Latitude(indbtl));
+        bottle_pt = gsw_pt0_from_t(bottle_SA, btlsumyr.T090C(indbtl), btlsumyr.PrDM(indbtl));
         plot(btlsumyr.Winkler_mLL(indbtl)*mltoumol, bottle_pt, 'bo','markerfacecolor','b'); hold on;
     end
     %Plot cleanup
     axis([250 320 1.5 5])
     title(['Year ' num2str(yr) ', Cast ' num2str(cast) ', ' datestr(casts.time(ind),1)])
     xlabel('Oxygen, \mumol/L','Fontsize',8)
-    ylabel('Potential temp*','Fontsize',8)
+    ylabel('Potential temp','Fontsize',8)
 
 end
 
-%Plot year 4 as a special case with no SBE data
-yr = 4; cast = 8;
-subplot(3,2,yr)
-
-%Extract bottle IDs of Winkler samples
-indbtl = find(btlsum{4}.Cast == cast);
-
-%Calculate bottle potential temp
-bottle_pt = gsw_pt0_from_t(dummyS*ones(length(indbtl),1), btlsum{4}.T090C(indbtl), btlsum{4}.PrDM(indbtl));
-
-%Extract the corresponding HYPM data
-    indHYPM = find(abs(wggmerge.time - datenum(btlsum{4}.Date(indbtl(1))) < tol_time) & wggmerge.deploy_yr == yr);
-    for j = 1:length(indHYPM)
-        if sum(~isnan(wggmerge.doxy_lagcorr(:,indHYPM(j)))) > minnumpts
-            HYPMprofile_O2umolL = wggmerge.doxy_lagcorr_pt(:,indHYPM(j)).*wggmerge.pdens_pt(:,indHYPM(j))/1000; %divide by potential density to convert to umol/L - will need to recalc b/c salinity issue
-            plot(HYPMprofile_O2umolL, pt_grid, '-', 'color', colorlist(yr,:)*0.6); hold on; 
-            %Calculate gain correction
-            HYPM_interp = interp1(pt_grid, HYPMprofile_O2umolL, bottle_pt);
-            gain = btlsum{4}.Winkler_mLL(indbtl)*mltoumol./HYPM_interp;
-            gainm(j) = nanmean(gain);
-            gains(j) = nanstd(gain);
-        else
-            gainm(j) = NaN; gains(j) = NaN;
-        end
-    end
-    gain_yr_pt(yr,1) = nanmean(gainm);
-    gain_yr_pt(yr,2) = nanstd(gainm);
-    clear gainm gains
-    
-    %Replot with the corrected data
-    for j = 1:length(indHYPM)
-        HYPMprofile_O2umolL = wggmerge.doxy_lagcorr_pt(:,indHYPM(j)).*wggmerge.pdens_pt(:,indHYPM(j))/1000; %divide by potential density to convert to umol/L - will need to recalc b/c salinity issue
-        plot(HYPMprofile_O2umolL*gain_yr_pt(yr,1), pt_grid, '-', 'color', colorlist(yr,:)); hold on; 
-    end
-    
-    %Plot the Winkler data
-    plot(btlsum{4}.Winkler_mLL(indbtl)*mltoumol, bottle_pt, 'bo','markerfacecolor','b'); hold on;
-
-    %Plot cleanup
-    axis([250 320 1.5 5])
-    title(['Year ' num2str(yr) ', Cast ' num2str(cast) ', ' datestr(btlsum{4}.Date(indbtl(1)),1)])
-    xlabel('Oxygen, \mumol/L','Fontsize',8)
-    ylabel('Potential temp*','Fontsize',8)
+% %Plot year 4 as a special case with no SBE data
+% yr = 4; cast = 8;
+% subplot(3,2,yr)
+% 
+% %Extract bottle IDs of Winkler samples
+% indbtl = find(btlsum{4}.Cast == cast);
+% 
+% %Calculate bottle potential temp
+% bottle_pt = gsw_pt0_from_t(btlsum{4}.C0mS_cm(indbtl), btlsum{4}.T090C(indbtl), btlsum{4}.PrDM(indbtl));
+% 
+% %Extract the corresponding HYPM data
+%     indHYPM = find(abs(wggmerge.time - datenum(btlsum{4}.Date(indbtl(1))) < tol_time) & wggmerge.deploy_yr == yr);
+%     for j = 1:length(indHYPM)
+%         if sum(~isnan(wggmerge.doxy_lagcorr(:,indHYPM(j)))) > minnumpts
+%             HYPMprofile_O2umolL = wggmerge.doxy_lagcorr_pt(:,indHYPM(j)).*wggmerge.pdens_pt(:,indHYPM(j))/1000; %divide by potential density to convert to umol/L - will need to recalc b/c salinity issue
+%             plot(HYPMprofile_O2umolL, pt_grid, '-', 'color', colorlist(yr,:)*0.6); hold on; 
+%             %Calculate gain correction
+%             HYPM_interp = interp1(pt_grid, HYPMprofile_O2umolL, bottle_pt);
+%             gain = btlsum{4}.Winkler_mLL(indbtl)*mltoumol./HYPM_interp;
+%             gainm(j) = nanmean(gain);
+%             gains(j) = nanstd(gain);
+%         else
+%             gainm(j) = NaN; gains(j) = NaN;
+%         end
+%     end
+%     gain_yr_pt(yr,1) = nanmean(gainm);
+%     gain_yr_pt(yr,2) = nanstd(gainm);
+%     clear gainm gains
+%     
+%     %Replot with the corrected data
+%     for j = 1:length(indHYPM)
+%         HYPMprofile_O2umolL = wggmerge.doxy_lagcorr_pt(:,indHYPM(j)).*wggmerge.pdens_pt(:,indHYPM(j))/1000; %divide by potential density to convert to umol/L - will need to recalc b/c salinity issue
+%         plot(HYPMprofile_O2umolL*gain_yr_pt(yr,1), pt_grid, '-', 'color', colorlist(yr,:)); hold on; 
+%     end
+%     
+%     %Plot the Winkler data
+%     plot(btlsum{4}.Winkler_mLL(indbtl)*mltoumol, bottle_pt, 'bo','markerfacecolor','b'); hold on;
+% 
+%     %Plot cleanup
+%     axis([250 320 1.5 5])
+%     title(['Year ' num2str(yr) ', Cast ' num2str(cast) ', ' datestr(btlsum{4}.Date(indbtl(1)),1)])
+%     xlabel('Oxygen, \mumol/L','Fontsize',8)
+%     ylabel('Potential temp','Fontsize',8)
 
