@@ -131,11 +131,12 @@ med_gain = median(T.met_o2sat(~isnan(T.met_o2sat))./T.air_corr(~isnan(T.met_o2sa
 %% Figures
     %set figure options
 ftsz = 14;
-lnw = 2;
-mrkr = 6;
+lnw = 1.5;
+mrkr = 10;
 
 %Plot time series of gain data with and without splash corrections
 figure; clf
+subplot(3,2,1:2)
     ax1 = gca;
     hold all;
     ax1.FontSize = ftsz;
@@ -152,7 +153,7 @@ legend('Gain data w/ no splash correction','Gain quadratic fit w/ no splash corr
 title([gliderstring ' gain corrections'])
 
 %Plot time series of glider data for gain calculations and corresponding MET data
-figure; clf
+subplot(3,2,3:4)
     ax2 = gca;
     hold all;
     box on;
@@ -167,11 +168,11 @@ xlim([mindateplot maxdateplot])
 title([gliderstring ' air calibration: median gain = ' num2str(med_gain)]);
 ylabel('Oxygen saturation (%)')
 datetick('x',2,'keeplimits');
-legend('\DeltaO_{2,w}^{meas}','\DeltaO_{2,a}^{meas}','\DeltaO_{2,w}^{mcorr}','\DeltaO_{2,w}^{gaincorr}','\DeltaO_{2,w}^{met}');
+legend('\DeltaO_{2,w}^{meas}','\DeltaO_{2,a}^{meas}','\DeltaO_{2,a}^{splash corr}','\DeltaO_{2,a}^{splash & gain corr}','\DeltaO_{2}^{met}');
 
 %Plot relationship between glider surface water and air measurements
 %(evidence of splashing)
-figure;
+subplot(3,2,5)
     ax3 = gca;
     ax3.FontSize = ftsz;
     hold all;
@@ -181,10 +182,10 @@ plot(ax3.XLim,p(1).*ax3.XLim+p(2),'-k','LineWidth',lnw);
 xlabel('\DeltaO_{2,w}^{meas}');
 ylabel('\DeltaO_{2,a}^{meas}');
     LM = fitlm(array2table([T.ml_o2sat,T.air_meas]),'linear');
-title([gliderstring ' air vs. surface water, R^2 = ' num2str(LM.Rsquared.Adjusted,3)]);
+title([gliderstring ' air vs. surface water, R^2 = ' num2str(LM.Rsquared.Adjusted,3) ', slope = ' num2str(p(1),3)]);
 
 %Relationship between MET and corrected glider air data
-figure;
+subplot(3,2,6)
     ax4 = gca;
     ax4.FontSize = ftsz;
     hold all;
@@ -193,8 +194,8 @@ plot(T.met_o2sat,T.air_corr,'.','MarkerSize',mrkr); hold on;
     ind = find(isnan(T.met_o2sat + T.air_corr) == 0);
     p2 = polyfit(T.met_o2sat(ind),T.air_corr(ind),1);
 plot(ax4.XLim,p2(1).*ax4.XLim+p2(2),'-k','LineWidth',lnw);
-xlabel('\DeltaO_{2,w}^{met}');
-ylabel('\DeltaO_{2,w}^{mcorr}');
+xlabel('\DeltaO_{2}^{met}');
+ylabel('\DeltaO_{2,a}^{splash corr}');
     LM = fitlm(array2table([T.met_o2sat,T.air_corr]),'linear');
 title([gliderstring ' corrected air vs. MET data, R^2 = ' num2str(LM.Rsquared.Adjusted,3)]);
 
