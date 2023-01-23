@@ -60,9 +60,38 @@ clear G515 G365
 
 %% Tried to save output of above b/c takes 10 min to run, but had a glitch
 
+%% Lag correction
+% Correct for historesis effects between up and down profiles using Gordon et al. 2020 approach, as in wfp_lag
+addpath(genpath('C:\Users\Palevsky\Documents\GitHub\optode-response-time'))
+
+[Yr5.Lag453] = glider_lagAssessFun(Yr5.G453, 26000, 39400, 1010, 'Glider 453, Year 5', [43:51]);
+
+[Yr5.Lag363] = glider_lagAssessFun(Yr5.G363, 10000, 120000, 1010, 'Glider 363, Year 5', [13:20]); %just first set
+
+[Yr6.Lag525] = glider_lagAssessFun(Yr6.G525, 800, 68200, 1010, 'Glider 525, Year 6', [7:17]);
+
+%% Plotting used in function and in manually finding ranges for each glider
+
+% GLin =
+% beg = 
+% stop = 
+% jump =
+% jump2 = 
+% name = 
+
+figure(100); clf
+plot(GLin.daten(beg:jump2:stop), GLin.depth_interp(beg:jump2:stop), 'k.'); hold on;
+scatter(GLin.daten(beg:jump:stop), GLin.depth_interp(beg:jump:stop), [], GLin.oxygen_saturation(beg:jump:stop),'filled'); colorbar; caxis([85 100])
+set(gca,'YDir','reverse'); 
+datetick('x',2,'keeplimits')
+ylabel('Depth (m)')
+ylim([-10 1010])
+title({['Glider ' name ', Initial paired up and down profiles (oxygen % saturation)']})
+
+
+
 %% Next steps
-% 1) Correct for historesis effects between up and down profiles - use
-% Gordon et al. 2020 approach, model after wfp_lag
+
 % 2) Identify cross-calibration opportunities
     % a) WFP aligned profiles
     % b) Turn-around cruise casts (Winkler + SBE43 on CTD)
@@ -80,3 +109,4 @@ clear G515 G365
 %     % Need to select profile direction (-1 == up 1 == down); -1 for 363 and 1 for 453
 % [G363_profile_summary, wfp_profile_summary_363] = glider_wfp_compare(G363, Yr5_wfp, dist_compare, time_compare, -1);
 % [G453_profile_summary, wfp_profile_summary_453] = glider_wfp_compare(G453, Yr5_wfp, dist_compare, time_compare, 1);
+
