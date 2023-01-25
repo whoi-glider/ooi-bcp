@@ -8,76 +8,76 @@ addpath(genpath('G:\Shared drives\NSF_Irminger\OOI Cruises CTD Casts\CTD_Data\Al
 clear castlist
 
 load Year1_Processed_KF.mat
-castsum_yr1{2} = cast02; %cast02.units - prDM is pressure in db
-castsum_yr1{3} = cast03;
-castsum_yr1{4} = cast04;
-castsum_yr1{5} = cast05;
-castsum_yr1{6} = cast06;
-castsum_yr1{7} = cast07;
-castsum_yr1{8} = cast08;
-castsum_yr1{9} = cast09;
+castsum_yr1{2} = cast02d; %cast02.units - prDM is pressure in db
+castsum_yr1{3} = cast03d;
+castsum_yr1{4} = cast04d;
+castsum_yr1{5} = cast05d;
+castsum_yr1{6} = cast06d;
+castsum_yr1{7} = cast07d;
+castsum_yr1{8} = cast08d;
+castsum_yr1{9} = cast09d;
 castlist{1} = [2:9];
 
 load Year2_Processed_KF.mat
-castsum_yr2{1} = cast01;
-castsum_yr2{2} = cast02;
-castsum_yr2{3} = cast03;
-castsum_yr2{4} = cast04;
-castsum_yr2{5} = cast05;
-castsum_yr2{6} = cast06;
-castsum_yr2{7} = cast07;
-castsum_yr2{8} = cast08;
-castsum_yr2{9} = cast09;
-castsum_yr2{10} = cast10;
-castsum_yr2{11} = cast11;
-castsum_yr2{12} = cast12;
-castsum_yr2{13} = cast13;
+castsum_yr2{1} = cast01d;
+castsum_yr2{2} = cast02d;
+castsum_yr2{3} = cast03d;
+castsum_yr2{4} = cast04d;
+castsum_yr2{5} = cast05d;
+castsum_yr2{6} = cast06d;
+castsum_yr2{7} = cast07d;
+castsum_yr2{8} = cast08d;
+castsum_yr2{9} = cast09d;
+castsum_yr2{10} = cast10d;
+castsum_yr2{11} = cast11d;
+castsum_yr2{12} = cast12d;
+castsum_yr2{13} = cast13d;
 castlist{2} = [1:13];
 
 load Year3_Processed_KF.mat
-castsum_yr3{1} = cast01;
-castsum_yr3{2} = cast02;
-castsum_yr3{3} = cast03;
-castsum_yr3{4} = cast04;
-castsum_yr3{5} = cast05;
-castsum_yr3{6} = cast06;
-castsum_yr3{7} = cast07;
-castsum_yr3{8} = cast08;
-castsum_yr3{9} = cast09;
-castsum_yr3{10} = cast10;
+castsum_yr3{1} = cast01d;
+castsum_yr3{2} = cast02d;
+castsum_yr3{3} = cast03d;
+castsum_yr3{4} = cast04d;
+castsum_yr3{5} = cast05d;
+castsum_yr3{6} = cast06d;
+castsum_yr3{7} = cast07d;
+castsum_yr3{8} = cast08d;
+castsum_yr3{9} = cast09d;
+castsum_yr3{10} = cast10d;
 castlist{3} = [1:10];
 
 load Year4_Processed_KF.mat
-castsum_yr4{9} = cast09;
-castsum_yr4{10} = cast10;
-castsum_yr4{11} = cast11;
-castsum_yr4{12} = cast12;
+castsum_yr4{9} = cast09d;
+castsum_yr4{10} = cast10d;
+castsum_yr4{11} = cast11d;
+castsum_yr4{12} = cast12d;
 castlist{4} = [9:12];
 
 load Year5_Processed_KF.mat
-castsum_yr5{1} = cast01;
-castsum_yr5{2} = cast02;
-castsum_yr5{3} = cast03;
-castsum_yr5{4} = cast04;
-castsum_yr5{5} = cast05;
-castsum_yr5{6} = cast06;
-castsum_yr5{7} = cast07;
-castsum_yr5{8} = cast08;
-castsum_yr5{9} = cast09;
-castsum_yr5{10} = cast10;
-castsum_yr5{11} = cast11;
-castsum_yr5{12} = cast12;
-castsum_yr5{13} = cast13;
-castsum_yr5{14} = cast14;
-castsum_yr5{15} = cast15;
-castsum_yr5{16} = cast16;
-castsum_yr5{17} = cast17;
-castsum_yr5{18} = cast18;
-castsum_yr5{19} = cast19;
-castsum_yr5{20} = cast20;
-castsum_yr5{21} = cast21;
-castsum_yr5{22} = cast22;
-castsum_yr5{23} = cast23;
+castsum_yr5{1} = cast01d;
+castsum_yr5{2} = cast02d;
+castsum_yr5{3} = cast03d;
+castsum_yr5{4} = cast04d;
+castsum_yr5{5} = cast05d;
+castsum_yr5{6} = cast06d;
+castsum_yr5{7} = cast07d;
+castsum_yr5{8} = cast08d;
+castsum_yr5{9} = cast09d;
+castsum_yr5{10} = cast10d;
+castsum_yr5{11} = cast11d;
+castsum_yr5{12} = cast12d;
+castsum_yr5{13} = cast13d;
+castsum_yr5{14} = cast14d;
+castsum_yr5{15} = cast15d;
+castsum_yr5{16} = cast16d;
+castsum_yr5{17} = cast17d;
+castsum_yr5{18} = cast18d;
+castsum_yr5{19} = cast19d;
+castsum_yr5{20} = cast20d;
+castsum_yr5{21} = cast21d;
+castsum_yr5{22} = cast22d;
+castsum_yr5{23} = cast23d;
 castlist{5} = [1:23];
 
 %Merge bottle summary tables
@@ -95,7 +95,7 @@ castsum{4} = castsum_yr4;
 castsum{5} = castsum_yr5;
 
 %% Loop over data from all years
-for yr = 1:4
+for yr = 1:5
     castsumyr = castsum{yr};
     castlistyr = castlist{yr};
     
@@ -105,7 +105,7 @@ for yr = 1:4
         if i < 17 %set for subplot max
         subplot(4,4,i)
             btlid = find(btlsum{yr}.Cast == i);
-        plot(castsumyr{i}.DOcorr_umolkg, castsumyr{i}.pm, 'k-'); hold on;
+        plot(castsumyr{i}.DOcorr_umolkg, castsumyr{i}.prs, 'k-'); hold on;
         if length(btlid) > 0
             plot(btlsum{yr}.Winkler_umolkg(btlid), btlsum{yr}.PrDM(btlid), 'ro'); hold on;
             %btlsum{yr}.CTD_Oxygen_mLL_corr(btlid) = interp1(castsumyr{i}.pm, castsumyr{i}.sbeox0mL_L, btlsum{yr}.PrDM(btlid));  removed line because Kristen now calculates interpolated DOcorr_umolkg in bottle files
@@ -150,7 +150,7 @@ clear casts
 casts = table;
 casts.year = [1*ones(length(castlist{1}),1); 2*ones(length(castlist{2}),1); 3*ones(length(castlist{3}),1);...
     4*ones(length(castlist{4}),1); 5*ones(length(castlist{5}),1)];
-casts.castnum = [castlist{1}'; castlist{2}'; castlist{3}'; castlist{4}'; castlist{5}';];
+casts.castnum = [castlist{1}'; castlist{2}'; castlist{3}'; castlist{4}'; castlist{5}'];
 casts.lat = NaN*ones(length(casts.year),1);
 casts.lon = NaN*ones(length(casts.year),1);
 casts.time = NaN*ones(length(casts.year),1);
@@ -169,7 +169,7 @@ h6 = plot(-OOImoorings.HYPM5(2), OOImoorings.HYPM5(1),'dk','markersize',M,'marke
 h7 = plot(-OOImoorings.FLMA5(2), OOImoorings.FLMA5(1),'ok','markersize',M,'markerfacecolor',nicecolor('bw')); hold on;
 h8 = plot(-OOImoorings.FLMB5(2), OOImoorings.FLMB5(1),'ok','markersize',M,'markerfacecolor',nicecolor('bbbkkw')); hold on;
 
-for yr = 1:4
+for yr = 1:5
     castsumyr = castsum{yr};
     castlistyr = castlist{yr};
     ind = find(casts.year == yr);
@@ -177,12 +177,12 @@ for yr = 1:4
         lat(i) = nanmean(castsumyr{i}.lat);
         lon(i) = nanmean(castsumyr{i}.lon);
         numWinkl(i) = length(find(btlsum{yr}.Cast == i & isnan(btlsum{yr}.Winkler_umolkg) == 0));
-        HYPMdist(i) = distlatlon(HYPMlat(yr), lat(i), HYPMlon(yr), lon(i));
-        time(i) = datenum(castsumyr{i}.instrumentheaders.SystemUTC);
+        HYPMdist(i) = distlatlon(OOImoorings.HYPM5(1), lat(i), OOImoorings.HYPM5(2), lon(i)); %need to update with locations for each year
+        %time(i) = datenum(castsumyr{i}.instrumentheaders.SystemUTC); %NOW IN SEPARETE VARIABLE FROM KF, NEED TO INCORPORATE 
     end
     casts.lat(ind) = lat(castlistyr); 
     casts.lon(ind) = lon(castlistyr);
-    casts.time(ind) = time(castlistyr);
+    %casts.time(ind) = time(castlistyr); %%RETURN TO THIS
     casts.numWinkl(ind) = numWinkl(castlistyr);
     casts.HYPMdist(ind) = HYPMdist(castlistyr);
     leg{yr} = plot(-casts.lon(ind), casts.lat(ind), 'ko','markersize',M/2-yr,'markerfacecolor',colorlist(yr,:)); hold on;
@@ -193,9 +193,9 @@ ylim([59.6 60.05])
 xlabel('Longitude (^oW)','Fontsize', Ftsz)
 ylabel('Latitude (^oN)','Fontsize', Ftsz)
 box on
-legend([h5 h6 h7 h8 leg{1} leg{2} leg{3} leg{4}],...
+legend([h5 h6 h7 h8 leg{1} leg{2} leg{3} leg{4} leg{5}],...
     'Apex surface mooring', 'Apex sub-surface profiler mooring', 'Flanking mooring A', 'Flanking mooring B',...
-    'Year 1 casts', 'Year 2 casts', 'Year 3 casts', 'Year 4 casts',...
+    'Year 1 casts', 'Year 2 casts', 'Year 3 casts', 'Year 4 casts','Year 5 casts',...
     'location','northeastoutside','Fontsize', Ftsz);
 
 %% Extract cruise SBE43 and Winkler data aligned with HYPM
@@ -209,7 +209,7 @@ for i = 1:length(ind)
     subplot(4,3,i)
     castyr = castsum{casts.year(ind(i))};
     %Interpolate the SBE43 profile onto the HYPM depth grid
-    SBE_interp = interp1(castyr{casts.castnum(ind(i))}.pm, castyr{casts.castnum(ind(i))}.DOcorr_umolkg.*castyr{casts.castnum(ind(i))}.prho/1000, pres_grid); %umol/L
+    SBE_interp = interp1(castyr{casts.castnum(ind(i))}.prs, castyr{casts.castnum(ind(i))}.DOcorr_umolkg.*castyr{casts.castnum(ind(i))}.prho/1000, pres_grid); %umol/L
     %Extract the corresponding HYPM data
     indHYPM = find(abs(wggmerge.time - casts.time(ind(i))) < tol_time);
     for j = 1:length(indHYPM)
