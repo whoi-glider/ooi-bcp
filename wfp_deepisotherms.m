@@ -26,20 +26,40 @@ iso_ind = find(pt_grid == ISO);
 figure(8); clf
     subplot(311)
 for yr = 1:8
-    yrind = find(wggmerge.deploy_yr == yr)
+    yrind = find(wggmerge.deploy_yr == yr);
     plot(wggmerge.time(yrind), wggmerge.doxy_lagcorr_pt(iso_ind,yrind),'.'); hold on;
+    try
+        plot(castalign{yr}.time, castalign{yr}.SBE_interp(iso_ind)./castalign{yr}.prho_interp(iso_ind)*1000,'ko','markerfacecolor','k'); hold on;
+    end
 end
 datetick('x'); ylabel('L2 oxygen, \mumol/kg'); title(['OOI Irminger WFP data on the ' num2str(ISO) ' \theta isotherm'])
     subplot(312)
 for yr = 1:8
-    yrind = find(wggmerge.deploy_yr == yr)
+    yrind = find(wggmerge.deploy_yr == yr);
     plot(wggmerge.time(yrind), wggmerge.pracsal_pt(iso_ind,yrind),'.'); hold on;
+    try
+        plot(castalign{yr}.time, castalign{yr}.SP_interp(iso_ind),'ko','markerfacecolor','k'); hold on;
+    end
 end
 datetick('x'); ylabel('Prac salinity, uncorr')
     subplot(313)
 for yr = 1:8
-    yrind = find(wggmerge.deploy_yr == yr)
+    yrind = find(wggmerge.deploy_yr == yr);
     plot(wggmerge.time(yrind), wggmerge.pres_pt(iso_ind,yrind),'.'); hold on;
 end
 datetick('x'); ylabel('Pressure, db')
 
+%%
+figure(9); clf
+for yr = [1:5,8,9]
+    yrind = find(wggmerge.deploy_yr == yr);
+    if yr == 4 | yr > 7
+        plot(wggmerge.time(yrind), wggmerge.doxy_lagcorr_pt(iso_ind,yrind).*gain_yr_pt(yr,1),'.'); hold on;
+    else
+        plot(wggmerge.time(yrind), wggmerge.doxy_lagcorr_pt(iso_ind,yrind).*gain_yr_pt(yr,3),'.'); hold on;
+    end
+    try
+        plot(castalign{yr}.time, castalign{yr}.SBE_interp(iso_ind)./castalign{yr}.prho_interp(iso_ind)*1000,'ko','markerfacecolor','k'); hold on;
+    end
+end
+datetick('x',2); ylabel('Gain-corrected L2 oxygen, \mumol/kg'); title(['OOI Irminger WFP data on the ' num2str(ISO) ' \theta isotherm'])

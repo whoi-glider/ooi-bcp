@@ -423,6 +423,9 @@ end
 castyr = castsum{yr};
 ind = find(casts.year == yr & casts.castnum == cast);
 
+%Subset isotherms to fit gain specifically to deep depths
+deep_ind = find(pt_grid >= 2 & pt_grid <= 3);
+
 %Pull out relevant cast information to save for later use
 castalign{yr}.castnum = cast;
 idc = find(casts.year == yr & casts.castnum == cast);
@@ -430,6 +433,9 @@ castalign{yr}.time = casts.time(idc);
 
     %Interpolate the SBE43 profile onto the HYPM depth grid
     castalign{yr}.SBE_interp = interp1(castyr{casts.castnum(ind)}.pt, castyr{casts.castnum(ind)}.DOcorr_umolkg.*castyr{casts.castnum(ind)}.prho/1000, pt_grid);
+    castalign{yr}.SP_interp = interp1(castyr{casts.castnum(ind)}.pt, castyr{casts.castnum(ind)}.SP, pt_grid);
+    castalign{yr}.SA_interp = interp1(castyr{casts.castnum(ind)}.pt, castyr{casts.castnum(ind)}.SA, pt_grid);
+    castalign{yr}.prho_interp = interp1(castyr{casts.castnum(ind)}.pt, castyr{casts.castnum(ind)}.prho, pt_grid);
     %Extract the corresponding HYPM data
     if yr < 6
         indHYPM = find(abs(wggmerge.time - casts.time(ind)) < tol_time & wggmerge.deploy_yr == yr);
@@ -442,15 +448,20 @@ castalign{yr}.time = casts.time(idc);
             plot(HYPMprofile_O2umolL, pt_grid, '-', 'color', colorlist(yr,:)*0.6); hold on; 
             %Calculate gain correction
             gain = castalign{yr}.SBE_interp'./HYPMprofile_O2umolL;
+            gain_deep = castalign{yr}.SBE_interp(deep_ind)'./HYPMprofile_O2umolL(deep_ind);
             gainm(j) = nanmean(gain);
             gains(j) = nanstd(gain);
+            gainmd(j) = nanmean(gain_deep);
+            gainsd(j) = nanstd(gain_deep);
         else
             gainm(j) = NaN; gains(j) = NaN;
         end
     end
     gain_yr_pt(yr,1) = nanmean(gainm);
     gain_yr_pt(yr,2) = nanstd(gainm);
-    clear gainm gains
+    gain_yr_pt(yr,3) = nanmean(gainmd);
+    gain_yr_pt(yr,4) = nanstd(gainmd);
+    %clear gainm gains
     
     %Replot with the corrected data
     for j = 1:length(indHYPM)
