@@ -35,16 +35,25 @@ met7t.barometric_pressure = ncread(Yr7_met_t,'barometric_pressure'); %mbar
 met7r.daten = datenum(1900,1,1,00,0,ncread(Yr7_met_r,'time')); % time is in sec since 190000
 met7r.barometric_pressure = ncread(Yr7_met_r,'barometric_pressure'); %mbar
 
+% Year 8
+Yr8_met_t = 'deployment0008_GI01SUMO-SBD11-06-METBKA000-telemetered-metbk_a_dcl_instrument_20210812T170400.699000-20211103T152651.950000.nc';
+Yr8_met_r = 'deployment0008_GI01SUMO-SBD11-06-METBKA000-recovered_host-metbk_a_dcl_instrument_recovered_20210812T170400.699000-20211103T161130.307000.nc';
+
+met8t.daten = datenum(1900,1,1,00,0,ncread(Yr8_met_t,'time')); % time is in sec since 190000
+met8t.barometric_pressure = ncread(Yr8_met_t,'barometric_pressure'); %mbar
+met8r.daten = datenum(1900,1,1,00,0,ncread(Yr8_met_r,'time')); % time is in sec since 190000
+met8r.barometric_pressure = ncread(Yr8_met_r,'barometric_pressure'); %mbar
+
 figure(1); clf
 
-subplot(3,1,1)
+subplot(4,1,1)
 plot(met5r.daten, met5r.barometric_pressure, 'b.','markersize',10); hold on;
 plot(met5t.daten, met5t.barometric_pressure, 'k.','markersize',5)
 datetick('x')
 legend('recovered','telemetered','location','southeast')
 title('OOI Irminger METBKA Barometric Pressure, Year 5: 2018-2019')
 
-subplot(3,1,2)
+subplot(4,1,2)
 plot(met6r.daten, met6r.barometric_pressure, 'b.','markersize',10); hold on;
 plot(met6t.daten, met6t.barometric_pressure, 'k.','markersize',5)
 datetick('x')
@@ -53,10 +62,18 @@ ylabel('mbar')
 legend('recovered','telemetered','location','southeast')
 title('OOI Irminger METBKA Barometric Pressure, Year 6: 2019-2020')
 
-subplot(3,1,3)
+subplot(4,1,3)
 plot(met7r.daten, met7r.barometric_pressure, 'b.','markersize',10); hold on;
 plot(met7t.daten, met7t.barometric_pressure, 'k.','markersize',5)
 datetick('x')
 ylabel('mbar')
 legend('recovered','telemetered','location','southeast')
 title('OOI Irminger METBKA Barometric Pressure, Year 7: 2020-2021')
+
+subplot(4,1,4)
+plot(met8r.daten, met8r.barometric_pressure, 'b.','markersize',10); hold on;
+plot(met8t.daten, met8t.barometric_pressure, 'k.','markersize',5)
+datetick('x')
+ylabel('mbar')
+legend('recovered','telemetered','location','southeast')
+title('OOI Irminger METBKA Barometric Pressure, Year 8: 2021-2022')
