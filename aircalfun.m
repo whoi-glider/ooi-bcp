@@ -46,6 +46,12 @@ met.rh = ncread(filename,'relative_humidity');
 met.water_temp = ncread(filename,'sea_surface_temperature');
 met.salinity = ncread(filename,'met_salsurf');
 
+%% Remove bad barometric pressure data
+tol_low = 920; %identified based on metbka_assess plot
+idout = find(met.barometric_pressure < tol_low);
+met.barometric_pressure(idout) = NaN;
+met.patm(idout) = NaN;
+
 %% Calculate O2 measurement expected in air based on SUMO data
 
 met.SVP_S = vpress(met.salinity,met.water_temp); % saturated water vapor pressure

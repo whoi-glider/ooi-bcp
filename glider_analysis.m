@@ -11,6 +11,7 @@ addpath('G:\Shared drives\NSF_Irminger\Data_Files\From_Roo') %Processed glider d
 Yr5.met = 'deployment0005_GI01SUMO-SBD11-06-METBKA000-recovered_host-metbk_a_dcl_instrument_recovered_20180608T172109.234000-20190809T080351.721000.nc';
 Yr6.met = 'deployment0006_GI01SUMO-SBD11-06-METBKA000-recovered_host-metbk_a_dcl_instrument_recovered_20190805T152914.351000-20200826T104006.497000.nc';
 Yr7.met = 'deployment0007_GI01SUMO-SBD11-06-METBKA000-recovered_host-metbk_a_dcl_instrument_recovered_20200817T173428.501000-20210819T064814.736000.nc';
+Yr8.met = 'deployment0008_GI01SUMO-SBD11-06-METBKA000-recovered_host-metbk_a_dcl_instrument_recovered_20210812T170400.699000-20211103T161130.307000.nc';
 
 %% Year 5 (2018 deployment) - initial air calibration & corrections for S & pressure
 load G453.mat
@@ -58,6 +59,23 @@ Yr7.G365 = glider_interpCorrFun(G365, 0);
 
 clear G515 G365
 
+%% Year 8 (2021 deployment) - initial air calibration & corrections for S & pressure
+load GL469.mat; G469 = T; %11 Aug to 18 Oct 2021
+load GL537.mat; G537 = T; %11 Aug to 5 Sept 2021
+load PG565.mat; G565 = T; %30 July 2021 to 10 Jan 2022 - no air cal
+
+rhcorr = 1; mindateplot = datenum(2021,7,30);
+[Yr8.T_469, Yr7.med_gain_515] = aircalfun(G469, 'Glider 469', 1, Yr8.met, mindateplot, rhcorr, mindateplot, datenum(2021,10,20));
+[Yr8.T_537, Yr7.med_gain_537] = aircalfun(G537, 'Glider 537', 1, Yr8.met, mindateplot, rhcorr, datenum(2021,8,11), datenum(2021,8,24));
+%[Yr8.T_565, Yr7.med_gain_565] = aircalfun(G565, 'Glider 565', 1, Yr8.met, mindateplot, rhcorr, mindateplot, datenum(2022,1,12)); %doesn't actuallyhave air cal, so this just shows that air & surf water match
+
+%Interpolation and S & P corrections - Internal salinity setting should be 0
+Yr8.G469 = glider_interpCorrFun(G469, 0);
+Yr8.G537 = glider_interpCorrFun(G537, 0);
+Yr8.G565 = glider_interpCorrFun(G565, 0);
+
+clear G469 G537 G565 T
+
 %% Tried to save output of above b/c takes 10 min to run, but had a glitch
 
 %% Lag correction
@@ -70,14 +88,16 @@ addpath(genpath('C:\Users\Palevsky\Documents\GitHub\optode-response-time'))
 
 [Yr6.Lag525] = glider_lagAssessFun(Yr6.G525, 800, 68200, 1010, 'Glider 525, Year 6', [7:17]);
 
+%Gliders 469, 537, and 565 Year 8 - no initial lag assessment
+
 %% Plotting used in function and in manually finding ranges for each glider
 
-% GLin =
-% beg = 
-% stop = 
-% jump =
-% jump2 = 
-% name = 
+GLin = Yr7.G365;
+beg = 1000;
+stop = 90000;
+jump = 2;
+jump2 = 2;
+name = 'Glider 365, Year 7';
 
 figure(100); clf
 plot(GLin.daten(beg:jump2:stop), GLin.depth_interp(beg:jump2:stop), 'k.'); hold on;
