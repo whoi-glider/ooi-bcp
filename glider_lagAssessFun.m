@@ -32,6 +32,8 @@ function [glg] = glider_lagAssessFun(GLin, beg, stop, ymax, name, profilelist)
 % AUTHOR:   Hilary Palevsky, 23 January 2023
 % -----------------------------------------------------------------------------
 
+secinday = 60*60*24;
+
 %Selection of depth range over which to compare profiles to calculate lag
 zlim_depth = [20 ymax*.95]; %use 95% of maximum depth, exclude top 20 m
 
@@ -51,7 +53,7 @@ for i = 1:length(profilelist)
     if length(indp) > tol
         glg.mtime(i,1:length(indp)) = GLin.daten(indp);
         glg.pres(i,1:length(indp)) = GLin.pressure_interp(indp);
-        glg.doxy(i,1:length(indp)) = GLin.O2_corr(indp);
+        glg.doxy(i,1:length(indp)) = GLin.O2sat_corr(indp);
         glg.temp(i,1:length(indp)) = GLin.temperature_interp(indp);
     end
 end
@@ -59,33 +61,34 @@ end
 %Calculate tau usinv version with temperature term, in depth space
     %Omitting version in density space because yields more NaN results
 [glg.thickness, glg.tau_Tref, glg.thickness_constants, glg.rmsdt] = calculate_tau_wTemp(glg.mtime, glg.pres, glg.doxy, glg.temp,...
-    'zlim',zlim_depth,'tref', tref);
+    'tlim',[0,250],'zlim',zlim_depth,'tref', tref);
 
 
 
-figure; clf
-    subplot(2,2,[1:2])
-plot(GLin.daten(beg:jump:stop), GLin.depth_interp(beg:jump:stop), 'k.'); hold on;
-scatter(GLin.daten(beg:jump:stop), GLin.depth_interp(beg:jump:stop), [], GLin.oxygen_saturation(beg:jump:stop),'filled'); colorbar; caxis([85 100])
-set(gca,'YDir','reverse'); 
-datetick('x',2,'keeplimits')
-ylabel('Depth (m)')
-ylim([-10 ymax])
-title({[name ', Initial paired up and down profiles (oxygen % saturation)']})
-
-    subplot(2,2,3)
-plot(glg.thickness_constants, glg.rmsdt,'.')
-xlabel('thickness (\mum)')
-ylabel('RMSD (%)')
-title('w/ T term, depth aligned')
-
-    subplot(2,2,4)
-plot(glg.doxy(1:2:end), glg.pres(1:2:end),'k.'); hold on;
-plot(glg.doxy(2:2:end), glg.pres(2:2:end),'b.'); hold on;
-axis ij
-xlabel('Oxygen (uncorr)')
-ylabel('Pressure (db)')
-title('Individual up & down profiles')
+% figure; clf %removed this to speed things up
+%     subplot(2,2,[1:2])
+% plot(GLin.daten(beg:jump:stop), GLin.depth_interp(beg:jump:stop), 'k.'); hold on;
+% scatter(GLin.daten(beg:jump:stop), GLin.depth_interp(beg:jump:stop), [], GLin.oxygen_saturation(beg:jump:stop),'filled'); colorbar; caxis([85 100])
+% set(gca,'YDir','reverse'); 
+% datetick('x',2,'keeplimits')
+% ylabel('Depth (m)')
+% ylim([-10 ymax])
+% title({[name ', Initial paired up and down profiles (oxygen % saturation)']})
+% 
+%     subplot(2,2,3)
+% plot(glg.thickness_constants, glg.rmsdt,'.')
+% xlabel('thickness (\mum)')
+% ylabel('RMSD (%)')
+% title('w/ T term, depth aligned')
+% 
+%     subplot(2,2,4)
+% plot(glg.doxy(1:2:end,:), glg.pres(1:2:end,:),'k.'); hold on;
+% plot(glg.doxy(2:2:end,:), glg.pres(2:2:end,:),'r.'); hold on;
+% axis ij
+% ylim([-10 ymax])
+% xlabel('Oxygen % (P-corr only)')
+% ylabel('Pressure (db)')
+% title('Individual up & down profiles')
 
 
 end
