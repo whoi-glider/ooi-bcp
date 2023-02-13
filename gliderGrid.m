@@ -16,7 +16,7 @@ function [G_out] = gliderGrid(G_in, pmin, pmax, pinterval)
 %    pinterval: pressure interval for gridding
 %
 % OUTPUT:
-%    G_out: G_in with added gridded doxy and doxy_lagcorr variables (mean
+%    G_out: G_in with added gridded temp, doxy, and doxy_lagcorr variables (mean
 %    and standard deviation) along pgrid
 %
 %
@@ -30,6 +30,8 @@ pgrid = [pmin + pinterval/2: pinterval: pmax];
     G_in.doxy_gridstd = NaN*ones(m,length(pgrid));
     G_in.doxy_lagcorr_gridmean = NaN*ones(m,length(pgrid));
     G_in.doxy_lagcorr_gridstd = NaN*ones(m,length(pgrid));
+    G_in.temp_gridmean = NaN*ones(m,length(pgrid));
+    G_in.temp_gridstd = NaN*ones(m,length(pgrid));
 for i = 1:m
     for j = 1:length(pgrid)
         ind = find(G_in.pres(i,:) > pgrid(j) - 2.5 & G_in.pres(i,:) <= pgrid(j) + 2.5);
@@ -38,6 +40,8 @@ for i = 1:m
             G_in.doxy_gridstd(i,j) = nanstd(G_in.doxy(i,ind));
             G_in.doxy_lagcorr_gridmean(i,j) = nanmean(G_in.doxy_lagcorr(i,ind));
             G_in.doxy_lagcorr_gridstd(i,j) = nanstd(G_in.doxy_lagcorr(i,ind));
+            G_in.temp_gridmean(i,j) = nanmean(G_in.temp(i,ind));
+            G_in.temp_gridstd(i,j) = nanstd(G_in.temp(i,ind));
         end
     end
 end
