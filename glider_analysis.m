@@ -1,5 +1,4 @@
 %% Main script for analyzing OOI Irminger glider data
-%Mirrors analysis in aircal_all, with additions for further processing
 
 %% Add paths to data
 addpath('G:\Shared drives\NSF_Irminger\Data_Files\METBKA') %SUMO met buoy data
@@ -76,204 +75,132 @@ Yr8.G565 = glider_interpCorrFun(G565, 0);
 
 clear G469 G537 G565 T
 
-%% Lag correction - only for years 5 and 6 (no paired profiles for lag assessment in years 7 and 8)
-% Correct for historesis effects between up and down profiles using Gordon et al. 2020 approach, as in wfp_lag
-addpath(genpath('C:\Users\Palevsky\Documents\GitHub\optode-response-time'))
+%% Calculate lag correction
+%glider_lagAssess
+%Can avoid running full lag assessment to save time - output boundary layer thickness below
+tau_in = 66.8878;
 
-% only one set of paired dive and climb, aligns with OSM 2020 analysis and 363 set b - NO TEMP DATA FOR DIVE!
-[Yr5.Lag453] = glider_lagAssessFun(Yr5.G453, 26000, 39400, 300, 'Glider 453, Year 5', [43:51]);
+%% Apply lag correction to glider data
+%For each glider dataset, reshape data into format for Gordon functions, then apply glider_lagCorrectFun
 
-% two sets of paired dive and climb, second aligns with cal cast analyzed for OSM 2020 lag analysis
-[Yr5.Lag363a] = glider_lagAssessFun(Yr5.G363, 10000, 210000, 300, 'Glider 363, Year 5', [13:20]); %just first set
-[Yr5.Lag363b] = glider_lagAssessFun(Yr5.G363, 10000, 210000, 300, 'Glider 363, Year 5', [42:46]); %just second set - NO TEMP DATA FOR DIVE!
+[Yr5.glg363] = glider_reshape(Yr5.G363);
+[Yr5.glg363.doxy_lagcorr] = glider_lagCorrectFun(Yr5.glg363, tau_in);
 
-%only one set of paired dive and climb
-[Yr6.Lag525] = glider_lagAssessFun(Yr6.G525, 800, 68200, 300, 'Glider 525, Year 6', [9:16]);
+[Yr5.glg453] = glider_reshape(Yr5.G453);
+[Yr5.glg453.doxy_lagcorr] = glider_lagCorrectFun(Yr5.glg453, tau_in);
 
-%long period of paired dive & climb (I think was a mistake...) after Glider 560 deployment
-[Yr6.Lag560a] = glider_lagAssessFun(Yr6.G560, 2000, 109000, 300, 'Glider 560, Year 6', [10:42]); %a = lag just for first set, before dives reduced to only 500 m
-[Yr6.Lag560b] = glider_lagAssessFun(Yr6.G560, 2000, 109000, 300, 'Glider 560, Year 6', [56:108]); %b = lag just for second set, after dives reduced to only 500 m
+[Yr6.glg525] = glider_reshape(Yr6.G525);
+[Yr6.glg525.doxy_lagcorr] = glider_lagCorrectFun(Yr6.glg525, tau_in);
 
-%% Plot lag correction histograms & summary stats
-    figure(10); clf
-subplot(221)
-histogram(Yr5.Lag453.thickness,[0:25:200])
-title(['Glider 453, Year 5; ' num2str(nanmean(Yr5.Lag453.thickness),3) ' +/- ' num2str(nanstd(Yr5.Lag453.thickness),2)])
-xlabel('Boundary layer thickness, \mum')
+[Yr6.glg560] = glider_reshape(Yr6.G560);
+[Yr6.glg560.doxy_lagcorr] = glider_lagCorrectFun(Yr6.glg560, tau_in);
 
-subplot(222)
-histogram([Yr5.Lag363a.thickness],[0:25:200])
-title(['Glider 363, Year 5; ' num2str(nanmean([Yr5.Lag363a.thickness]),3) ' +/- ' num2str(nanstd([Yr5.Lag363a.thickness]),2)])
-xlabel('Boundary layer thickness, \mum')
+[Yr7.glg515] = glider_reshape(Yr7.G515);
+[Yr7.glg515.doxy_lagcorr] = glider_lagCorrectFun(Yr7.glg515, tau_in);
 
-subplot(223)
-histogram(Yr6.Lag525.thickness,[0:25:200])
-title(['Glider 525, Year 6; ' num2str(nanmean(Yr6.Lag525.thickness),3) ' +/- ' num2str(nanstd(Yr6.Lag525.thickness),2)])
-xlabel('Boundary layer thickness, \mum')
+[Yr7.glg365] = glider_reshape(Yr7.G365);
+[Yr7.glg365.doxy_lagcorr] = glider_lagCorrectFun(Yr7.glg365, tau_in);
 
-subplot(224)
-histogram([Yr6.Lag560a.thickness Yr6.Lag560b.thickness],[0:25:200])
-title('Glider 560, Year 6')
-title(['Glider 560, Year 6; ' num2str(nanmean([Yr6.Lag560a.thickness Yr6.Lag560b.thickness]),3) ' +/- ' num2str(nanstd([Yr6.Lag560a.thickness Yr6.Lag560b.thickness]),2)])
-xlabel('Boundary layer thickness, \mum')
-%%
-    figure(11); clf
-secinday = 60*60*24;
-subplot(221)
-    Yr5.Lag453.vert_velocity = (diff(Yr5.Lag453.pres')')./(diff(Yr5.Lag453.mtime')'*secinday);
-histogram(abs(Yr5.Lag453.vert_velocity(:)))
-title(['Glider 453, Year 5; ' num2str(nanmean(abs(Yr5.Lag453.vert_velocity(:))),3) ' +/- ' num2str(nanstd(abs(Yr5.Lag453.vert_velocity(:))),2) 'dbar s^{-1}'])
-xlabel('Vertical velocity, dbar s^{-1}')
+[Yr8.glg469] = glider_reshape(Yr8.G469);
+[Yr8.glg469.doxy_lagcorr] = glider_lagCorrectFun(Yr8.glg469, tau_in);
 
-subplot(222)
-    Yr5.Lag363a.vert_velocity = (diff(Yr5.Lag363a.pres')')./(diff(Yr5.Lag363a.mtime')'*secinday);
-    Yr5.Lag363b.vert_velocity = (diff(Yr5.Lag363b.pres')')./(diff(Yr5.Lag363b.mtime')'*secinday);
-histogram([abs(Yr5.Lag363a.vert_velocity(:)); abs(Yr5.Lag363b.vert_velocity(:))])
-title(['Glider 363, Year 5; ' num2str(nanmean([abs(Yr5.Lag363a.vert_velocity(:)); abs(Yr5.Lag363b.vert_velocity(:))]),3) ' +/- ' num2str(nanstd([abs(Yr5.Lag363a.vert_velocity(:)); abs(Yr5.Lag363b.vert_velocity(:))]),2) 'dbar s^{-1}'])
-xlabel('Vertical velocity, dbar s^{-1}')
+[Yr8.glg537] = glider_reshape(Yr8.G537);
+[Yr8.glg537.doxy_lagcorr] = glider_lagCorrectFun(Yr8.glg537, tau_in);
 
-subplot(223)
-    Yr6.Lag525.vert_velocity = (diff(Yr6.Lag525.pres')')./(diff(Yr6.Lag525.mtime')'*secinday);
-histogram(abs(Yr6.Lag525.vert_velocity(:)))
-title(['Glider 525, Year 6; ' num2str(nanmean(abs(Yr6.Lag525.vert_velocity(:))),3) ' +/- ' num2str(nanstd(abs(Yr6.Lag525.vert_velocity(:))),2) 'dbar s^{-1}'])
-xlabel('Vertical velocity, dbar s^{-1}')
-
-subplot(224)
-    Yr6.Lag560a.vert_velocity = (diff(Yr6.Lag560a.pres')')./(diff(Yr6.Lag560a.mtime')'*secinday);
-    Yr6.Lag560b.vert_velocity = (diff(Yr6.Lag560b.pres')')./(diff(Yr6.Lag560b.mtime')'*secinday);
-histogram([abs(Yr6.Lag560a.vert_velocity(:)); abs(Yr6.Lag560b.vert_velocity(:))])
-title(['Glider 560, Year 6; ' num2str(nanmean([abs(Yr6.Lag560a.vert_velocity(:)); abs(Yr6.Lag560b.vert_velocity(:))]),3) ' +/- ' num2str(nanstd([abs(Yr6.Lag560a.vert_velocity(:)); abs(Yr6.Lag560b.vert_velocity(:))]),2) 'dbar s^{-1}'])
-xlabel('Vertical velocity, dbar s^{-1}')
-
-%%
-figure(12); clf
-thickness_all = [Yr5.Lag363a.thickness Yr6.Lag525.thickness Yr6.Lag560a.thickness Yr6.Lag560b.thickness]; %Yr5.Lag453.thickness Yr5.Lag363b.thickness 
-histogram(thickness_all,[0:10:150])
-xlabel('Boundary layer thickness, \mum')
-title(['All paired up & down profiles, Yr 6 & 7 gliders: mean = ' num2str(nanmean(thickness_all),3) ' +/- ' num2str(nanstd(thickness_all),2)])
+[Yr8.glg565] = glider_reshape(Yr8.G565);
+[Yr8.glg565.doxy_lagcorr] = glider_lagCorrectFun(Yr8.glg565, tau_in);
 
 
-%% Apply tau correction to glider data that has been reprocessed for lag correction
+%% Identify and flag outliers and spikes in data, and regrid on pressure surfaces (following same approach as wfp_analysis)
 
-tau_in = nanmean(thickness_all);
+%tolerances for spikes (2 x those chosen for WFP for oxy and 20x for
+%temp and sal, given higher variability near surface)
+oxyspike = 6;
+tempspike = 1;
+salspike = 0.1;
+oxymin = 220;
+oxymax = 380;
 
-[Yr5.Lag453.doxy_lagcorr] = glider_lagCorrectFun(Yr5.Lag453, tau_in);
-[Yr5.Lag363a.doxy_lagcorr] = glider_lagCorrectFun(Yr5.Lag363a, tau_in);
-[Yr5.Lag363b.doxy_lagcorr] = glider_lagCorrectFun(Yr5.Lag363b, tau_in);
-[Yr6.Lag525.doxy_lagcorr] = glider_lagCorrectFun(Yr6.Lag525, tau_in);
-[Yr6.Lag560a.doxy_lagcorr] = glider_lagCorrectFun(Yr6.Lag560a, tau_in);
-[Yr6.Lag560b.doxy_lagcorr] = glider_lagCorrectFun(Yr6.Lag560b, tau_in);
+%Select depth resolution and smoothing - current setting is 1 m resolution
+%w/ 5-m smoothing
+pres_grid = [1:1:1000];
+smval = 5; %points to smooth over
 
+[Yr5.glg363,Yr5.glg363.fract_flag] = glider_flag_regrid(Yr5.glg363, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
+[Yr5.glg453,Yr5.glg453.fract_flag] = glider_flag_regrid(Yr5.glg453, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
+[Yr6.glg525,Yr6.glg525.fract_flag] = glider_flag_regrid(Yr6.glg525, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
+[Yr6.glg560,Yr6.glg560.fract_flag] = glider_flag_regrid(Yr6.glg560, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
+[Yr7.glg515,Yr7.glg515.fract_flag] = glider_flag_regrid(Yr7.glg515, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
+[Yr7.glg365,Yr7.glg365.fract_flag] = glider_flag_regrid(Yr7.glg365, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
+[Yr8.glg469,Yr8.glg469.fract_flag] = glider_flag_regrid(Yr8.glg469, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
+[Yr8.glg537,Yr8.glg537.fract_flag] = glider_flag_regrid(Yr8.glg537, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
+[Yr8.glg565,Yr8.glg565.fract_flag] = glider_flag_regrid(Yr8.glg565, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
 
-%% Grid lag corrected (and uncorrected) data for plotting
+%Consider whether to also regrid on isotherms?
 
-    pmin = 0; pmax = 1000; pinterval = 5;
-[Yr5.Lag453] = gliderGrid(Yr5.Lag453, pmin, pmax, pinterval);
-[Yr5.Lag363a] = gliderGrid(Yr5.Lag363a, pmin, pmax, pinterval);
-[Yr5.Lag363b] = gliderGrid(Yr5.Lag363b, pmin, pmax, pinterval);
-[Yr6.Lag525] = gliderGrid(Yr6.Lag525, pmin, pmax, pinterval);
-[Yr6.Lag560a] = gliderGrid(Yr6.Lag560a, pmin, pmax, pinterval);
-[Yr6.Lag560b] = gliderGrid(Yr6.Lag560b, pmin, pmax, pinterval);
+%% Combine glider datasets
+glgmerge{1} = Yr5.glg363;
+glgmerge{2} = Yr5.glg453;
+glgmerge{3} = Yr6.glg525;
+glgmerge{4} = Yr6.glg560;
+glgmerge{5} = Yr7.glg515;
+glgmerge{6} = Yr7.glg365;
+glgmerge{7} = Yr8.glg469;
+glgmerge{8} = Yr8.glg537;
+glgmerge{9} = Yr8.glg565;
 
-%% Plot output data
-
-downC = nicecolor('bbbc');
-down = nicecolor('bbcww');
-upC = nicecolor('gby');
-up = nicecolor('gbyww');
-L1 = 0.5;
-L2 = 2;
-L3 = 3;
-pplotmax = 1000;
-titlestr = {'Glider 363, Year 5, June 9-10, 2018', 'Glider 525, Year 6, Aug. 6-7, 2019',...
-    'Glider 560, Year 6, Aug. 7-10, 2019', 'Glider 560, Year 6, Aug. 11-16, 2019'};
-
-figure(1); clf
-
-for i = 1:4
-    if i == 1
-        %Gin = Yr5.Lag453; d1 = 1;
-        %Gin = Yr5.Lag363b; d1 = 2;
-        Gin = Yr5.Lag363a; d1 = 1;
-    elseif i == 2
-        Gin = Yr6.Lag525; d1 = 1;
-    elseif i == 3
-        Gin = Yr6.Lag560a; d1 = 2;
-    elseif i == 4
-        Gin = Yr6.Lag560b; d1 = 2;
-    end
-
-subplot(2,4,1+2*(i-1))
-plot(Gin.doxy_gridmean(d1:2:end,:),Gin.pgrid,'-','color',down,'linewidth',L1); hold on;
-plot(Gin.doxy_lagcorr_gridmean(d1:2:end,:),Gin.pgrid,'-','color',downC,'linewidth',L1); hold on;
-plot(Gin.doxy_gridmean(d1+1:2:end,:),Gin.pgrid,'-','color',up,'linewidth',L1); hold on;
-plot(Gin.doxy_lagcorr_gridmean(d1+1:2:end,:),Gin.pgrid,'-','color',upC,'linewidth',L1); hold on;
-
-h1 = plot(nanmean(Gin.doxy_gridmean(d1:2:end,:)),Gin.pgrid,'-','color',down,'linewidth',L2); hold on;
-h2 = plot(nanmean(Gin.doxy_lagcorr_gridmean(d1:2:end,:)),Gin.pgrid,'-','color',downC,'linewidth',L3); hold on;
-h3 = plot(nanmean(Gin.doxy_gridmean(d1+1:2:end,:)),Gin.pgrid,'-','color',up,'linewidth',L2); hold on;
-h4 = plot(nanmean(Gin.doxy_lagcorr_gridmean(d1+1:2:end,:)),Gin.pgrid,'-','color',upC,'linewidth',L3); hold on;
-
-axis ij; ylim([-10 pplotmax])
-xlabel('Oxygen % (P-corr only)')
-ylabel('Pressure (db)')
-title(titlestr(i))
-legend([h1 h2 h3 h4], 'Dive','Dive, lag corr','Climb','Climb, lag corr','location','SE')
-
-subplot(2,4,2+2*(i-1))
-plot([0 0],[-10 pplotmax],'k--'); hold on;
-h1 = plot(nanmean(Gin.doxy_gridmean(d1:2:end,:)) - nanmean(Gin.doxy_gridmean(d1+1:2:end,:)),Gin.pgrid,'-','color',nicecolor('kw'),'linewidth',L2); hold on;
-h2 = plot(nanmean(Gin.doxy_lagcorr_gridmean(d1:2:end,:)) - nanmean(Gin.doxy_lagcorr_gridmean(d1+1:2:end,:)),Gin.pgrid,'-','color',nicecolor('kkkw'),'linewidth',L3); hold on;
-
-axis ij; ylim([-10 pplotmax])
-xlabel('Dive - Climb, Oxygen %')
-ylabel('Pressure (db)')
-xlim([-6 6])
-legend([h1 h2],'No lag corr','After lag corr','location','SE')
-
+%% Plot regridded glider data
+figure(100); clf
+C = cmocean('Thermal'); %set colormap
+for i = 1:9
+    glg = glgmerge{i};
+    [X,Y] = meshgrid(glg.time_start, pres_grid);
+    scatter(X(:),Y(:),5,glg.temp_grid(:),'filled'); hold on;
 end
-
-%% Diagnostic plot using temperature, showing match for used data and missing data for unused data from June 12-13, 2018
-figure(2); clf
-% titlestr = {'Glider 453, Year 5, June 12-13, 2018', 'Glider 363, Year 5, June 9-10, 2018', 'Glider 363, Year 5, June 12-13, 2018',...
-%     'Glider 525, Year 6, Aug. 6-7, 2019', 'Glider 560, Year 6, Aug. 7-10, 2019', 'Glider 560, Year 6, Aug. 11-16, 2019'};
-
-for i = 1:4
-    if i == 1
-        %Gin = Yr5.Lag453; d1 = 1;
-        %Gin = Yr5.Lag363b; d1 = 2;
-        Gin = Yr5.Lag363a; d1 = 1;
-    elseif i == 2
-        Gin = Yr6.Lag525; d1 = 1;
-    elseif i == 3
-        Gin = Yr6.Lag560a; d1 = 2;
-    elseif i == 4
-        Gin = Yr6.Lag560b; d1 = 2;
-    end
-
-subplot(2,4,1+2*(i-1))
-plot(Gin.temp_gridmean(d1:2:end,:),Gin.pgrid,'-','color',down,'linewidth',L1); hold on;
-plot(Gin.temp_gridmean(d1+1:2:end,:),Gin.pgrid,'-','color',up,'linewidth',L1); hold on;
-
-h1 = plot(nanmean(Gin.temp_gridmean(d1:2:end,:)),Gin.pgrid,'-','color',down,'linewidth',L2); hold on;
-h2 = plot(nanmean(Gin.temp_gridmean(d1+1:2:end,:)),Gin.pgrid,'-','color',up,'linewidth',L2); hold on;
-
-axis ij; ylim([-10 pplotmax])
-xlabel('Temp (^oC)')
-ylabel('Pressure (db)')
-title(titlestr(i))
-legend([h1 h2], 'Dive','Climb','location','SE')
-
-subplot(2,4,2+2*(i-1))
-plot([0 0],[-10 pplotmax],'k--'); hold on;
-h1 = plot(nanmean(Gin.temp_gridmean(d1:2:end,:)) - nanmean(Gin.temp_gridmean(d1+1:2:end,:)),Gin.pgrid,'-','color',nicecolor('kw'),'linewidth',L2); hold on;
-
-axis ij; ylim([-10 pplotmax])
-xlabel('Dive - Climb, Temp (^oC)')
-ylabel('Pressure (db)')
-xlim([-0.5 0.5])
-
+    axis ij; axis tight
+    colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
+    caxis([2 11])
+    datetick('x',2,'keeplimits');
+    title('Merged glider temperature (^oC)', 'Fontsize', 10)
+%%    
+figure(101); clf
+C = cmocean('Haline'); %set colormap
+for i = 1:9
+    glg = glgmerge{i};
+    [X,Y] = meshgrid(glg.time_start, pres_grid);
+    scatter(X(:),Y(:),5,glg.sal_grid(:),'filled'); hold on;
 end
+    axis ij; axis tight
+    colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
+    caxis([34.5 35.1])
+    datetick('x',2,'keeplimits');
+    title('Merged glider salinity (PSU)', 'Fontsize', 10)
+    
+%%    
+figure(102); clf
+C = cmocean('Dense'); %set colormap
+for i = 1:9
+    glg = glgmerge{i};
+    [X,Y] = meshgrid(glg.time_start, pres_grid);
+    scatter(X(:),Y(:),5,glg.doxy_lagcorr_grid(:),'filled'); hold on;
+end
+    axis ij; axis tight
+    colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
+    caxis([270 340])
+    datetick('x',2,'keeplimits');
+    title('Merged glider oxygen, uncalibrated (\mumol/kg)', 'Fontsize', 10)
+%%    
+% figure(103); clf
+% C = cmocean('Algae'); %set colormap
+% for i = 1:9
+%     glg = glgmerge{i};
+%     [X,Y] = meshgrid(glg.time_start, pres_grid);
+%     scatter(X(:),Y(:),5,glg.chl_grid(:),'filled'); hold on;
+% end
+%     axis ij; axis tight
+%     colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
+%     datetick('x',2,'keeplimits');
+%     title('Merged glider chlorophyll', 'Fontsize', 10)
 
 %% Next steps
 

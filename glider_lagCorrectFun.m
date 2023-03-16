@@ -30,7 +30,9 @@ doxy_lagcorr = NaN(size(glg.doxy));
 
 for i = 1:m
     ind = ~(isnan(glg.mtime(i,:)) | isnan(glg.doxy(i,:)) | isnan(glg.temp(i,:)));
-    doxy_lagcorr(i,ind) = correct_oxygen_profile_wTemp(glg.mtime(i,ind), glg.doxy(i,ind), glg.temp(i,ind), tau_in);
+    if sum(ind) > 10
+        doxy_lagcorr(i,ind) = correct_oxygen_profile_wTemp(glg.mtime(i,ind), glg.doxy(i,ind), glg.temp(i,ind), tau_in);
+    end
 end
 
 
