@@ -118,23 +118,28 @@ tau_in = 66.8878;
 oxyspike = 6;
 tempspike = 1;
 salspike = 0.1;
-oxymin = 220;
-oxymax = 380;
+oxymin = 240;
+oxymax = 360;
+tempmin = 1;
+tempmax = 12;
+salmin = 32;
+salmax = 35.1
+
 
 %Select depth resolution and smoothing - current setting is 1 m resolution
 %w/ 5-m smoothing
 pres_grid = [1:1:1000];
 smval = 5; %points to smooth over
 
-[Yr5.glg363,Yr5.glg363.fract_flag] = glider_flag_regrid(Yr5.glg363, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
-[Yr5.glg453,Yr5.glg453.fract_flag] = glider_flag_regrid(Yr5.glg453, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
-[Yr6.glg525,Yr6.glg525.fract_flag] = glider_flag_regrid(Yr6.glg525, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
-[Yr6.glg560,Yr6.glg560.fract_flag] = glider_flag_regrid(Yr6.glg560, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
-[Yr7.glg515,Yr7.glg515.fract_flag] = glider_flag_regrid(Yr7.glg515, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
-[Yr7.glg365,Yr7.glg365.fract_flag] = glider_flag_regrid(Yr7.glg365, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
-[Yr8.glg469,Yr8.glg469.fract_flag] = glider_flag_regrid(Yr8.glg469, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
-[Yr8.glg537,Yr8.glg537.fract_flag] = glider_flag_regrid(Yr8.glg537, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
-[Yr8.glg565,Yr8.glg565.fract_flag] = glider_flag_regrid(Yr8.glg565, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval);
+[Yr5.glg363,Yr5.glg363.fract_flag] = glider_flag_regrid(Yr5.glg363, oxymin, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr5.glg453,Yr5.glg453.fract_flag] = glider_flag_regrid(Yr5.glg453, oxymin, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr6.glg525,Yr6.glg525.fract_flag] = glider_flag_regrid(Yr6.glg525, oxymin, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr6.glg560,Yr6.glg560.fract_flag] = glider_flag_regrid(Yr6.glg560, oxymin, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr7.glg515,Yr7.glg515.fract_flag] = glider_flag_regrid(Yr7.glg515, oxymin, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr7.glg365,Yr7.glg365.fract_flag] = glider_flag_regrid(Yr7.glg365, oxymin, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr8.glg469,Yr8.glg469.fract_flag] = glider_flag_regrid(Yr8.glg469, oxymin, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr8.glg537,Yr8.glg537.fract_flag] = glider_flag_regrid(Yr8.glg537, oxymin, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr8.glg565,Yr8.glg565.fract_flag] = glider_flag_regrid(Yr8.glg565, oxymin, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
 
 %Consider whether to also regrid on isotherms?
 
@@ -148,6 +153,36 @@ glgmerge{6} = Yr7.glg365;
 glgmerge{7} = Yr8.glg469;
 glgmerge{8} = Yr8.glg537;
 glgmerge{9} = Yr8.glg565;
+
+glidertitles = [{'Glider 363, Year 5','Glider 453, Year 5','Glider 560, Year 6','Glider 515, Year 6',...
+    'Glider 515, Year 7','Glider 365, Year 7','Glider 469, Year 8','Glider 537, Year 8','Glider 565, Year 8'}];
+
+%% Assessment histograms
+figure(1); clf
+subplot(311)
+for i = 1:9
+    histogram(glgmerge{i}.doxy_lagcorr_grid(:)); hold on;
+end
+legend(glidertitles,'location','NW')
+xlabel('Dissolved oxygen, uncalibrated (\mumol/kg)');
+xlim([oxymin oxymax])
+
+subplot(312)
+for i = 1:9
+    histogram(glgmerge{i}.temp_grid(:)); hold on;
+end
+legend(glidertitles,'location','NW')
+xlabel('Temperature (^oC)');
+xlim([tempmin tempmax])
+
+subplot(313)
+for i = 1:9
+    histogram(glgmerge{i}.sal_grid(:)); hold on;
+end
+legend(glidertitles,'location','NW')
+xlabel('Salinity (PSU)');
+xlim([salmin + 2.5 salmax])
+
 
 %% Plot regridded glider data
 figure(100); clf

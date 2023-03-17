@@ -1,4 +1,4 @@
-function [GLout,fract_flag] = glider_flag_regrid(glg, oxymin, oxymax, oxyspike, tempspike, salspike, pres_grid, smval)
+function [GLout,fract_flag] = glider_flag_regrid(glg, oxymin, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval)
 
 %% Flag spikes and outliers, and regrid data excluding those points
 c = 0; %counter to keep track of # datapoints flagged
@@ -19,12 +19,16 @@ for i = 1:num_profiles
     Sout = find(abs(S) > salspike);
     %Identify outliers
     O_outrange = find(glg.doxy_lagcorr(i,:) < oxymin | glg.doxy_lagcorr(i,:) > oxymax);
+    T_outrange = find(glg.temp(i,:) < tempmin | glg.temp(i,:) > tempmax);
+    S_outrange = find(glg.sal(i,:) < salmin | glg.sal(i,:) > salmax);
     gps_outrange = find(glg.lon(i,:) > 360 | glg.lat(i,:) > 90);
     %Flag spikes and outliers
     glg.flag(i,Oout) = glg.flag(i,Oout) + 1;
     glg.flag(i,Tout) = glg.flag(i,Tout) + 10;
     glg.flag(i,Sout) = glg.flag(i,Sout) + 100;
     glg.flag(i,O_outrange) = glg.flag(i,O_outrange) + 1000;
+    glg.flag(i,T_outrange) = glg.flag(i,T_outrange) + 10000;
+    glg.flag(i,S_outrange) = glg.flag(i,S_outrange) + 10000;
     glg.lon(i,gps_outrange) = NaN; glg.lat(i,gps_outrange) = NaN;
     %Keep track out # datapoints flagged
     c = c + length(find(glg.flag(i,:) > 0));
