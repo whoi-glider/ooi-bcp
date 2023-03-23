@@ -43,6 +43,37 @@ for yr = 2:8
     wggmerge.pdens_pt = [wggmerge.pdens_pt wgg{yr}.pdens_ptgrid];
 end
 
+%% Create a merged dataset from the gridded fluorometer data
+
+%Overarching data
+wggmerge_fl.time = wgg_flord{1}.time_start;
+wggmerge_fl.duration = wgg_flord{1}.duration;
+wggmerge_fl.lat = wgg_flord{1}.lat_profile;
+wggmerge_fl.lon = wgg_flord{1}.lon_profile;
+wggmerge_fl.deploy_yr = ones(length(wgg_flord{1}.time_start),1);
+
+%Data gridded on pressure surfaces
+wggmerge_fl.temp = wgg_flord{1}.temp_grid;
+wggmerge_fl.pracsal = wgg_flord{1}.pracsal_grid;
+wggmerge_fl.chla = wgg_flord{1}.chla_grid;
+wggmerge_fl.backscatter = wgg_flord{1}.backscatter_grid;
+wggmerge_fl.spikes = wgg_flord{1}.spikes_grid;
+wggmerge_fl.chlspikes = wgg_flord{1}.chlspikes_grid;
+
+for yr = 2:7
+    wggmerge_fl.time = [wggmerge_fl.time; wgg_flord{yr}.time_start];
+    wggmerge_fl.duration = [wggmerge_fl.duration; wgg_flord{yr}.duration];
+    wggmerge_fl.lat = [wggmerge_fl.lat; wgg_flord{yr}.lat_profile];
+    wggmerge_fl.lon = [wggmerge_fl.lon; wgg_flord{yr}.lon_profile];
+    wggmerge_fl.temp = [wggmerge_fl.temp wgg_flord{yr}.temp_grid];
+    wggmerge_fl.pracsal = [wggmerge_fl.pracsal wgg_flord{yr}.pracsal_grid];
+    wggmerge_fl.deploy_yr = [wggmerge_fl.deploy_yr; yr*ones(length(wgg_flord{yr}.time_start),1)];
+    wggmerge_fl.chla = [wggmerge_fl.chla wgg_flord{yr}.chla_grid];
+    wggmerge_fl.backscatter = [wggmerge_fl.backscatter wgg_flord{yr}.backscatter_grid];
+    wggmerge_fl.spikes = [wggmerge_fl.spikes wgg_flord{yr}.spikes_grid];
+    wggmerge_fl.chlspikes = [wggmerge_fl.chlspikes wgg_flord{yr}.chlspikes_grid];
+end
+
 %% Initial look at lag-corrected, gridded data
 
 figure(4); clf
@@ -60,7 +91,7 @@ sz = 1;
 C = cmocean('Dense'); %set colormap
 
 doxy_scat = wggmerge.doxy_lagcorr(:,profilerng);
-[X,Y] = meshgrid(wggmerge.time(profilerng), pres_grid);
+[X,Y] = meshgrid(wggmerge.time(profilerng), pres_grid_hypm);
 
 figure(5); clf
 scatter(X(:),Y(:),5,doxy_scat(:),'filled'); hold on;

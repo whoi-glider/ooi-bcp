@@ -30,18 +30,21 @@ for i = 1:8
     [wfp{i}, wfpgrid{i}, wfpgrid_therm{i}] = load_HYPM_DOSTA_fun(filenames{i}, depth_grid, therm_grid);
 end
 
-%% Read in fluorometer data
-% filenames_flord = {'deployment0001_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20140912T000208-20150812T103930.nc',...
-%     'deployment0002_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20150817T030206-20160628T060527.nc',...
-%     'deployment0003_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20160712T000207-20170712T072809.nc',...
-%     'deployment0004_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20170807T000204-20180615T185737.nc',...
-%     'deployment0005_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20180610T000207-20190630T071452.nc',...
-%     'deployment0006_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20190807T000205-20200509T172910.nc'};
-% 
-% filterres = 5; %choose number of points to use in running min/max filter for backscatter spike analysis
-% for i = 1:6
-%     [wfp_flord{i}, wfpgrid_flord{i}] = load_HYPM_FLORD_fun(filenames_flord{i}, depth_grid, filterres);
-% end
+%% Read in fluorometer data and complete initial processing
+filenames_flord = {'deployment0001_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20140912T000208-20150812T103930.nc',...
+    'deployment0002_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20150817T030206-20160628T060527.nc',...
+    'deployment0003_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20160712T000207-20170712T072809.nc',...
+    'deployment0004_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20170807T000204-20180615T185737.nc',...
+    'deployment0005_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20180610T000207-20190630T071452.nc',...
+    'deployment0006_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20190807T000205-20200509T172910.nc'...
+    'deployment0007_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20200825T200205-20210819T060646.nc'...
+    'deployment0008_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20210814T000210-20220710T045503.nc'};
+
+filterres = 11; %choose number of points to use in running min/max filter for backscatter spike analysis
+max_tol = 0.005;
+for i = 1:8
+    [wfp_flord{i}] = load_HYPM_FLORD_fun(filenames_flord{i}, filterres, max_tol);
+end
 
 %% Lag correction
 %wfp_lag.m %this takes a long time to run, so output is saved
@@ -142,8 +145,99 @@ for yr = 1:8
     c
 end
  
+%% Reformat fluorometer data following same structure as oxygen data
+tol = 50; %only use profiles with at least 50 points
 
-%% Regrid data reformatted for lag correction
+for yr = 1:8
+numprofiles = max(wfp_flord{yr}.profile_index);
+    wgg_flord{yr}.mtime = NaN(numprofiles,2000);
+    wgg_flord{yr}.lon = NaN(numprofiles,2000);
+    wgg_flord{yr}.lat = NaN(numprofiles,2000);
+    wgg_flord{yr}.pracsal = NaN(numprofiles,2000);
+    wgg_flord{yr}.pres = NaN(numprofiles,2000);
+    wgg_flord{yr}.temp = NaN(numprofiles,2000);
+    wgg_flord{yr}.chla = NaN(numprofiles,2000);
+    wgg_flord{yr}.backscatter = NaN(numprofiles,2000);
+    wgg_flord{yr}.backscatter_w_outliers = NaN(numprofiles,2000);
+    wgg_flord{yr}.filteredspikes = NaN(numprofiles,2000);
+    wgg_flord{yr}.filteredchlspikes = NaN(numprofiles,2000);
+    wgg_flord{yr}.updown = NaN(numprofiles,1);
+for i = 1:numprofiles
+    indp = find(wfp{yr}.profile_index == i);
+    if length(indp) > tol
+        wgg_flord{yr}.mtime(i,1:length(indp)) = wfp_flord{yr}.time_flord_mat(indp);
+        wgg_flord{yr}.lon(i,1:length(indp)) = wfp_flord{yr}.lon_flord(indp);
+        wgg_flord{yr}.lat(i,1:length(indp)) = wfp_flord{yr}.lat_flord(indp);
+        wgg_flord{yr}.pracsal(i,1:length(indp)) = wfp_flord{yr}.pracsal_flord(indp);
+        wgg_flord{yr}.pres(i,1:length(indp)) = wfp_flord{yr}.pressure_flord(indp);
+        wgg_flord{yr}.temp(i,1:length(indp)) = wfp_flord{yr}.temperature_flord(indp);
+        wgg_flord{yr}.chla(i,1:length(indp)) = wfp_flord{yr}.chla(indp);
+        wgg_flord{yr}.backscatter(i,1:length(indp)) = wfp_flord{yr}.backscatter(indp);
+        wgg_flord{yr}.backscatter_w_outliers(i,1:length(indp)) = wfp_flord{yr}.backscatter_w_outliers(indp);
+        wgg_flord{yr}.filteredspikes(i,1:length(indp)) = wfp_flord{yr}.filteredspikes(indp);
+        wgg_flord{yr}.filteredchlspikes(i,1:length(indp)) = wfp_flord{yr}.filteredchlspikes(indp);
+        wgg_flord{yr}.updown(i) = wfp_flord{yr}.updown_index(indp(1+tol));
+    end
+    indzero = find(wgg_flord{yr}.backscatter(i,:) == 0);
+    wgg_flord{yr}.backscatter(i,indzero) = NaN;
+end
+
+% Cut out rows and columns of all NaNs
+ind_good = find(~all(isnan(wgg_flord{yr}.backscatter')) & ~isnan(wgg_flord{yr}.updown)' == 1); %includes > tol pts and has up/down index
+    wgg_flord{yr}.mtime = wgg_flord{yr}.mtime(ind_good,~all(isnan(wgg_flord{yr}.backscatter)));
+    wgg_flord{yr}.lon = wgg_flord{yr}.lon(ind_good,~all(isnan(wgg_flord{yr}.backscatter)));
+    wgg_flord{yr}.lat = wgg_flord{yr}.lat(ind_good,~all(isnan(wgg_flord{yr}.backscatter)));
+    wgg_flord{yr}.pracsal = wgg_flord{yr}.pracsal(ind_good,~all(isnan(wgg_flord{yr}.backscatter)));
+    wgg_flord{yr}.pres = wgg_flord{yr}.pres(ind_good,~all(isnan(wgg_flord{yr}.backscatter)));
+    wgg_flord{yr}.temp = wgg_flord{yr}.temp(ind_good,~all(isnan(wgg_flord{yr}.backscatter)));
+    wgg_flord{yr}.chla = wgg_flord{yr}.chla(ind_good,~all(isnan(wgg_flord{yr}.backscatter)));
+    wgg_flord{yr}.backscatter = wgg_flord{yr}.backscatter(ind_good,~all(isnan(wgg_flord{yr}.backscatter)));
+    wgg_flord{yr}.filteredspikes = wgg_flord{yr}.filteredspikes(ind_good,~all(isnan(wgg_flord{yr}.backscatter)));
+    wgg_flord{yr}.filteredchlspikes = wgg_flord{yr}.filteredchlspikes(ind_good,~all(isnan(wgg_flord{yr}.backscatter)));
+    wgg_flord{yr}.updown = wgg_flord{yr}.updown(ind_good);
+    
+end
+
+%% Regrid reformatted flord data
+
+%Select depth resolution and smoothing - current setting is 1 m resolution
+%w/ 5-m smoothing
+pres_grid = [150:1:2600];
+S = 5; %points to smooth over
+
+for yr = 1:7 %didn't run on year 8 because error, need to resolve later
+
+    %Number of profile indices
+    num_profiles = length(wgg_flord{yr}.updown);
+
+    wgg_flord{yr}.time_start = NaN*ones(num_profiles,1);
+    wgg_flord{yr}.duration = NaN*ones(num_profiles,1);
+    wgg_flord{yr}.lat_profile = NaN*ones(num_profiles,1);
+    wgg_flord{yr}.lon_profile = NaN*ones(num_profiles,1);
+    wgg_flord{yr}.chla_grid = NaN*ones(length(pres_grid),num_profiles);
+    wgg_flord{yr}.backscatter_grid = NaN*ones(length(pres_grid),num_profiles);
+    wgg_flord{yr}.spikes_grid = NaN*ones(length(pres_grid),num_profiles);
+    wgg_flord{yr}.chlspikes_grid = NaN*ones(length(pres_grid),num_profiles);
+    wgg_flord{yr}.pracsal_grid = NaN*ones(length(pres_grid),num_profiles);
+    wgg_flord{yr}.temp_grid = NaN*ones(length(pres_grid),num_profiles);
+
+    for i = 1:num_profiles
+        ind = find(~isnan(wgg_flord{yr}.pres(i,:)) & ~isnan(wgg_flord{yr}.backscatter(i,:))); %no nan values for depth or backscatter
+        wgg_flord{yr}.chla_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.chla(i,ind), pres_grid),S);
+        wgg_flord{yr}.backscatter_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.backscatter(i,ind), pres_grid),S);
+        wgg_flord{yr}.spikes_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.filteredspikes(i,ind), pres_grid),S);
+        wgg_flord{yr}.chlspikes_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.filteredchlspikes(i,ind), pres_grid),S);
+        wgg_flord{yr}.pracsal_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.pracsal(i,ind), pres_grid),S);
+        wgg_flord{yr}.temp_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.temp(i,ind), pres_grid),S);
+        wgg_flord{yr}.time_start(i) = nanmin(wgg_flord{yr}.mtime(i,:));
+        wgg_flord{yr}.duration(i) = nanmax(wgg_flord{yr}.mtime(i,:)) - nanmin(wgg_flord{yr}.mtime(i,:));
+        wgg_flord{yr}.lat_profile(i) = nanmean(wgg_flord{yr}.lat(i,:));
+        wgg_flord{yr}.lon_profile(i) = nanmean(wgg_flord{yr}.lon(i,:)); 
+    end
+    
+end
+
+%% Regrid oxygen data reformatted for lag correction
 
 %Select depth resolution and smoothing - current setting is 1 m resolution
 %w/ 5-m smoothing

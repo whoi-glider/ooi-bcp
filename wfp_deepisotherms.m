@@ -63,3 +63,21 @@ for yr = [1:5,8,9]
     end
 end
 datetick('x',2); ylabel('Gain-corrected L2 oxygen, \mumol/kg'); title(['OOI Irminger WFP data on the ' num2str(ISO) ' \theta isotherm'])
+
+%% Apply a rough deep isotherm correction
+
+%Determine value of deep isotherm for pinning from cruise casts
+deep_iso_pin = NaN(9,1);
+for yr = 1:9
+    try
+        deep_iso_pin(yr) = castalign{yr}.SBE_interp(iso_ind)./castalign{yr}.prho_interp(iso_ind)*1000;
+    end
+end
+
+%Calculate profile-specific gain correction to pin to deep isotherm
+wfp_profilegain = movmean(nanmedian(deep_iso_pin)./wggmerge.doxy_lagcorr_pt(iso_ind,:),30,'omitnan'); %30 profile smoothing
+%Interpolate onto times with missing values - use 'previous'
+ind = find(isnan(wfp_profilegain) == 0);
+wfp_profilegain_interp = interp1(wggmerge.time(ind), wfp_profilegain(ind), wggmerge.time, 'previous');
+
+
