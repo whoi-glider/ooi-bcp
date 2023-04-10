@@ -75,9 +75,19 @@ for yr = 1:9
 end
 
 %Calculate profile-specific gain correction to pin to deep isotherm
+wfp_profilegain_nosmooth = nanmedian(deep_iso_pin)./wggmerge.doxy_lagcorr_pt(iso_ind,:);
 wfp_profilegain = movmean(nanmedian(deep_iso_pin)./wggmerge.doxy_lagcorr_pt(iso_ind,:),30,'omitnan'); %30 profile smoothing
 %Interpolate onto times with missing values - use 'previous'
 ind = find(isnan(wfp_profilegain) == 0);
 wfp_profilegain_interp = interp1(wggmerge.time(ind), wfp_profilegain(ind), wggmerge.time, 'previous');
+
+figure(10); clf
+plot(wggmerge.time, wfp_profilegain_nosmooth, 'c.'); hold on;
+plot(wggmerge.time, wfp_profilegain, 'k.'); hold on;
+xlim([min(wggmerge.time)-30 max(wggmerge.time)-100])
+datetick('x',2,'keeplimits')
+title('OOI Irminger WFP oxygen, deep isotherm gain correction')
+legend('Individual profile values','30-profile moving mean')
+ylabel('Gain')
 
 

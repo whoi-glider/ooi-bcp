@@ -75,6 +75,9 @@ Yr8.G565 = glider_interpCorrFun(G565, 0);
 
 clear G469 G537 G565 T
 
+%% Close plots from air cal function
+close all
+
 %% Calculate lag correction
 %glider_lagAssess
 %Can avoid running full lag assessment to save time - output boundary layer thickness below
@@ -82,6 +85,7 @@ tau_in = 66.8878;
 
 %% Apply lag correction to glider data
 %For each glider dataset, reshape data into format for Gordon functions, then apply glider_lagCorrectFun
+addpath(genpath('C:\Users\palevsky\Documents\GitHub\optode-response-time'))
 
 [Yr5.glg363] = glider_reshape(Yr5.G363);
 [Yr5.glg363.doxy_lagcorr] = glider_lagCorrectFun(Yr5.glg363, tau_in);
@@ -123,7 +127,7 @@ oxymax = 360;
 tempmin = 3;
 tempmax = 12;
 salmin = 32;
-salmax = 35.1
+salmax = 35.1;
 
 
 %Select depth resolution and smoothing - current setting is 1 m resolution
@@ -158,6 +162,15 @@ glgmerge{8} = Yr8.glg565;
 glidertitles = [{'Glider 363, Year 5','Glider 453, Year 5','Glider 560, Year 6','Glider 515, Year 6',...
     'Glider 515, Year 7','Glider 365, Year 7','Glider 469, Year 8','Glider 565, Year 8'}];
 
+%% Add air cal output to combined glider datasets
+glgmerge{1}.Taircal = Yr5.T_363;
+glgmerge{2}.Taircal = Yr5.T_453;
+glgmerge{3}.Taircal = Yr6.T_525;
+glgmerge{4}.Taircal = Yr6.T_560;
+glgmerge{5}.Taircal = Yr7.T_515;
+glgmerge{6}.Taircal = Yr7.T_365;
+glgmerge{7}.Taircal = Yr8.T_469;
+
 %% Assessment histograms
 figure(1); clf
 subplot(311)
@@ -183,302 +196,4 @@ end
 legend(glidertitles,'location','NW')
 xlabel('Salinity (PSU)');
 xlim([salmin + 2.5 salmax])
-
-
-%% Plot regridded glider data
-figure(100); clf
-C = cmocean('Thermal'); %set colormap
-for i = 1:length(glgmerge)
-    glg = glgmerge{i};
-    [X,Y] = meshgrid(glg.time_start, pres_grid);
-    scatter(X(:),Y(:),5,glg.temp_grid(:),'filled'); hold on;
-end
-    axis ij; axis tight
-    colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
-    caxis([2 11])
-    datetick('x',2,'keeplimits');
-    title('Merged glider temperature (^oC)', 'Fontsize', 10)
-%%    
-figure(101); clf
-C = cmocean('Haline'); %set colormap
-for i = 1:length(glgmerge)
-    glg = glgmerge{i};
-    [X,Y] = meshgrid(glg.time_start, pres_grid);
-    scatter(X(:),Y(:),5,glg.sal_grid(:),'filled'); hold on;
-end
-    axis ij; axis tight
-    colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
-    caxis([34.5 35.1])
-    datetick('x',2,'keeplimits');
-    title('Merged glider salinity (PSU)', 'Fontsize', 10)
-    
-%%    
-figure(102); clf
-C = cmocean('Dense'); %set colormap
-for i = 1:length(glgmerge)
-    glg = glgmerge{i};
-    [X,Y] = meshgrid(glg.time_start, pres_grid);
-    scatter(X(:),Y(:),5,glg.doxy_lagcorr_grid(:),'filled'); hold on;
-end
-    axis ij; axis tight
-    colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
-    caxis([270 340])
-    datetick('x',2,'keeplimits');
-    title('Merged glider oxygen, uncalibrated (\mumol/kg)', 'Fontsize', 10)
-%%    
-% figure(103); clf
-% C = cmocean('Algae'); %set colormap
-% for i = 1:9
-%     glg = glgmerge{i};
-%     [X,Y] = meshgrid(glg.time_start, pres_grid);
-%     scatter(X(:),Y(:),5,glg.chl_grid(:),'filled'); hold on;
-% end
-%     axis ij; axis tight
-%     colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
-%     datetick('x',2,'keeplimits');
-%     title('Merged glider chlorophyll', 'Fontsize', 10)
-
-
-%% Plot glider locations
-M1 = 8; M2 = 5;
-
-figure(2); clf
-for i = 1:length(glgmerge)
-    indnonan = find((isnan(glgmerge{i}.lon_profile) + isnan(glgmerge{i}.lat_profile) + isnan(glgmerge{i}.time_start)) == 0);
-    plot(glgmerge{i}.lon_profile(indnonan), glgmerge{i}.lat_profile(indnonan), '-'); hold on;
-end
-plot(HYPMlon, HYPMlat, 'ko','markerfacecolor','k','markersize',M1);
-for yr = [5,9]
-    castsumyr = castsum{yr};
-    for i = 1:length(castsumyr)
-        if height(castsumyr{i}) > 0
-            plot(castsumyr{i}.lon, castsumyr{i}.lat, 'ko','markerfacecolor',nicecolor('wkk'),'markersize',M2);
-        end
-    end
-end
-legend([glidertitles,'WFP mooring sites','Turn-around cruise casts'],'location','SW')
-axis([-40.1 -38.9 59.5 60.1])
-
-%% Find WFP matchups with glider profiles
-
-dist_tol = 4;
-time_tol = 1;
-
-%For each glider profile within dist_tol of HYPM, find nearest time-aligned
-%HYPM profile (but only keep if within time_tol)
-for i = 1:length(glgmerge)
-    glgmerge{i}.HYPMdist_align = NaN(length(glgmerge{i}.profilelist),1);
-    glgmerge{i}.HYPMdist_align_ind = NaN(length(glgmerge{i}.profilelist),1);
-    glgmerge{i}.HYPMdist_align_time = NaN(length(glgmerge{i}.profilelist),1);
-    for j = 1:length(glgmerge{i}.profilelist)
-        ind_talign = find(abs(glgmerge{i}.time_start(j) - wggmerge.time) < time_tol);
-        if length(ind_talign) > 0
-            glgmerge{i}.HYPMdist_align(j) = distlatlon(glgmerge{i}.lat_profile(j), nanmean(wggmerge.lat(ind_talign)), glgmerge{i}.lon_profile(j), nanmean(wggmerge.lon(ind_talign)));
-            if glgmerge{i}.HYPMdist_align(j) < dist_tol
-                [glgmerge{i}.HYPMdist_align_time(j), indt] = min(abs(glgmerge{i}.time_start(j) - wggmerge.time(ind_talign)));
-                glgmerge{i}.HYPMdist_align_ind(j) = ind_talign(indt);
-            end
-        end
-    end
-end
-
-%% For glider profiles with WFP matchups, regrid on isotherms
-%Then find matching depths and isotherms, and match up
-pt_grid_glider = [1.5:0.02:11];
-[pt_grid_overlap, ind_glider_ptgrid, ind_hypm_ptgrid] = intersect(pt_grid_glider, pt_grid, 'stable');
-    pres_grid_hypm = [150:1:2600];
-    pres_grid_glider = [1:1:1000];
-[pres_grid_overlap, ind_glider_presgrid, ind_hypm_presgrid] = intersect(pres_grid_glider, pres_grid_hypm, 'stable');
-
-for i = 1:length(glgmerge)
-    ind = find(isnan(glgmerge{i}.HYPMdist_align_ind) == 0); %indices for glider profiles that have a HYPM matchup
-    %Create arrays to hold oxygen and salinity regridded on isotherms
-    glgmerge{i}.HYPMalign_doxy_lagcorr_pt = NaN(length(pt_grid_glider),length(ind));
-    glgmerge{i}.HYPMalign_sal_pt = NaN(length(pt_grid_glider),length(ind));
-    %Create table to hold stats of alignment comparisons
-    glgmerge{i}.HYPMalign_stats = table;
-    glgmerge{i}.HYPMalign_stats.O2_presA_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_presA_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_presA_std = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.T_presA_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.T_presA_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.T_presA_std = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.S_presA_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.S_presA_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.S_presA_std = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_thermA_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_thermA_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_thermA_std = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.S_thermA_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.S_thermA_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.S_thermA_std = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_std = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_thermA_deepcor_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_thermA_deepcor_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_thermA_deepcor_std = NaN(height(ind),1);
-    for j = 1:length(ind)
-        ind_nonan = find(isnan(glgmerge{i}.doxy_lagcorr_grid(:,ind(j))) + isnan(glgmerge{i}.sal_grid(:,ind(j))) == 0);
-        if length(ind_nonan) > 10
-            %Regrid each profile on isotherms
-            try
-                glgmerge{i}.HYPMalign_doxy_lagcorr_pt(:,j) = interp1(glgmerge{i}.temp_grid(ind_nonan,ind(j)), glgmerge{i}.doxy_lagcorr_grid(ind_nonan,ind(j)), pt_grid_glider);
-                glgmerge{i}.HYPMalign_sal_pt(:,j) = interp1(glgmerge{i}.temp_grid(ind_nonan,ind(j)), glgmerge{i}.sal_grid(ind_nonan,ind(j)), pt_grid_glider);
-            end
-            %Calculate HYPM-glider align factors for:
-            % Lag-corrected O2, pracsal, and potential T for each depth
-            O2depthComp = glgmerge{i}.doxy_lagcorr_grid(ind_glider_presgrid,ind(j))./wggmerge.doxy_lagcorr(ind_hypm_presgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)));
-            O2depthComp_wfpdeepcorr = glgmerge{i}.doxy_lagcorr_grid(ind_glider_presgrid,ind(j))./...
-                (wggmerge.doxy_lagcorr(ind_hypm_presgrid,glgmerge{i}.HYPMdist_align_ind(ind(j))).*wfp_profilegain_interp(glgmerge{i}.HYPMdist_align_ind(ind(j))));
-            TdepthComp = glgmerge{i}.temp_grid(ind_glider_presgrid,ind(j))./wggmerge.temp(ind_hypm_presgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)));
-            SdepthComp = glgmerge{i}.sal_grid(ind_glider_presgrid,ind(j))./wggmerge.pracsal(ind_hypm_presgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)));
-            % Lag-corrected O2 and pracsal for each isotherm
-            O2thermComp = glgmerge{i}.HYPMalign_doxy_lagcorr_pt(ind_glider_ptgrid,j)./wggmerge.doxy_lagcorr_pt(ind_hypm_ptgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)));
-            O2thermComp_wfpdeepcorr = glgmerge{i}.HYPMalign_doxy_lagcorr_pt(ind_glider_ptgrid,j)./...
-                (wggmerge.doxy_lagcorr_pt(ind_hypm_ptgrid,glgmerge{i}.HYPMdist_align_ind(ind(j))).*wfp_profilegain_interp(glgmerge{i}.HYPMdist_align_ind(ind(j))));
-            SthermComp = glgmerge{i}.HYPMalign_sal_pt(ind_glider_ptgrid,j)./wggmerge.pracsal_pt(ind_hypm_ptgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)));
-            % Mean, median, and standard deviation for each of those - put in table
-            glgmerge{i}.HYPMalign_stats.O2_presA_mean(j) = nanmean(O2depthComp);
-            glgmerge{i}.HYPMalign_stats.O2_presA_median(j) = nanmedian(O2depthComp);
-            glgmerge{i}.HYPMalign_stats.O2_presA_std(j) = nanstd(O2depthComp);
-            glgmerge{i}.HYPMalign_stats.T_presA_mean(j) = nanmean(TdepthComp);
-            glgmerge{i}.HYPMalign_stats.T_presA_median(j) = nanmedian(TdepthComp);
-            glgmerge{i}.HYPMalign_stats.T_presA_std(j) = nanstd(TdepthComp);
-            glgmerge{i}.HYPMalign_stats.S_presA_mean(j) = nanmean(TdepthComp);
-            glgmerge{i}.HYPMalign_stats.S_presA_median(j) = nanmedian(TdepthComp);
-            glgmerge{i}.HYPMalign_stats.S_presA_std(j) = nanstd(TdepthComp);
-            glgmerge{i}.HYPMalign_stats.O2_thermA_mean(j) = nanmean(O2thermComp);
-            glgmerge{i}.HYPMalign_stats.O2_thermA_median(j) = nanmedian(O2thermComp);
-            glgmerge{i}.HYPMalign_stats.O2_thermA_std(j) = nanstd(O2thermComp);
-            glgmerge{i}.HYPMalign_stats.S_thermA_mean(j) = nanmean(SthermComp);
-            glgmerge{i}.HYPMalign_stats.S_thermA_median(j) = nanmedian(SthermComp);
-            glgmerge{i}.HYPMalign_stats.S_thermA_std(j) = nanstd(SthermComp);
-            glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(j) = nanmean(O2depthComp_wfpdeepcorr);
-            glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_median(j) = nanmedian(O2depthComp_wfpdeepcorr);
-            glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_std(j) = nanstd(O2depthComp_wfpdeepcorr);
-            glgmerge{i}.HYPMalign_stats.O2_thermA_deepcor_mean(j) = nanmean(O2thermComp_wfpdeepcorr);
-            glgmerge{i}.HYPMalign_stats.O2_thermA_deepcor_median(j) = nanmedian(O2thermComp_wfpdeepcorr);
-            glgmerge{i}.HYPMalign_stats.O2_thermA_deepcor_std(j) = nanstd(O2thermComp_wfpdeepcorr);
-        end
-    end
-end
-
-%% Plot histograms of alignments
-
-figure(3); clf
-subplot(231)
-for i = 1:length(glgmerge)
-    histogram(glgmerge{i}.HYPMalign_stats.O2_thermA_mean,[0.9:0.01:1.2]); hold on;
-end
-legend(glidertitles,'location','NE')
-xlabel('Glider: HYPM oxygen ratio in matchup profiles, aligned on isotherms');
-
-subplot(232)
-for i = 1:length(glgmerge)
-    histogram(glgmerge{i}.HYPMalign_stats.O2_presA_mean,[0.9:0.01:1.2]); hold on;
-end
-legend(glidertitles,'location','NE')
-xlabel('Glider: HYPM oxygen ratio in matchup profiles, aligned on pressure surfaces');
-
-subplot(234)
-for i = 1:length(glgmerge)
-    ind = find(glgmerge{i}.HYPMalign_stats.O2_thermA_mean > 0.9 & glgmerge{i}.HYPMalign_stats.O2_thermA_mean < 1.2);
-    histogram(glgmerge{i}.HYPMalign_stats.O2_thermA_std(ind),[0:0.002:0.05]); hold on;
-end
-legend(glidertitles,'location','NE')
-xlabel('Stdev of Glider: HYPM matchup profiles, aligned on isotherms');
-
-subplot(235)
-for i = 1:length(glgmerge)
-    ind = find(glgmerge{i}.HYPMalign_stats.O2_presA_mean > 0.9 & glgmerge{i}.HYPMalign_stats.O2_presA_mean < 1.2);
-    histogram(glgmerge{i}.HYPMalign_stats.O2_presA_std(ind),[0:0.002:0.05]); hold on;
-end
-legend(glidertitles,'location','NE')
-xlabel('Stdev of Glider: HYPM matchup profiles, aligned on pressure surfaces');
-
-subplot(233)
-for i = 1:length(glgmerge)
-    histogram(glgmerge{i}.HYPMalign_stats.T_presA_mean,[0.9:0.01:1.2]); hold on;
-end
-legend(glidertitles,'location','NE')
-xlabel('Glider: HYPM temperature ratio in matchup profiles, aligned on pressure surfaces');
-
-subplot(236)
-for i = 1:length(glgmerge)
-    ind = find(glgmerge{i}.HYPMalign_stats.T_presA_mean > 0.9 & glgmerge{i}.HYPMalign_stats.T_presA_mean < 1.2);
-    histogram(glgmerge{i}.HYPMalign_stats.T_presA_std(ind),[0:0.002:0.05]); hold on;
-end
-legend(glidertitles,'location','NE')
-xlabel('Stdev of Glider: HYPM temp matchup profiles, aligned on pressure surfaces');
-
-%% Plot time series of alignments
-
-figure(4); clf
-subplot(311)
-for i = 1:length(glgmerge)
-    indlist = glgmerge{i}.HYPMdist_align_ind(~isnan(glgmerge{i}.HYPMdist_align_ind));
-    plot(wggmerge.time(indlist), glgmerge{i}.HYPMalign_stats.O2_presA_mean,'.','markersize',8); hold on;
-    %errorbar(wggmerge.time(indlist), glgmerge{i}.HYPMalign_stats.O2_presA_mean, glgmerge{i}.HYPMalign_stats.O2_presA_std, '.'); hold on;
-end
-ylim([0.95 1.2])
-xlim([min(wgg{5}.time_start) max(wgg{8}.time_start - 150)])
-datetick('x',2,'keeplimits')
-legend(glidertitles,'location','N')
-title('Glider: HYPM oxygen ratio in matchup profiles, aligned on pressure surfaces');
-
-subplot(312)
-for i = 1:length(glgmerge)
-    indlist = glgmerge{i}.HYPMdist_align_ind(~isnan(glgmerge{i}.HYPMdist_align_ind));
-    plot(wggmerge.time(indlist), glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean,'.','markersize',8); hold on;
-    %errorbar(wggmerge.time(indlist), glgmerge{i}.HYPMalign_stats.O2_presA_mean, glgmerge{i}.HYPMalign_stats.O2_presA_std, '.'); hold on;
-end
-ylim([0.95 1.2])
-xlim([min(wgg{5}.time_start) max(wgg{8}.time_start - 150)])
-datetick('x',2,'keeplimits')
-legend(glidertitles,'location','N')
-title('Glider: HYPM oxygen ratio in matchup profiles, aligned on pressure surfaces');
-
-subplot(313)
-for i = 1:length(glgmerge)
-    indlist = glgmerge{i}.HYPMdist_align_ind(~isnan(glgmerge{i}.HYPMdist_align_ind));
-    plot(wggmerge.time(indlist), glgmerge{i}.HYPMalign_stats.T_presA_mean,'.','markersize',8); hold on;
-end
-ylim([0.85 1.1])
-xlim([min(wgg{5}.time_start) max(wgg{8}.time_start - 150)])
-datetick('x',2,'keeplimits')
-%legend(glidertitles,'location','NW')
-title('Glider: HYPM temperature ratio in matchup profiles, aligned on pressure surfaces');
-
-%% 
-
-
-%% Next steps
-
-% WFP matchups:
-% For each glider profile, identify number of WFP profiles within selected
-% distance and time alignment tolerances (use to get sense of matchup
-% frequencies and to adjust chosen tolerances)
-% For each glider profile with > 0 matchups, regrid on isotherms to
-% facilitate comparison with WFP
-% Investigate each matchup - at least at first, make plots (both vs
-% pressure and vs temperature), identify aligned section of profiles, and
-% calculate a gain correction/alignment factor for each pressure/isotherm
-% interval. Anticipate that profiles with lower stdev of that term will be
-% better aligned (use to quantify goodness of matchup), and can use
-% profile-mean matchups deemed good enough as gain/alignment factors.
-
-% 2) Identify cross-calibration opportunities
-    % a) WFP aligned profiles
-    % b) Turn-around cruise casts (Winkler + SBE43 on CTD)
-    % c) Intercalibration with FLMA and FLMB
-
-% 
-% %% Compare with wire-following profiler
-% wfp_analysis %Load wfp data and do initial processings
-%     dist_compare = 4; %Select radius around mooring to use for comparison (kilometers)
-%     time_compare = 1; %Select time difference between mooring and glider profiles to keep for comparison (days)
-%     % Need to select profile direction (-1 == up 1 == down); -1 for 363 and 1 for 453
-% [G363_profile_summary, wfp_profile_summary_363] = glider_wfp_compare(G363, Yr5_wfp, dist_compare, time_compare, -1);
-% [G453_profile_summary, wfp_profile_summary_453] = glider_wfp_compare(G453, Yr5_wfp, dist_compare, time_compare, 1);
 

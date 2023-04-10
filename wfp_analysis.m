@@ -142,7 +142,6 @@ for yr = 1:8
         end
         c = c + length(find(wgg{yr}.flag(i,:) > 0));
     end
-    c
 end
  
 %% Reformat fluorometer data following same structure as oxygen data
@@ -242,6 +241,7 @@ end
 %Select depth resolution and smoothing - current setting is 1 m resolution
 %w/ 5-m smoothing
 pres_grid = [150:1:2600];
+pres_grid_hypm = pres_grid;
 S = 5; %points to smooth over
 
 for yr = 1:8
@@ -310,7 +310,13 @@ for yr = 1:8
 end
 
 %% Test plots to ensure that all is calculated appropriately
-wfp_plotting
+
+%Time stamps are identical for all of 1st 7 deployments in wfp for
+%fluorometer and oxygen, but different number of profiles removed based on
+%anomalous data, so different sizes in wgg and wgg_flord
+
+wfp_plotting %plots now superceded by irminger_presentation_plotting but still need the merging done in this script
+close all;
 
 %% Extract location of HYPM in each year
 for yr = 1:8
@@ -320,25 +326,9 @@ end
 
 %% Gain corrections with cruise data processed by Kristen
 cruise_oxygen
+close all;
 
 %% Analysis on deep isotherms
 wfp_deepisotherms
 
-% %% Load Winkler data for calibrations
-% addpath('C:/Users/palevsky/Dropbox/Wellesley/OOI_Irminger_students/CruiseData_Yrs1to4')
-% loadWinklerIrmingerYrs1to5
-% 
-% %% Calculate Year 1-5 gain corrections based on Winkler data
-% wfp_Irminger_winklercalibration_Yrs1to5
-% 
-% %% Apply initial gain corrections to Year 1-5 data
-% 
-% for i = 1:5
-%     wfp{i}.oxygen_gaincorr = wfp{i}.oxygen * gain_hypm(i);
-%     wfpgrid{i}.oxygen_gaincorr = wfpgrid{i}.O2conc * gain_hypm(i);
-%     wfpgrid_therm{i}.oxygen_gaincorr = wfpgrid_therm{i}.O2conc * gain_hypm(i);
-% end
-
-%% Perform deep isotherm drift correction
-%wfp_deepIsotherm_driftCorrection_Yr5 %note - still needs to be updated to make better correction for drift at depth
 
