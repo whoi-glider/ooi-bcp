@@ -66,7 +66,7 @@ for i = 1:length(profilelist)
         glg.depth(i,1:length(indp)) = GLin.depth_interp(indp);
         try
             glg.chl(i,1:length(indp)) = GLin.chlorophyll(indp);
-            glg.backscatter(i,1:length(indp)) = GLin.backscatter(indp);
+            glg.backscatter(i,1:length(indp)) = GLin.backscatter_700(indp);
         end
     end
 end

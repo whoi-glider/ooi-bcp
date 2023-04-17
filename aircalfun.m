@@ -69,10 +69,12 @@ end
 %%%% Constants used in calculations below
     %Percentile of air measurement distribution to use
 qntl = 0.32; %(value from Nicholson and Feen, 2017, p. 499)
+percentiles = [0.05:0.05:0.95];
     %Depths used to define near-surface oxygen measurements
 surf_mindepth = 0.5;
 surf_maxdepth = 10;
 O2satmin = 20;
+O2satmin_air = 80;
     %Time window for surface data: twin_beg sec < obs < twin_end sec
 twin_beg = 90;
 twin_end = 800;
@@ -90,7 +92,7 @@ for ii = 1:np
     uts = G.profile_index == ii & G.profile_direction == prof_dir & G.depth_interp < surf_maxdepth & G.depth_interp > surf_mindepth;
     
     % select surface interval
-    s = G.profile_index == ii-0.5+isup & ~isnan(G.oxygen_saturation) & G.depth_interp < surf_mindepth & G.oxygen_saturation > 80;
+    s = G.profile_index == ii-0.5+isup & ~isnan(G.oxygen_saturation) & G.depth_interp < surf_mindepth & G.oxygen_saturation > O2satmin_air;
 
     % extract air oxygen measurements from surface interval
     t0 = find(s > 0,1);
@@ -110,6 +112,7 @@ for ii = 1:np
     T.ml_daten(ii) = nanmean(G.daten(u));
     T.air_meas(ii) = quantile(O2air,qntl);
     T.air_daten(ii,1) = nanmean(G.daten(s));
+    T.air_meas_dist(ii,:) = quantile(O2air,percentiles);
 end
 
 %% Determine remaining output values
@@ -121,7 +124,7 @@ T(~d,:) = [];
 
 %Correct air measurements for surface water splashing
 p = polyfit(T.ml_o2sat,T.air_meas,1);
-T.air_corr = (T.air_meas-p(1).*T.ml_o2sat)./(1-p(1));
+T.air_corr = (T.air_meas-p(1).*T.ml_o2sat)./(1-p(1)); %eqn 5 in Nicholson and Feen 2017
 
 %% Calculate gain corrections
 
