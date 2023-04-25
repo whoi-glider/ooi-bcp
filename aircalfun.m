@@ -1,4 +1,4 @@
-function [T, med_gain] = aircalfun(G, gliderstring, prof_dir, filename, tref, rhcorr, mindateplot, maxdateplot)
+function [T, met] = aircalfun(G, glg, prof_dir, filename, rhcorr, smoothval, outtolsd)
 
 %===================================================================
 %
@@ -8,20 +8,20 @@ function [T, med_gain] = aircalfun(G, gliderstring, prof_dir, filename, tref, rh
 %   and create diagnostic plots
 %
 % INPUT:
-%    G: Table of input glider data
-%    gliderstring: string with glider name (used for plot titles)
+%    G: Table of input glider data before applying any corrections
+%    glg: Table of input glider data, after having applied S, P, and lag
+%       corrections (using glider_interpCorrFun, glider_reshape, and glider_lagCorrectFun)
 %    prof_dir: profile direction (-1 == up 1 == down)
 %    filename: string with name of netcdf file with meterological data
-%    tref: time reference in datenum format (generally choose beginning of deployment)
 %    rhcorr: rhcorr = 1 to use observed relative humidy rhcorr = 0 to assume saturated water vapor
-%    mindateplot: time in datenum format of minimum date for plotting
-%    maxdateplot: time in datenum format of maximum date for plotting
+%    smoothval: number of points over which to apply moving mean before removing outliers
+%    tolsd: number of standard deviations outside moving mean to use for outlier flagging
 %
 % OUTPUT:
 %    T: Table with data from all air calibration intervals over the course of the deployment
-%    med_gain: median gain correction over the course of the deployment
+%    met: Table with data from associated meteorological measurements
 %
-% AUTHOR:   Hilary Palevsky, 3 February 2020
+% AUTHOR:   Hilary Palevsky, updated 24 April 2023
 %
 % REFERENCE:
 %    Based on code by D. P. Nicholson and analysis published in:
@@ -68,12 +68,12 @@ end
 
 %%%% Constants used in calculations below
     %Percentile of air measurement distribution to use
-qntl = 0.32; %(value from Nicholson and Feen, 2017, p. 499)
+qntl = 0.5; %(value from Nicholson and Feen, 2017, p. 499 is 0.32 but using median here)
 percentiles = [0.05:0.05:0.95];
     %Depths used to define near-surface oxygen measurements
 surf_mindepth = 0.5;
 surf_maxdepth = 10;
-O2satmin = 20;
+O2min = 60;
 O2satmin_air = 80;
     %Time window for surface data: twin_beg sec < obs < twin_end sec
 twin_beg = 90;
@@ -81,17 +81,23 @@ twin_end = 800;
 
 %Create a table to hold output
 np = max(floor(G.profile_index)); %number of profiles
-vars = {'air_daten','air_meas','air_corr','met_o2sat','ml_daten','ml_o2sat','ml_tem','ml_sal','nsurf'};
+vars = {'air_daten','air_meas','air_corr','met_o2sat','ml_daten','ml_o2conc','ml_o2conc_nocorr','ml_o2sat','ml_tem','ml_sal','nsurf'};
 T = array2table(nan(np,length(vars)));
 T.Properties.VariableNames = vars;
 
 %Loop over all profiles
 for ii = 1:np   
-    % select near-surface measurements from glider profile
-    u = G.profile_index == ii & G.profile_direction == prof_dir & G.depth_interp < surf_maxdepth & G.depth_interp > surf_mindepth & G.oxygen_saturation > O2satmin;
-    uts = G.profile_index == ii & G.profile_direction == prof_dir & G.depth_interp < surf_maxdepth & G.depth_interp > surf_mindepth;
+    % select near-surface measurements from glider profile (from corrected data)
+    glgind = find((glg.profilelist == ii) == 1);
+    if glg.profile_direction(glgind) == prof_dir
+        u = glg.depth(glgind,:) < surf_maxdepth & glg.depth(glgind,:) > surf_mindepth & glg.doxy_lagcorr(glgind,:) > O2min;
+        uts = glg.depth(glgind,:) < surf_maxdepth & glg.depth(glgind,:) > surf_mindepth;
+    else
+        u = NaN;
+        uts = NaN;
+    end
     
-    % select surface interval
+    % select surface interval (from raw data table)
     s = G.profile_index == ii-0.5+isup & ~isnan(G.oxygen_saturation) & G.depth_interp < surf_mindepth & G.oxygen_saturation > O2satmin_air;
 
     % extract air oxygen measurements from surface interval
@@ -106,106 +112,51 @@ for ii = 1:np
     end
 
     %Save output value for each profile
-    T.ml_tem(ii) = nanmean(G.temperature(uts));
-    T.ml_sal(ii) = nanmean(G.salinity(uts));
-    T.ml_o2sat(ii) = nanmedian(G.oxygen_saturation(u));
-    T.ml_daten(ii) = nanmean(G.daten(u));
-    T.air_meas(ii) = quantile(O2air,qntl);
-    T.air_daten(ii,1) = nanmean(G.daten(s));
-    T.air_meas_dist(ii,:) = quantile(O2air,percentiles);
+    if sum(~isnan(uts)) > 0
+        T.ml_tem(ii) = nanmean(glg.temp(glgind,uts)); %from corrected data
+        T.ml_sal(ii) = nanmean(glg.sal(glgind,uts)); %from corrected data
+        T.ml_o2conc(ii) = nanmedian(glg.doxy_lagcorr(glgind,u)); %from corrected data
+        T.ml_o2conc_nocorr(ii) = nanmedian(glg.doxy(glgind,u)); %from corrected data
+        T.ml_daten(ii) = nanmean(glg.mtime(glgind,u)); %from corrected data
+    end
+    T.air_meas(ii) = quantile(O2air,qntl); %from raw data table
+    T.air_daten(ii,1) = nanmean(G.daten(s)); %from raw data table
+    T.air_meas_dist(ii,:) = quantile(O2air,percentiles); %from raw data table
 end
 
+%% Remove lines with missing data
+d = ~isnan(T.air_meas+T.ml_o2conc) & T.air_meas > 0;
+T(~d,:) = [];
+
+%% Flag and remove outliers
+ind_mlout = find(abs(T.ml_o2conc - movmean(T.ml_o2conc,smoothval,'omitnan','endpoints','fill')) > outtolsd*nanstd((T.ml_o2conc)));
+    T.ml_o2conc(ind_mlout) = NaN;
+    T.ml_o2conc_nocorr(ind_mlout) = NaN;
+
+T.ml_tem(T.ml_tem < 0.1) = NaN; %removing data approaching zero
+ind_temout = find(abs(T.ml_tem - movmean(T.ml_tem ,smoothval,'omitnan','endpoints','fill')) > outtolsd*nanstd((T.ml_tem)));
+    T.ml_tem(ind_temout) = NaN;
+
+T.ml_sal(T.ml_sal < 0.1) = NaN; %removing data approaching zero
+ind_salout = find(abs(T.ml_sal - movmean(T.ml_sal ,smoothval,'omitnan','endpoints','fill')) > outtolsd*nanstd((T.ml_sal)));
+    T.ml_sal(ind_salout) = NaN;
+    
+ind_airout = find(abs(T.air_meas - movmean(T.air_meas,smoothval,'omitnan','endpoints','fill')) > outtolsd*nanstd((T.air_meas)));
+    T.air_meas(ind_airout) = NaN;
+
+ind_metout = find(abs(met.O2satcorr - movmean(met.O2satcorr,smoothval,'omitnan','endpoints','fill')) > outtolsd*nanstd((met.O2satcorr)));
+    met.O2satcorr(ind_metout) = NaN;
+
 %% Determine remaining output values
+T.ml_o2sat = T.ml_o2conc./gsw_O2sol_SP_pt(T.ml_sal, T.ml_tem)*100;
 T.met_o2sat = naninterp1(met.daten,met.O2satcorr,T.air_daten);
 
-%Remove lines with missing data
+%% Again remove lines with missing data
 d = ~isnan(T.air_meas+T.ml_o2sat) & T.air_meas > 0;
 T(~d,:) = [];
 
-%Correct air measurements for surface water splashing
+%% Correct air measurements for surface water splashing
 p = polyfit(T.ml_o2sat,T.air_meas,1);
 T.air_corr = (T.air_meas-p(1).*T.ml_o2sat)./(1-p(1)); %eqn 5 in Nicholson and Feen 2017
-
-%% Calculate gain corrections
-
-%This is a version not accounting for surface water splashing
-px = polyfit(T.ml_daten-tref,T.met_o2sat./T.air_meas,2);
-T.air_meas_corr = T.air_meas.*polyval(px,T.ml_daten-tref);
-T.ml_o2sat_corr = T.ml_o2sat.*polyval(px,T.ml_daten-tref);
-
-%Account for surface water splashing
-px2 = polyfit(T.ml_daten-tref,T.met_o2sat./T.air_corr,1);
-med_gain = median(T.met_o2sat(~isnan(T.met_o2sat))./T.air_corr(~isnan(T.met_o2sat)));
-
-%% Figures
-    %set figure options
-ftsz = 14;
-lnw = 1.5;
-mrkr = 10;
-
-%Plot time series of gain data with and without splash corrections
-figure; clf
-subplot(3,2,1:2)
-    ax1 = gca;
-    hold all;
-    ax1.FontSize = ftsz;
-    dateplot = [floor(min(T.ml_daten)):ceil(max(T.ml_daten))];
-plot(T.ml_daten, T.met_o2sat./T.air_meas, 'k.'); %not accounting for surface water splashing
-    plot(dateplot, polyval(px,dateplot-tref),'k-','linewidth',lnw);
-plot(T.ml_daten, T.met_o2sat./T.air_corr, 'b.'); %account for surface water splashing
-    plot(dateplot, polyval(px2,dateplot-tref),'b-','linewidth',lnw);
-    plot(dateplot, med_gain*ones(size(dateplot)),'b--','linewidth',lnw);
-datetick('x',2,'keeplimits')
-ylabel('Gain correction')
-legend('Gain data w/ no splash correction','Gain quadratic fit w/ no splash correction',...
-    'Gain data w/ splash correction','Gain linear fit w/ splash correction','Median gain w/ splash correction')
-title([gliderstring ' gain corrections'])
-
-%Plot time series of glider data for gain calculations and corresponding MET data
-subplot(3,2,3:4)
-    ax2 = gca;
-    hold all;
-    box on;
-    cols = ax2.ColorOrder;
-    ax2.FontSize = ftsz;
-plot(T.ml_daten,T.ml_o2sat,'.-','MarkerSize',mrkr,'LineWidth',lnw,'Color',cols(1,:));
-plot(T.air_daten,T.air_meas,'.-','MarkerSize',mrkr,'LineWidth',lnw,'Color',cols(3,:));
-plot(T.air_daten,T.air_corr,'.-','MarkerSize',mrkr,'LineWidth',lnw,'Color',cols(4,:));
-plot(T.air_daten,med_gain.*T.air_corr,'.-','MarkerSize',mrkr,'LineWidth',lnw,'Color',cols(5,:));
-plot(met.daten,met.O2satcorr,'-','LineWidth',lnw,'Color','k');
-xlim([mindateplot maxdateplot])
-title([gliderstring ' air calibration: median gain = ' num2str(med_gain)]);
-ylabel('Oxygen saturation (%)')
-datetick('x',2,'keeplimits');
-legend('\DeltaO_{2,w}^{meas}','\DeltaO_{2,a}^{meas}','\DeltaO_{2,a}^{splash corr}','\DeltaO_{2,a}^{splash & gain corr}','\DeltaO_{2}^{met}');
-
-%Plot relationship between glider surface water and air measurements
-%(evidence of splashing)
-subplot(3,2,5)
-    ax3 = gca;
-    ax3.FontSize = ftsz;
-    hold all;
-    box on;
-plot(T.ml_o2sat,T.air_meas,'.','MarkerSize',mrkr);
-plot(ax3.XLim,p(1).*ax3.XLim+p(2),'-k','LineWidth',lnw);
-xlabel('\DeltaO_{2,w}^{meas}');
-ylabel('\DeltaO_{2,a}^{meas}');
-    LM = fitlm(array2table([T.ml_o2sat,T.air_meas]),'linear');
-title([gliderstring ' air vs. surface water, R^2 = ' num2str(LM.Rsquared.Adjusted,3) ', slope = ' num2str(p(1),3)]);
-
-%Relationship between MET and corrected glider air data
-subplot(3,2,6)
-    ax4 = gca;
-    ax4.FontSize = ftsz;
-    hold all;
-    box on;
-plot(T.met_o2sat,T.air_corr,'.','MarkerSize',mrkr); hold on;
-    ind = find(isnan(T.met_o2sat + T.air_corr) == 0);
-    p2 = polyfit(T.met_o2sat(ind),T.air_corr(ind),1);
-plot(ax4.XLim,p2(1).*ax4.XLim+p2(2),'-k','LineWidth',lnw);
-xlabel('\DeltaO_{2}^{met}');
-ylabel('\DeltaO_{2,a}^{splash corr}');
-    LM = fitlm(array2table([T.met_o2sat,T.air_corr]),'linear');
-title([gliderstring ' corrected air vs. MET data, R^2 = ' num2str(LM.Rsquared.Adjusted,3)]);
 
 end
