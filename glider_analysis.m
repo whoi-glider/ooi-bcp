@@ -1,8 +1,9 @@
 %% Main script for analyzing OOI Irminger glider data
 
 %% Add paths to data
-addpath('G:\Shared drives\NSF_Irminger\Data_Files\METBKA') %SUMO met buoy data
-addpath('G:\Shared drives\NSF_Irminger\Data_Files\From_Roo') %Processed glider data
+ooiroot;
+addpath([ooi_root_dir, '/Data_Files/METBKA']) %SUMO met buoy data
+addpath([ooi_root_dir, '/Data_Files/From_Roo']) %Processed glider data
 
 %% Identify METBKA files to use for air calibration
 % See metbka_assess for analysis of METBKA data to determine coverage of recovered vs telemetered files
@@ -13,9 +14,11 @@ Yr7.met = 'deployment0007_GI01SUMO-SBD11-06-METBKA000-recovered_host-metbk_a_dcl
 Yr8.met = 'deployment0008_GI01SUMO-SBD11-06-METBKA000-recovered_host-metbk_a_dcl_instrument_recovered_20210812T170400.699000-20211103T161130.307000.nc';
 
 %% Year 5 (2018 deployment) - initial air calibration & corrections for S & pressure
-load G453.mat
-load G363.mat
-G363 = G363R;
+load GI05MOAS-GL453-D00001;
+G453 = T;
+load GI05MOAS-GL363-R00003;
+G363 = T;
+%G363 = G363R;
 
 %Air calibration
 rhcorr = 1; mindateplot = datenum(2018,6,1);
@@ -26,11 +29,13 @@ rhcorr = 1; mindateplot = datenum(2018,6,1);
 Yr5.G363 = glider_interpCorrFun(G363, 35);
 Yr5.G453 = glider_interpCorrFun(G453, 0);
 
-clear G363 G363R G453
+clear G363 G453
 
 %% Year 6 (2019 deployment) - initial air calibration & corrections for S & pressure
-load G525.mat %data until 3 April 2020
-load G560.mat %data until Oct. 2019 (O2 sensor failed - other data ok through)
+load GI05MOAS-GL525-D00002; %data until 3 April 2020
+G525 = T;
+load GI05MOAS-GL560-D00002; %data until Oct. 2019 (O2 sensor failed - other data ok through)
+G560 = T;
 
 rhcorr = 1; mindateplot = datenum(2019,8,1);
 
@@ -44,8 +49,10 @@ Yr6.G560 = glider_interpCorrFun(G560, 0);
 clear G525 G560
 
 %% Year 7 (2020 deployment) - initial air calibration & corrections for S & pressure
-load G515.mat %data through 15 June 2021
-load G365.mat %data through 21 Nov 2020
+load GI05MOAS-PG515-D00004; %data through 15 June 2021
+G515=T;
+load GI05MOAS-GL365-D00004; %data through 21 Nov 2020
+G365=T;
 
 rhcorr = 1; mindateplot = datenum(2020,8,1);
 
@@ -59,9 +66,9 @@ Yr7.G365 = glider_interpCorrFun(G365, 0);
 clear G515 G365
 
 %% Year 8 (2021 deployment) - initial air calibration & corrections for S & pressure
-load GL469.mat; G469 = T; %11 Aug to 18 Oct 2021
-load GL537.mat; G537 = T; %11 Aug to 5 Sept 2021
-load PG565.mat; G565 = T; %30 July 2021 to 10 Jan 2022 - no air cal
+load GI05MOAS-GL469-D00004; G469 = T; %11 Aug to 18 Oct 2021
+load GI05MOAS-GL537-D00003; G537 = T; %11 Aug to 5 Sept 2021
+load GI05MOAS-PG565-D00002; G565 = T; %30 July 2021 to 10 Jan 2022 - no air cal
 
 rhcorr = 1; mindateplot = datenum(2021,7,30);
 [Yr8.T_469, Yr7.med_gain_515] = aircalfun(G469, 'Glider 469', 1, Yr8.met, mindateplot, rhcorr, mindateplot, datenum(2021,10,20));

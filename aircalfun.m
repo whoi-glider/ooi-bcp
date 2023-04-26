@@ -121,6 +121,8 @@ T(~d,:) = [];
 
 %Correct air measurements for surface water splashing
 p = polyfit(T.ml_o2sat,T.air_meas,1);
+%%%% FIXED carry-over splash correction
+p(1) = 0.36;
 T.air_corr = (T.air_meas-p(1).*T.ml_o2sat)./(1-p(1));
 
 %% Calculate gain corrections
