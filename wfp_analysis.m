@@ -331,4 +331,8 @@ close all;
 %% Analysis on deep isotherms
 wfp_deepisotherms
 
+%% Save outputs
+save wfp_analysis_output.mat wggmerge wggmerge_fl wgg HYPMlat HYPMlon
+save cruise_oxygen_output.mat castsum btlsum
+
 

@@ -45,7 +45,7 @@ Yr5.G453 = glider_interpCorrFun(G453, 0);
 %Air calibration
 [Yr5.T_363, Yr5.met_363] = aircalfun(Yr5.G363, Yr5.glg363, -1, Yr5.met, rhcorr, smoothval, outtolsd);
 [Yr5.T_453, Yr5.met_453] = aircalfun(Yr5.G453, Yr5.glg453, 1, Yr5.met, rhcorr, smoothval, outtolsd);
-                                                                   vvvvvvvvv
+
 clear G363 G363R G453
 
 %% Year 6 (2019 deployment) - corrections for S & pressure, lag correction, and air calibration
@@ -217,20 +217,20 @@ n = 7; %number of gliders in glgmerge with aircal data
 for ii = 1:n
     subplot(2,n,ii)
     for i = 1:height(glgmerge{ii}.Taircal)
-       plot([0.05:0.05:0.95], glgmerge{ii}.Taircal.air_meas_dist(i,:) - glgmerge{ii}.Taircal.air_meas_dist(i,10)); hold on;
-       A(i,:) = glgmerge{ii}.Taircal.air_meas_dist(i,:) - glgmerge{ii}.Taircal.air_meas_dist(i,10);
+       plot([0.2:0.05:0.8], glgmerge{ii}.Taircal.air_meas_dist(i,4:16) - glgmerge{ii}.Taircal.air_meas_dist(i,10)); hold on;
+       A(i,:) = glgmerge{ii}.Taircal.air_meas_dist(i,4:16) - glgmerge{ii}.Taircal.air_meas_dist(i,10);
     end
-    plot([0.05:0.05:0.95], nanmean(A),'k-','linewidth',5); hold on;
+    plot([0.2:0.05:0.8], nanmean(A),'k-','linewidth',5); hold on;
     title([glidertitles{ii}])
     xlabel('Percentile'); ylabel('\DeltaO_{2,a}^{meas} - median');
     ylim([-3 3])
 
     subplot(2,n,ii+n)
     for i = 1:height(glgmerge{ii}.Taircal)
-       plot([0.075:0.05:0.95], diff(glgmerge{ii}.Taircal.air_meas_dist(i,:))); hold on;
-       B(i,:) = diff(glgmerge{ii}.Taircal.air_meas_dist(i,:));
+       plot([0.225:0.05:0.8], diff(glgmerge{ii}.Taircal.air_meas_dist(i,4:16))); hold on;
+       B(i,:) = diff(glgmerge{ii}.Taircal.air_meas_dist(i,4:16));
     end
-    plot([0.075:0.05:0.95], nanmean(B),'k-','linewidth',5); hold on;
+    plot([0.225:0.05:0.8], nanmean(B),'k-','linewidth',5); hold on;
     title([glidertitles{ii}])
     xlabel('Percentile'); ylabel('d\DeltaO_{2,a}^{meas}');
     ylim([0 1])
@@ -298,7 +298,7 @@ title('Glider gain corrections: Sensitivity to air-water slopes');
 
 %% Synthesize all air vs water empirical slope data
 
-p_ind = 11; %index for 50th percentile
+p_ind = 10; %index for 50th percentile
 ftsz = 10;
 lnw = 1.5;
 mrkr = 10;
@@ -336,7 +336,7 @@ hold all; box on;
     h3 = plot(glgmerge{ii}.Taircal.air_daten,air_corr,'-','MarkerSize',mrkr,'LineWidth',lnw2,'Color',cols(4,:));
     h4 = plot(glgmerge{ii}.met.daten,glgmerge{ii}.met.O2satcorr,'-','LineWidth',lnw2,'Color','k');
 
-title(glidertitles(ii),'Fontsize',ftsz);
+title(glidertitles(ii),'Fontsize',ftsz+2);
 ylabel('Oxygen saturation (%)')
 xlim([min(glgmerge{ii}.Taircal.air_daten) - tgap max(glgmerge{ii}.Taircal.air_daten) + tgap])
 datetick('x',2,'keeplimits');
@@ -345,7 +345,7 @@ if ii == 1
         'location','northeast','orientation','horizontal');
 end
 end
-%%
+
 figure(6); clf
 ax = gca; cols = ax.ColorOrder;
 for ii = 1:7
@@ -367,4 +367,14 @@ title({'All Gliders' 'corrected air vs. MET data'},'Fontsize',ftsz);
 xlabel('\DeltaO_{2}^{met}');
 ylabel('\DeltaO_{2,a}^{splash corr}');
 
+%% Visualize lag corrected, gridded glider oxygen data from near surface
+figure(7); clf
+for ii = 1:8
+subplot(4,2,ii)
+    indplot = find(sum(~isnan(glgmerge{ii}.doxy_lagcorr_grid(1:50,:))) > 0);
+    imagesc(glgmerge{ii}.doxy_lagcorr_grid(1:50, indplot))
+    colorbar
+    title(glidertitles(ii))
+    ylabel('Depth (m)','Fontsize',8)
+end
 

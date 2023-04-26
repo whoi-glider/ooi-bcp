@@ -194,6 +194,7 @@ end
 
 %% Plot time series of alignments
 C_gl = [166 206 227; 31 120 180; 178 223 138; 51 160 44; 253 191 111; 255 127 0; 202 178 214; 106 61 154]/256;
+slope_pick = 0.25;
 
 figure(4); clf
 for i = 1:length(glgmerge)
@@ -205,9 +206,11 @@ for i = 1:length(glgmerge)
     [P(i,:),Sfit{i}] = polyfit(wggmerge.time(indlist(indnoflag)) - t_start, glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(indnoflag),1);
     [y_fit,delta] = polyval(P(i,:),wggmerge.time(indlist(indnoflag)) - t_start, Sfit{i});
     try
-        %plot(glgmerge{i}.Taircal.ml_daten, movmean(glgmerge{i}.Taircal.met_o2sat./glgmerge{i}.Taircal.air_meas, 60), 'k.'); hold on;%not accounting for surface water splashing
+        air_corr_slopeset = (glgmerge{i}.Taircal.air_meas_dist(:,10)-slope_pick.*glgmerge{i}.Taircal.ml_o2sat)./(1-slope_pick);
         plot(glgmerge{i}.Taircal.ml_daten, movmean(glgmerge{i}.Taircal.met_o2sat./glgmerge{i}.Taircal.air_corr, 60),...
-            '-','linewidth',5,'color',C_gl(i,:).*[0.8 0.8 0.8]); hold on; %account for surface water splashing
+            '-','linewidth',3,'color',C_gl(i,:).*[0.9 0.9 0.9]); hold on; %empirical slope
+        plot(glgmerge{i}.Taircal.ml_daten, movmean(glgmerge{i}.Taircal.met_o2sat./air_corr_slopeset, 60),...
+            '-','linewidth',5,'color',C_gl(i,:).*[0.7 0.7 0.7]); hold on; %slope set by slope pick
     end
     h(i) = plot(wggmerge.time(indlist(indnoflag)), y_fit, '-','linewidth',2.5,'color',C_gl(i,:)); hold on;
     plot(wggmerge.time(indlist(indnoflag)), y_fit - delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
@@ -216,8 +219,7 @@ end
 ylim([0.92 1.15])
 xlim([min(wgg{5}.time_start)-20 max(wgg{8}.time_start - 150)])
 datetick('x',2,'keeplimits')
-legend(h, glidertitles,'location','NW')
-%title('Glider: deep isotherm corrected HYPM oxygen ratio in matchup profiles, aligned on pressure surfaces');
+legend(h, glidertitles,'location','N','orientation','horizontal')
 title('Glider gain corrections: Comparison of deep isotherm (points & linear fits) and air calibration (thick line) approaches');
 
 

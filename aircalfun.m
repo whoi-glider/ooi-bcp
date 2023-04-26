@@ -72,7 +72,7 @@ qntl = 0.5; %(value from Nicholson and Feen, 2017, p. 499 is 0.32 but using medi
 percentiles = [0.05:0.05:0.95];
     %Depths used to define near-surface oxygen measurements
 surf_mindepth = 0.5;
-surf_maxdepth = 10;
+surf_maxdepth = 20;
 O2min = 60;
 O2satmin_air = 80;
     %Time window for surface data: twin_beg sec < obs < twin_end sec
