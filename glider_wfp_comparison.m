@@ -57,28 +57,12 @@ for i = 1:length(glgmerge)
     glgmerge{i}.HYPMalign_doxy_lagcorr_pt = NaN(length(pt_grid_glider),length(ind));
     glgmerge{i}.HYPMalign_sal_pt = NaN(length(pt_grid_glider),length(ind));
     %Create table to hold stats of alignment comparisons
-    glgmerge{i}.HYPMalign_stats = table;
-    glgmerge{i}.HYPMalign_stats.O2_presA_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_presA_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_presA_std = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.T_presA_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.T_presA_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.T_presA_std = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.S_presA_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.S_presA_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.S_presA_std = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_thermA_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_thermA_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_thermA_std = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.S_thermA_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.S_thermA_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.S_thermA_std = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_std = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_thermA_deepcor_mean = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_thermA_deepcor_median = NaN(height(ind),1);
-    glgmerge{i}.HYPMalign_stats.O2_thermA_deepcor_std = NaN(height(ind),1);
+    vars = {'O2_presA_mean','O2_presA_median','O2_presA_std','T_presA_mean','T_presA_median','T_presA_std','S_presA_mean','S_presA_median','S_presA_std',...
+        'O2_thermA_mean','O2_thermA_median','O2_thermA_std','S_thermA_mean','S_thermA_median','S_thermA_std','O2_presA_deepcor_mean','O2_presA_deepcor_median',...
+        'O2_presA_deepcor_std','O2_thermA_deepcor_mean','O2_thermA_deepcor_median','O2_thermA_deepcor_std'};
+    glgmerge{i}.HYPMalign_stats = array2table(nan(length(ind),length(vars)));
+    glgmerge{i}.HYPMalign_stats.Properties.VariableNames = vars;
+  
     for j = 1:length(ind)
         ind_nonan = find(isnan(glgmerge{i}.doxy_lagcorr_grid(:,ind(j))) + isnan(glgmerge{i}.sal_grid(:,ind(j))) == 0);
         if length(ind_nonan) > 10
@@ -129,21 +113,21 @@ end
 
 figure(3); clf
 subplot(231)
-for i = [5,8,1:4,6,7]%length(glgmerge)
+for i = 1:length(glgmerge)
     histogram(glgmerge{i}.HYPMalign_stats.O2_thermA_mean,[0.9:0.01:1.2]); hold on;
 end
 %legend(glidertitles,'location','NE')
 xlabel('Glider: HYPM oxygen ratio in matchup profiles, aligned on isotherms');
 
 subplot(232)
-for i = [5,8,1:4,6,7]%length(glgmerge)
-    histogram(glgmerge{i}.HYPMalign_stats.O2_presA_mean,[0.9:0.01:1.2]); hold on;
+for i = 1:length(glgmerge)
+    histogram(glgmerge{i}.HYPMalign_stats.O2_presA_mean,[0.5:0.01:1.]); hold on;
 end
 %legend(glidertitles,'location','NE')
 xlabel('Glider: HYPM oxygen ratio in matchup profiles, aligned on pressure surfaces');
 
 subplot(234)
-for i = [5,8,1:4,6,7]%length(glgmerge)
+for i = 1:length(glgmerge)
     ind = find(glgmerge{i}.HYPMalign_stats.O2_thermA_mean > 0.9 & glgmerge{i}.HYPMalign_stats.O2_thermA_mean < 1.2);
     histogram(glgmerge{i}.HYPMalign_stats.O2_thermA_std(ind),[0:0.002:0.05]); hold on;
 end
@@ -151,7 +135,7 @@ end
 xlabel('Stdev of Glider: HYPM matchup profiles, aligned on isotherms');
 
 subplot(235)
-for i = [5,8,1:4,6,7]%length(glgmerge)
+for i = 1:length(glgmerge)
     ind = find(glgmerge{i}.HYPMalign_stats.O2_presA_mean > 0.9 & glgmerge{i}.HYPMalign_stats.O2_presA_mean < 1.2);
     histogram(glgmerge{i}.HYPMalign_stats.O2_presA_std(ind),[0:0.002:0.05]); hold on;
 end
@@ -159,14 +143,14 @@ end
 xlabel('Stdev of Glider: HYPM matchup profiles, aligned on pressure surfaces');
 
 subplot(233)
-for i = [5,8,1:4,6,7]%length(glgmerge)
+for i = 1:length(glgmerge)
     histogram(glgmerge{i}.HYPMalign_stats.T_presA_mean,[0.9:0.01:1.2]); hold on;
 end
 %legend(glidertitles,'location','NE')
 xlabel('Glider: HYPM temperature ratio in matchup profiles, aligned on pressure surfaces');
 
 subplot(236)
-for i = [5,8,1:4,6,7]%length(glgmerge)
+for i = 1:length(glgmerge)
     ind = find(glgmerge{i}.HYPMalign_stats.T_presA_mean > 0.9 & glgmerge{i}.HYPMalign_stats.T_presA_mean < 1.2);
     histogram(glgmerge{i}.HYPMalign_stats.T_presA_std(ind),[0:0.002:0.05]); hold on;
 end
@@ -193,33 +177,39 @@ for i = 1:length(glgmerge)
 end
 
 %% Plot time series of alignments
-C_gl = [166 206 227; 31 120 180; 178 223 138; 51 160 44; 253 191 111; 255 127 0; 202 178 214; 106 61 154]/256;
+C_gl = cmocean('phase',18);
 slope_pick = 0.25;
+glg_reorder = [1:8];
+C_gl = C_gl(glg_reorder,:);
 
 figure(4); clf
-for i = 1:length(glgmerge)
+for i = glg_reorder
     indnoflag = find(glgmerge{i}.HYPMalign_stats.flag == 0 & isnan(glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean) == 0);
-    indlist = glgmerge{i}.HYPMdist_align_ind(~isnan(glgmerge{i}.HYPMdist_align_ind));
-    plot(wggmerge.time(indlist), glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean,'.k','markersize',2); hold on;
-    plot(wggmerge.time(indlist(indnoflag)), glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(indnoflag),'ko','markerfacecolor',C_gl(i,:),'markersize',3); hold on;
-    t_start = wggmerge.time(indlist(indnoflag(1)));
-    [P(i,:),Sfit{i}] = polyfit(wggmerge.time(indlist(indnoflag)) - t_start, glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(indnoflag),1);
-    [y_fit,delta] = polyval(P(i,:),wggmerge.time(indlist(indnoflag)) - t_start, Sfit{i});
-    try
-        air_corr_slopeset = (glgmerge{i}.Taircal.air_meas_dist(:,10)-slope_pick.*glgmerge{i}.Taircal.ml_o2sat)./(1-slope_pick);
-        plot(glgmerge{i}.Taircal.ml_daten, movmean(glgmerge{i}.Taircal.met_o2sat./glgmerge{i}.Taircal.air_corr, 60),...
-            '-','linewidth',3,'color',C_gl(i,:).*[0.9 0.9 0.9]); hold on; %empirical slope
-        plot(glgmerge{i}.Taircal.ml_daten, movmean(glgmerge{i}.Taircal.met_o2sat./air_corr_slopeset, 60),...
-            '-','linewidth',5,'color',C_gl(i,:).*[0.7 0.7 0.7]); hold on; %slope set by slope pick
+    if length(indnoflag) > 0
+        indlist = glgmerge{i}.HYPMdist_align_ind(~isnan(glgmerge{i}.HYPMdist_align_ind));
+        plot(wggmerge.time(indlist), 1./glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean,'.k','markersize',2); hold on;
+        plot(wggmerge.time(indlist(indnoflag)), 1./glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(indnoflag),'ko','markerfacecolor',C_gl(i,:),'markersize',3); hold on;
+        t_start = wggmerge.time(indlist(indnoflag(1)));
+        [P(i,:),Sfit{i}] = polyfit(wggmerge.time(indlist(indnoflag)) - t_start, 1./glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(indnoflag),1);
+        [y_fit,delta] = polyval(P(i,:),wggmerge.time(indlist(indnoflag)) - t_start, Sfit{i});
+        try
+            air_corr_slopeset = (glgmerge{i}.Taircal.air_meas_dist(:,10)-slope_pick.*glgmerge{i}.Taircal.ml_o2sat)./(1-slope_pick);
+%             plot(glgmerge{i}.Taircal.ml_daten, movmean(glgmerge{i}.Taircal.met_o2sat./glgmerge{i}.Taircal.air_corr, 60),...
+%                 '-','linewidth',3,'color',C_gl(i,:).*[0.9 0.9 0.9]); hold on; %empirical slope
+            plot(glgmerge{i}.Taircal.ml_daten, movmean(glgmerge{i}.Taircal.met_o2sat./air_corr_slopeset, 60),...
+                '-','linewidth',5,'color',C_gl(i,:).*[0.7 0.7 0.7]); hold on; %slope set by slope pick
+        end
+        h(i) = plot(wggmerge.time(indlist(indnoflag)), y_fit, '-','linewidth',2.5,'color',C_gl(i,:)); hold on;
+        plot(wggmerge.time(indlist(indnoflag)), y_fit - delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
+        plot(wggmerge.time(indlist(indnoflag)), y_fit + delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
+    else
+        h(i) = h(i-1);
     end
-    h(i) = plot(wggmerge.time(indlist(indnoflag)), y_fit, '-','linewidth',2.5,'color',C_gl(i,:)); hold on;
-    plot(wggmerge.time(indlist(indnoflag)), y_fit - delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
-    plot(wggmerge.time(indlist(indnoflag)), y_fit + delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
 end
-ylim([0.92 1.15])
-xlim([min(wgg{5}.time_start)-20 max(wgg{8}.time_start - 150)])
+%ylim([0.92 1.15])
+xlim([min(wgg{1}.time_start)-20 max(wgg{8}.time_start - 150)])
 datetick('x',2,'keeplimits')
-legend(h, glidertitles,'location','N','orientation','horizontal')
+legend(h(glg_reorder), glidertitles(glg_reorder),'location','SW')
 title('Glider gain corrections: Comparison of deep isotherm (points & linear fits) and air calibration (thick line) approaches');
 
 

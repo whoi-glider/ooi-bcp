@@ -125,6 +125,42 @@ Yr8.G565 = glider_interpCorrFun(G565, 0);
 
 clear G469 G537 G565
 
+%% Year 2-4 data
+
+%Load data and then apply interpolation and S & P corrections - assuming internal setting is 0 for all
+load GI05MOAS-GL493-D00002.mat %Year 4 - 8/9/2017-10/14/2017
+    Yr4.G493 = glider_interpCorrFun(T, 0); clear T
+load GI05MOAS-GL559-R00001.mat %Year 3 - 7/9/2016-1/8/2017
+    Yr3.G559 = glider_interpCorrFun(T, 0); clear T
+load GI05MOAS-GL484-D00002.mat %Year 2 - 8/17/2015-10/18/2016
+    Yr2.G484 = glider_interpCorrFun(T, 0); clear T
+load GI05MOAS-PG528-R00001.mat %Year 2 - 8/17/2015-5/30/2016
+    Yr2.G528 = glider_interpCorrFun(T, 0); clear T
+load GI05MOAS-GL485-D00002.mat %Year 2 - 8/17/2015-11/22/2015
+    Yr2.G485 = glider_interpCorrFun(T, 0); clear T
+load GI05MOAS-GL495-D00002.mat %Year 2 - 8/17/2015-5/11/2015
+    Yr2.G495 = glider_interpCorrFun(T, 0); clear T
+    
+    %%
+%For each glider dataset, reshape data into format for Gordon functions, then apply glider_lagCorrectFun
+[Yr4.glg493] = glider_reshape(Yr4.G493);
+[Yr4.glg493.doxy_lagcorr] = glider_lagCorrectFun(Yr4.glg493, tau_in);
+
+[Yr3.glg559] = glider_reshape(Yr3.G559);
+[Yr3.glg559.doxy_lagcorr] = glider_lagCorrectFun(Yr3.glg559, tau_in);
+
+[Yr2.glg484] = glider_reshape(Yr2.G484);
+[Yr2.glg484.doxy_lagcorr] = glider_lagCorrectFun(Yr2.glg484, tau_in);
+
+[Yr2.glg528] = glider_reshape(Yr2.G528);
+[Yr2.glg528.doxy_lagcorr] = glider_lagCorrectFun(Yr2.glg528, tau_in);
+
+[Yr2.glg485] = glider_reshape(Yr2.G485);
+[Yr2.glg485.doxy_lagcorr] = glider_lagCorrectFun(Yr2.glg485, tau_in);
+
+[Yr2.glg495] = glider_reshape(Yr2.G495);
+[Yr2.glg495.doxy_lagcorr] = glider_lagCorrectFun(Yr2.glg495, tau_in);
+
 %% Identify and flag outliers and spikes in data, and regrid on pressure surfaces (following same approach as wfp_analysis)
 %tolerances for spikes (2 x those chosen for WFP for oxy and 20x for
 %temp and sal, given higher variability near surface)
@@ -132,6 +168,7 @@ oxyspike = 6;
 tempspike = 1;
 salspike = 0.1;
 oxymin = 240;
+oxymin2 = 180;
 oxymax = 360;
 tempmin = 3;
 tempmax = 12;
@@ -153,6 +190,13 @@ smval = 5; %points to smooth over
 [Yr8.glg537,Yr8.glg537.fract_flag] = glider_flag_regrid(Yr8.glg537, oxymin, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
 [Yr8.glg565,Yr8.glg565.fract_flag] = glider_flag_regrid(Yr8.glg565, oxymin, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
 
+[Yr4.glg493,Yr4.glg493.fract_flag] = glider_flag_regrid(Yr4.glg493, oxymin2, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr3.glg559,Yr3.glg559.fract_flag] = glider_flag_regrid(Yr3.glg559, oxymin2, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr2.glg484,Yr2.glg484.fract_flag] = glider_flag_regrid(Yr2.glg484, oxymin2, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr2.glg528,Yr2.glg528.fract_flag] = glider_flag_regrid(Yr2.glg528, oxymin2, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr2.glg485,Yr2.glg485.fract_flag] = glider_flag_regrid(Yr2.glg485, oxymin2, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+[Yr2.glg495,Yr2.glg495.fract_flag] = glider_flag_regrid(Yr2.glg495, oxymin2, oxymax, oxyspike, tempmin, tempmax, tempspike, salmin, salmax, salspike, pres_grid, smval);
+
 %% Combine glider datasets
 %Note - Year 8 glider 537 removed from further analysis because all salinity data flagged as outlier, and only lasted a few weeks anyway
 glgmerge{1} = Yr5.glg363;
@@ -164,8 +208,16 @@ glgmerge{6} = Yr7.glg365;
 glgmerge{7} = Yr8.glg469;
 glgmerge{8} = Yr8.glg565;
 
+glgmerge{9} = Yr2.glg495;
+glgmerge{10} = Yr2.glg485;
+glgmerge{11} = Yr2.glg528;
+glgmerge{12} = Yr2.glg484; %no usable data
+glgmerge{13} = Yr3.glg559;
+glgmerge{14} = Yr4.glg493;
+
 glidertitles = [{'Glider 363, Year 5','Glider 453, Year 5','Glider 525, Year 6','Glider 560, Year 6',...
-    'Glider 515, Year 7','Glider 365, Year 7','Glider 469, Year 8','Glider 565, Year 8'}];
+    'Glider 515, Year 7','Glider 365, Year 7','Glider 469, Year 8','Glider 565, Year 8'...
+    'Glider 495, Year 2', 'Glider 485, Year 2', 'Glider 528, Year 2', 'Glider 484, Year 2', 'Glider 559, Year 3', 'Glider 493, Year 4'}];
 
 %% Add air cal output to combined glider datasets
 glgmerge{1}.Taircal = Yr5.T_363;
@@ -191,9 +243,9 @@ subplot(311)
 for i = 1:length(glgmerge)
     histogram(glgmerge{i}.doxy_lagcorr_grid(:)); hold on;
 end
-legend(glidertitles,'location','NW')
+legend(glidertitles(6:14),'location','NW')
 xlabel('Dissolved oxygen, uncalibrated (\mumol/kg)');
-xlim([oxymin oxymax])
+xlim([oxymin2 oxymax])
 
 subplot(312)
 for i = 1:length(glgmerge)
@@ -373,6 +425,17 @@ for ii = 1:8
 subplot(4,2,ii)
     indplot = find(sum(~isnan(glgmerge{ii}.doxy_lagcorr_grid(1:50,:))) > 0);
     imagesc(glgmerge{ii}.doxy_lagcorr_grid(1:50, indplot))
+    colorbar
+    title(glidertitles(ii))
+    ylabel('Depth (m)','Fontsize',8)
+end
+
+%%
+figure(7); clf
+for ii = 1:14
+subplot(4,4,ii)
+    indplot = find(sum(~isnan(glgmerge{ii}.doxy_lagcorr_grid(1:100,:))) > 0);
+    imagesc((glgmerge{ii}.doxy_lagcorr_grid(:, indplot)))
     colorbar
     title(glidertitles(ii))
     ylabel('Depth (m)','Fontsize',8)
