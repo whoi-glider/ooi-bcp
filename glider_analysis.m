@@ -441,3 +441,5 @@ subplot(4,4,ii)
     ylabel('Depth (m)','Fontsize',8)
 end
 
+%% Save output
+save('glider_output.mat', 'glgmerge', '-v7.3')

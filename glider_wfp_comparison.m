@@ -179,10 +179,11 @@ end
 %% Plot time series of alignments
 C_gl = cmocean('phase',18);
 slope_pick = 0.25;
-glg_reorder = [1:8];
+glg_reorder = [9:14,1:8];
 C_gl = C_gl(glg_reorder,:);
 
 figure(4); clf
+yline(1,'k-'); hold on; box on
 for i = glg_reorder
     indnoflag = find(glgmerge{i}.HYPMalign_stats.flag == 0 & isnan(glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean) == 0);
     if length(indnoflag) > 0
@@ -206,8 +207,10 @@ for i = glg_reorder
         h(i) = h(i-1);
     end
 end
-%ylim([0.92 1.15])
-xlim([min(wgg{1}.time_start)-20 max(wgg{8}.time_start - 150)])
+ylim([0.85 1.39])
+%ylim([0.9 1.1])
+%xlim([min(wgg{5}.time_start)-10 max(wgg{8}.time_start - 150)])
+xlim([min(wgg{1}.time_start)+30 max(wgg{8}.time_start - 150)])
 datetick('x',2,'keeplimits')
 legend(h(glg_reorder), glidertitles(glg_reorder),'location','SW')
 title('Glider gain corrections: Comparison of deep isotherm (points & linear fits) and air calibration (thick line) approaches');

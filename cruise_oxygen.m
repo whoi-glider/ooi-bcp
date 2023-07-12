@@ -4,135 +4,57 @@
 mltoumol = 44.661;
 
 %% Read in processed data and reformat
-addpath(genpath('G:\Shared drives\NSF_Irminger\OOI Cruises CTD Casts\CTD_Data\Alfresco'))
+addpath(genpath('G:\Shared drives\NSF_Irminger\OOI Cruises CTD Casts\CTD_Data\Processed'))
+load('AllYears_Processed_KF.mat')
 clear castlist
 
 load Year1_Processed_KF.mat
-castsum_yr1{2} = cast02d; %cast02.units - prDM is pressure in db
-castsum_yr1{3} = cast03d;
-castsum_yr1{4} = cast04d;
-castsum_yr1{5} = cast05d;
-castsum_yr1{6} = cast06d;
-castsum_yr1{7} = cast07d;
-castsum_yr1{8} = cast08d;
-castsum_yr1{9} = cast09d;
+Winkler_umolkg = [btlsum_tbl_yr1.Winkler1_umolkg; btlsum_tbl_yr1.Winkler2_umolkg];
+btlsum_tbl_yr1 = [btlsum_tbl_yr1; btlsum_tbl_yr1];
+btlsum_tbl_yr1.Winkler_umolkg = Winkler_umolkg;
 castlist{1} = [2:9];
 
 load Year2_Processed_KF.mat
-castsum_yr2{1} = cast01d;
-castsum_yr2{2} = cast02d;
-castsum_yr2{3} = cast03d;
-castsum_yr2{4} = cast04d;
-castsum_yr2{5} = cast05d;
-castsum_yr2{6} = cast06d;
-castsum_yr2{7} = cast07d;
-castsum_yr2{8} = cast08d;
-castsum_yr2{9} = cast09d;
-castsum_yr2{10} = cast10d;
-castsum_yr2{11} = cast11d;
-castsum_yr2{12} = cast12d;
-castsum_yr2{13} = cast13d;
 castlist{2} = [1:13];
 
 load Year3_Processed_KF.mat
-castsum_yr3{1} = cast01d;
-castsum_yr3{2} = cast02d;
-castsum_yr3{3} = cast03d;
-castsum_yr3{4} = cast04d;
-castsum_yr3{5} = cast05d;
-castsum_yr3{6} = cast06d;
-castsum_yr3{7} = cast07d;
-castsum_yr3{8} = cast08d;
-castsum_yr3{9} = cast09d;
-castsum_yr3{10} = cast10d;
 castlist{3} = [1:10];
 
 load Year4_Processed_KF.mat
-castsum_yr4{9} = cast09d;
-castsum_yr4{10} = cast10d;
-castsum_yr4{11} = cast11d;
-castsum_yr4{12} = cast12d;
 castlist{4} = [9:12];
 
 load Year5_Processed_KF.mat
-castsum_yr5{1} = cast01d;
-castsum_yr5{2} = cast02d;
-castsum_yr5{3} = cast03d;
-castsum_yr5{4} = cast04d;
-castsum_yr5{5} = cast05d;
-castsum_yr5{6} = cast06d;
-castsum_yr5{7} = cast07d;
-castsum_yr5{8} = cast08d;
-castsum_yr5{9} = cast09d;
-castsum_yr5{10} = cast10d;
-castsum_yr5{11} = cast11d;
-castsum_yr5{12} = cast12d;
-castsum_yr5{13} = cast13d;
-castsum_yr5{14} = cast14d;
-castsum_yr5{15} = cast15d;
-castsum_yr5{16} = cast16d;
-castsum_yr5{17} = cast17d;
-castsum_yr5{18} = cast18d;
-castsum_yr5{19} = cast19d;
-castsum_yr5{20} = cast20d;
-castsum_yr5{21} = cast21d;
-castsum_yr5{22} = cast22d;
-castsum_yr5{23} = cast23d;
+Winkler_umolkg = [btlsum_tbl_yr5.Winkler_OOI_umolkg; btlsum_tbl_yr5.Winkler1_HIP_umolkg; btlsum_tbl_yr5.Winkler2_HIP_umolkg];
+btlsum_tbl_yr5 = [btlsum_tbl_yr5; btlsum_tbl_yr5; btlsum_tbl_yr5];
+btlsum_tbl_yr5.Winkler_umolkg = Winkler_umolkg;
 castlist{5} = [1:23];
 
+castlist{6} = cast_num{6};
+castlist{7} = cast_num{7}; 
+
 load Year8_Processed_KF.mat
-castsum_yr8{1} = cast01d;
-castsum_yr8{2} = cast02d;
-castsum_yr8{3} = cast03d;
-castsum_yr8{4} = cast04d;
-castsum_yr8{5} = cast05d;
-castsum_yr8{6} = cast06d;
-castsum_yr8{7} = cast07d;
-castsum_yr8{8} = cast08d;
-castsum_yr8{9} = cast09d;
-castsum_yr8{10} = cast10d;
-castsum_yr8{11} = cast11d;
-castsum_yr8{12} = cast12d;
 castlist{8} = [1:12];
 
 load Year9_Processed_KF.mat
-castsum_yr9{6} = cast06d;
-castsum_yr9{7} = cast07d;
-castsum_yr9{8} = cast08d;
-castsum_yr9{9} = cast09d;
-castsum_yr9{10} = cast10d;
-castsum_yr9{11} = cast11d;
-castsum_yr9{12} = cast12d;
-castsum_yr9{13} = cast13d;
-castsum_yr9{14} = cast14d;
-castsum_yr9{15} = cast15d;
-castsum_yr9{16} = cast16d;
-castsum_yr9{17} = cast17d;
-castsum_yr9{18} = cast18d;
-castsum_yr9{19} = cast19d;
-castsum_yr9{20} = cast20d;
-castsum_yr9{21} = cast21d;
-castsum_yr9{22} = cast22d;
-castsum_yr9{23} = cast23d;
+Winkler_umolkg = [btlsum_tbl_yr9.Winkler1_umolkg; btlsum_tbl_yr9.Winkler2_umolkg; btlsum_tbl_yr9.Winkler3_umolkg];
+btlsum_tbl_yr9 = [btlsum_tbl_yr9; btlsum_tbl_yr9; btlsum_tbl_yr9];
+btlsum_tbl_yr9.Winkler_umolkg = Winkler_umolkg;
 castlist{9} = [6:23];
 
 %Merge bottle summary tables
-btlsum{1} = btlsum_yr1;
-btlsum{2} = btlsum_yr2;
-btlsum{3} = btlsum_yr3;
-btlsum{4} = btlsum_yr4;
-btlsum{5} = btlsum_yr5;
-btlsum{8} = btlsum_yr8;
-btlsum{9} = btlsum_yr9;
+btlsum{1} = btlsum_tbl_yr1;
+btlsum{2} = btlsum_tbl_yr2;
+btlsum{3} = btlsum_tbl_yr3;
+btlsum{4} = btlsum_tbl_yr4;
+btlsum{5} = btlsum_tbl_yr5;
+btlsum{8} = btlsum_tbl_yr8;
+btlsum{9} = btlsum_tbl_yr9;
 
-%Merge cast structures
-castsum{1} = castsum_yr1;
-castsum{2} = castsum_yr2;
-castsum{3} = castsum_yr3;
-castsum{4} = castsum_yr4;
-castsum{5} = castsum_yr5;
-castsum{8} = castsum_yr8;
-castsum{9} = castsum_yr9;
+castsum = downcasts;  
+
+%Over-write with old file output - eventually update to use finalized data
+addpath('G:\Shared drives\NSF_Irminger\Data_Files\From_Hilary')
+load cruise_oxygen_output.mat
 
 %% Loop over data from all years
 for yr = [1:5,8,9]
@@ -141,11 +63,11 @@ for yr = [1:5,8,9]
     
     %% Plot all casts and interpolate at Winkler depth
     figure(100*yr); clf
-    for i = castlistyr
-        if i < 17 %set for subplot max
+    for i = 1:length(castlistyr)
+        if castlistyr(i) < 17 %set for subplot max
         subplot(4,4,i)
             btlid = find(btlsum{yr}.Cast == i);
-        plot(castsumyr{i}.DOcorr_umolkg, castsumyr{i}.prs, 'k-'); hold on;
+        plot(castsumyr{castlistyr(i)}.DOcorr_umolkg, castsumyr{castlistyr(i)}.prs, 'k-'); hold on;
         if length(btlid) > 0
             plot(btlsum{yr}.Winkler_umolkg(btlid), btlsum{yr}.prs(btlid), 'ro'); hold on;
         end

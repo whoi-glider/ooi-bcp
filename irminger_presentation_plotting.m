@@ -29,7 +29,7 @@ figure(1); clf %Oxygen concentration
 C = cmocean('Dense'); %set colormap
 for i = 1:length(glgmerge)
     glg = glgmerge{i};
-    [X,Y] = meshgrid(glg.time_start(1:5:end), pres_grid);
+    [X,Y] = meshgrid(glg.time_start(1:5:end), pres_grid_glider);
     GL_doxy_scat = glg.doxy_lagcorr_grid(:,1:5:end)./nanmean(glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean);
     scatter(X(:),Y(:),5,GL_doxy_scat(:),'filled'); hold on;
 end
@@ -48,7 +48,7 @@ figure(2); clf %Temperature
 C = cmocean('Thermal'); %set colormap
 for i = 1:length(glgmerge)
     glg = glgmerge{i};
-    [X,Y] = meshgrid(glg.time_start(1:5:end), pres_grid);
+    [X,Y] = meshgrid(glg.time_start(1:5:end), pres_grid_glider);
     GL_temp_scat = glg.temp_grid(:,1:5:end);
     scatter(X(:),Y(:),5,GL_temp_scat(:),'filled'); hold on;
 end
@@ -84,6 +84,12 @@ title('Merged OOI Irminger glider and WFP oxygen saturation (%)', 'Fontsize', 12
 
 %% 
 figure(4); clf %Chlorophyll - note that background at depth should be subtracted, and differs by deployment
+for i = 1:length(glgmerge)
+    glg = glgmerge{i};
+    [X,Y] = meshgrid(glg.time_start, pres_grid_glider);
+    GL_chl_scat = log10(glg.chl_grid);
+    scatter(X(:),Y(:),5,GL_chl_scat(:),'filled'); hold on;
+end
 chl_scat = log10(wggmerge_fl.chla(:,1:3:end));
 [X,Y] = meshgrid(wggmerge_fl.time(1:3:end), pres_grid_hypm);
 scatter(X(:),Y(:),5,chl_scat(:),'filled'); hold on;
@@ -107,6 +113,49 @@ axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2022,1,1)]); ylim([0 ymax]
 colormap(cmocean('Algae')); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
 datetick('x',2,'keeplimits');
 title('OOI Irminger WFP backscatter spikes (large particles)', 'Fontsize', 12)
+
+%% Plot Meg's DIC figure
+addpath 'C:\Users\palevsky\Documents\GitHub\CANYON-B-MFY\For Hilary review'
+load workspace20230321.mat %Meg's workspace from analysis
+addpath(genpath('C:\Users\palevsky\Documents\GitHub\boundedline-pkg'))
+
+colorlist = [nicecolor('rrry'); nicecolor('ryyym'); nicecolor('yyyyyym');  nicecolor('ggyc'); nicecolor('ggbb'); nicecolor('bccc'); nicecolor('ccbb'); nicecolor('bbbbb'); nicecolor('m'); nicecolor('rrmmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb')];
+  clear leg
+red = nicecolor('rrryb');
+cruise1 = nicecolor('ggycc'); 
+cruise2 = nicecolor('gbbb'); 
+  figure(10); clf 
+    
+      hold on 
+for yr = 2:8
+    %xline(deployment_dates{yr}(1))
+    castsumyr = castsum{yr};
+    castlistyr = castlist{yr};
+    
+            v = b_shift{yr};
+
+            bl_er = 7.5*ones(length(deep{yr}.longdic), 1);
+%             if yr == 2 | yr == 5 | yr == 6 | yr == 7
+%                 bl_er(deep{yr}.longdic == NaN) = NaN;
+%                 bl2 = boundedline(deep{yr}.longdate, deep{yr}.longdic,bl_er, 'nan', 'gap', 'alpha'); 
+%             end 
+            bl = boundedline(deployment_dates{yr}, dic_mean{yr}.dic+v,dic_mean{yr}.dic_u+nanmean(bl_er), 'nan', 'gap', 'alpha'); 
+            h1 = plot(deployment_dates{yr}, dic_mean{yr}.dic+v,'.','markersize',6,'color',nicecolor('bbckkkw')); 
+            
+            %h2 =  plot(deep{yr}.longdate, deep{yr}.longdic,'.','markersize',10,'color','k');
+
+                %legend([h1 h2],...
+                   %'Average 0-50m, adjusted', 'Average 80-130m', 'orientation','horizontal','location','south')
+  
+        %formatting 
+        ylabel('DIC (\mumol/kg)')
+        xlim([datenum(2015,6,10) datenum(2022,8,1)]); 
+        datetick('x',2,'keeplimits');
+        title('OOI Irminger mixed layer DIC, Deployments 2-8','Fontsize',12)
+         ylim([2020 2200]) 
+                
+                
+    end  
 
 %% Next steps
 % 1. Add temperature plot with glider & WFP - DONE

@@ -332,7 +332,7 @@ close all;
 wfp_deepisotherms
 
 %% Save outputs
-save wfp_analysis_output.mat wggmerge wggmerge_fl wgg HYPMlat HYPMlon
-save cruise_oxygen_output.mat castsum btlsum
+%save wfp_analysis_output.mat wggmerge wggmerge_fl wgg HYPMlat HYPMlon
+%save cruise_oxygen_output.mat castsum btlsum
 
 
