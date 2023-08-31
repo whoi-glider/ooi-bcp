@@ -266,6 +266,7 @@ xlim([salmin + 2.5 salmax])
 %% Assess sensitivity to selection of air measurement value from distribution within each surface interval
 figure(2); clf
 n = 7; %number of gliders in glgmerge with aircal data
+clear A B
 for ii = 1:n
     subplot(2,n,ii)
     for i = 1:height(glgmerge{ii}.Taircal)

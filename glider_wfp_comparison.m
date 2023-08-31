@@ -178,7 +178,7 @@ end
 
 %% Plot time series of alignments
 C_gl = cmocean('phase',18);
-slope_pick = 0.25;
+slope_pick = 0.2;
 glg_reorder = [9:14,1:8];
 C_gl = C_gl(glg_reorder,:);
 
@@ -190,6 +190,8 @@ for i = glg_reorder
         indlist = glgmerge{i}.HYPMdist_align_ind(~isnan(glgmerge{i}.HYPMdist_align_ind));
         plot(wggmerge.time(indlist), 1./glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean,'.k','markersize',2); hold on;
         plot(wggmerge.time(indlist(indnoflag)), 1./glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(indnoflag),'ko','markerfacecolor',C_gl(i,:),'markersize',3); hold on;
+        glgmerge{i}.deepisotherm_gains = 1./glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(indnoflag);
+        glgmerge{i}.deepisotherm_times = wggmerge.time(indlist(indnoflag));
         t_start = wggmerge.time(indlist(indnoflag(1)));
         [P(i,:),Sfit{i}] = polyfit(wggmerge.time(indlist(indnoflag)) - t_start, 1./glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(indnoflag),1);
         [y_fit,delta] = polyval(P(i,:),wggmerge.time(indlist(indnoflag)) - t_start, Sfit{i});

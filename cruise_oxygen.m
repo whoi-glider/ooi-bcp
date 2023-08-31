@@ -107,11 +107,7 @@ for i = 1:length(ind)
     %Plot the SBE43 profile and Winkler data
     castyr = castsum{casts.year(ind(i))};
     plot(castyr{casts.castnum(ind(i))}.DOcorr_umolkg.*castyr{casts.castnum(ind(i))}.prho/1000, castyr{casts.castnum(ind(i))}.prs, 'k-','linewidth',1.5); hold on;
-%     if casts.numWinkl(ind(i)) > 0
-%         btlsumyr = btlsum{casts.year(ind(i))};
-%         indbtl = find(btlsumyr.Cast == casts.castnum(ind(i)));
-%         plot(btlsumyr.Winkler_mLL(indbtl)*mltoumol, btlsumyr.prs(indbtl), 'bo'); hold on;
-%     end
+
     %Plot cleanup
     axis ij
     axis([240 320 0 2700])
