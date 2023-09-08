@@ -110,66 +110,66 @@ end
     legend(h,leg,'fontsize',ftsz)
     ylabel('Gain')
 
-%% Pull all data on selected deep isotherm across all casts, not just HYPM-aligned
-ISO = 3.1;
-%Loop over all casts in castsum to find values interpolated at pt == ISO
-%Put output values in table "casts"
-
-for i = 1:height(casts)
-    casttbl = castsum{casts.year(i)}(casts.castnum(i));
-    casts.ISOdepth(i) = interp1(casttbl{1}.pt, casttbl{1}.depth, ISO);
-    casts.ISO_SP(i) = interp1(casttbl{1}.pt, casttbl{1}.SP, ISO);
-    casts.ISO_prho(i) = interp1(casttbl{1}.pt, casttbl{1}.prho, ISO);
-    casts.ISO_DOcorr_umolkg(i) = interp1(casttbl{1}.pt, casttbl{1}.DOcorr_umolkg, ISO);
-end
-%%
-%Identify all values within +/- 2 stdev of mean for depth, salinity, and density
-ind_ISO_depth = find(casts.ISOdepth < nanmean(casts.ISOdepth) + 2*nanstd(casts.ISOdepth) & casts.ISOdepth > nanmean(casts.ISOdepth) - 2*nanstd(casts.ISOdepth));
-ind_ISO_SP = find(casts.ISO_SP < nanmean(casts.ISO_SP) + 2*nanstd(casts.ISO_SP) & casts.ISO_SP > nanmean(casts.ISO_SP) - 2*nanstd(casts.ISO_SP));
-ind_ISO_prho = find(casts.ISO_prho < nanmean(casts.ISO_prho) + 2*nanstd(casts.ISO_prho) & casts.ISO_prho > nanmean(casts.ISO_prho) - 2*nanstd(casts.ISO_prho));
-ind_phys = intersect(intersect(ind_ISO_depth, ind_ISO_SP),ind_ISO_prho);
-
-%Within the non-outlier values for physical properties, identify DO values within +/- 2 stdev of mean
-ind_ISO_DO = find(casts.ISO_DOcorr_umolkg(ind_phys) < nanmean(casts.ISO_DOcorr_umolkg(ind_phys)) + 2*nanstd(casts.ISO_DOcorr_umolkg(ind_phys)) &...
-    casts.ISO_DOcorr_umolkg(ind_phys) > nanmean(casts.ISO_DOcorr_umolkg(ind_phys)) - 2*nanstd(casts.ISO_DOcorr_umolkg(ind_phys)));
-
-%Final index with outliers removed
-ind_ISO = ind_phys(ind_ISO_DO);
-
-%% Plot variability of data on deep isotherm
-ind_nearHYPM = find(casts.HYPMdist < 50);
-ind_ISOnearHYPM = intersect(ind_ISO, ind_nearHYPM); %doesn't seem to make a difference, tried values from 50-200 for distance
-ind_no2020 = find(casts.time < datenum(2020,1,1) | casts.time > datenum(2021,1,1));
-ind_ISOno2020 = intersect(ind_ISO, ind_no2020);
-ind_ISOno2020nearHYPM = intersect(ind_ISOno2020, ind_ISOnearHYPM); %still doesn't seem to make a difference
-ind_noDepthOutliers = find(casts.ISOdepth > 1800 & casts.ISOdepth < 2050);
-ind_ISOno2020noDepthOutliers = intersect(ind_noDepthOutliers, ind_ISOno2020); %doesn't seem to make a difference
-ind_noSalOutliers = find(casts.ISO_SP < (mean(casts.ISO_SP(ind_ISO))+ std(casts.ISO_SP(ind_ISO))) &...
-    casts.ISO_SP > (mean(casts.ISO_SP(ind_ISO))- std(casts.ISO_SP(ind_ISO))));
-ind_ISOno2020noSalOutliers = intersect(ind_noSalOutliers, ind_ISOno2020);
-
-figure(11); clf
-    subplot(4,1,1)
-histogram(casts.ISOdepth(ind_ISO))
-    subplot(4,1,2)
-histogram(casts.ISO_SP(ind_ISO))
-    subplot(4,1,3)
-histogram(casts.ISO_prho(ind_ISO))
-    subplot(4,1,4)
-histogram(casts.ISO_DOcorr_umolkg(ind_ISO))
-
-    M = 16;
-figure(12); clf
-%scatter(casts.time(ind_ISOno2020), casts.ISO_DOcorr_umolkg(ind_ISOno2020),[],casts.ISO_SP(ind_ISOno2020),'filled');
-plot(casts.time(ind_ISOno2020noSalOutliers), casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers),'k.','markersize',M);
-text(datenum(2014,3,1), 278.5, ['mean = ' num2str(mean(casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers)),4) char(177) num2str(std(casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers)),2) ' \mumol/kg'])
-datetick('x','keeplimits')
-ylabel('\mumol/kg')
-ylim([268 281])
-title('Dissolved oxygen on 3.1 deg isotherm from calibrated oxygen profiles on cruise casts')
-%c = colorbar;
-%ylabel(c, 'Salinity')
-
-%% Uncertainty quantification: how well do we know the deep isotherm?
-iso_percenterr = std(casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers))./mean(casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers))*100;
-iso_rmse = sqrt(mean((casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers) - mean(casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers))).^2));
+% %% Pull all data on selected deep isotherm across all casts, not just HYPM-aligned
+% ISO = 3.1;
+% %Loop over all casts in castsum to find values interpolated at pt == ISO
+% %Put output values in table "casts"
+% 
+% for i = 1:height(casts)
+%     casttbl = castsum{casts.year(i)}(casts.castnum(i));
+%     casts.ISOdepth(i) = interp1(casttbl{1}.pt, casttbl{1}.depth, ISO);
+%     casts.ISO_SP(i) = interp1(casttbl{1}.pt, casttbl{1}.SP, ISO);
+%     casts.ISO_prho(i) = interp1(casttbl{1}.pt, casttbl{1}.prho, ISO);
+%     casts.ISO_DOcorr_umolkg(i) = interp1(casttbl{1}.pt, casttbl{1}.DOcorr_umolkg, ISO);
+% end
+% %%
+% %Identify all values within +/- 2 stdev of mean for depth, salinity, and density
+% ind_ISO_depth = find(casts.ISOdepth < nanmean(casts.ISOdepth) + 2*nanstd(casts.ISOdepth) & casts.ISOdepth > nanmean(casts.ISOdepth) - 2*nanstd(casts.ISOdepth));
+% ind_ISO_SP = find(casts.ISO_SP < nanmean(casts.ISO_SP) + 2*nanstd(casts.ISO_SP) & casts.ISO_SP > nanmean(casts.ISO_SP) - 2*nanstd(casts.ISO_SP));
+% ind_ISO_prho = find(casts.ISO_prho < nanmean(casts.ISO_prho) + 2*nanstd(casts.ISO_prho) & casts.ISO_prho > nanmean(casts.ISO_prho) - 2*nanstd(casts.ISO_prho));
+% ind_phys = intersect(intersect(ind_ISO_depth, ind_ISO_SP),ind_ISO_prho);
+% 
+% %Within the non-outlier values for physical properties, identify DO values within +/- 2 stdev of mean
+% ind_ISO_DO = find(casts.ISO_DOcorr_umolkg(ind_phys) < nanmean(casts.ISO_DOcorr_umolkg(ind_phys)) + 2*nanstd(casts.ISO_DOcorr_umolkg(ind_phys)) &...
+%     casts.ISO_DOcorr_umolkg(ind_phys) > nanmean(casts.ISO_DOcorr_umolkg(ind_phys)) - 2*nanstd(casts.ISO_DOcorr_umolkg(ind_phys)));
+% 
+% %Final index with outliers removed
+% ind_ISO = ind_phys(ind_ISO_DO);
+% 
+% %% Plot variability of data on deep isotherm
+% ind_nearHYPM = find(casts.HYPMdist < 50);
+% ind_ISOnearHYPM = intersect(ind_ISO, ind_nearHYPM); %doesn't seem to make a difference, tried values from 50-200 for distance
+% ind_no2020 = find(casts.time < datenum(2020,1,1) | casts.time > datenum(2021,1,1));
+% ind_ISOno2020 = intersect(ind_ISO, ind_no2020);
+% ind_ISOno2020nearHYPM = intersect(ind_ISOno2020, ind_ISOnearHYPM); %still doesn't seem to make a difference
+% ind_noDepthOutliers = find(casts.ISOdepth > 1800 & casts.ISOdepth < 2050);
+% ind_ISOno2020noDepthOutliers = intersect(ind_noDepthOutliers, ind_ISOno2020); %doesn't seem to make a difference
+% ind_noSalOutliers = find(casts.ISO_SP < (mean(casts.ISO_SP(ind_ISO))+ std(casts.ISO_SP(ind_ISO))) &...
+%     casts.ISO_SP > (mean(casts.ISO_SP(ind_ISO))- std(casts.ISO_SP(ind_ISO))));
+% ind_ISOno2020noSalOutliers = intersect(ind_noSalOutliers, ind_ISOno2020);
+% 
+% figure(11); clf
+%     subplot(4,1,1)
+% histogram(casts.ISOdepth(ind_ISO))
+%     subplot(4,1,2)
+% histogram(casts.ISO_SP(ind_ISO))
+%     subplot(4,1,3)
+% histogram(casts.ISO_prho(ind_ISO))
+%     subplot(4,1,4)
+% histogram(casts.ISO_DOcorr_umolkg(ind_ISO))
+% 
+%     M = 16;
+% figure(12); clf
+% %scatter(casts.time(ind_ISOno2020), casts.ISO_DOcorr_umolkg(ind_ISOno2020),[],casts.ISO_SP(ind_ISOno2020),'filled');
+% plot(casts.time(ind_ISOno2020noSalOutliers), casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers),'k.','markersize',M);
+% text(datenum(2014,3,1), 278.5, ['mean = ' num2str(mean(casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers)),4) char(177) num2str(std(casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers)),2) ' \mumol/kg'])
+% datetick('x','keeplimits')
+% ylabel('\mumol/kg')
+% ylim([268 281])
+% title('Dissolved oxygen on 3.1 deg isotherm from calibrated oxygen profiles on cruise casts')
+% %c = colorbar;
+% %ylabel(c, 'Salinity')
+% 
+% %% Uncertainty quantification: how well do we know the deep isotherm?
+% iso_percenterr = std(casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers))./mean(casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers))*100;
+% iso_rmse = sqrt(mean((casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers) - mean(casts.ISO_DOcorr_umolkg(ind_ISOno2020noSalOutliers))).^2));

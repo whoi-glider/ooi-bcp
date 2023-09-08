@@ -1,18 +1,8 @@
-%% Analyzes wire-following profiler (HYPM) data
-%Note: completely modified from original version written in Sept. 2018 to
-%now have separate scripts for each step modeled on Lucy's thesis pipeline
-
-addpath('C:/Users/palevsky/Dropbox/MATLAB/OOI data processing/OOI_Irminger')
+%% Loads, does lag correction, and removes outliers from wire-following profiler (HYPM) data
 
 %% Load oxygen data from all deployments and interpolate onto even grid
 %This step reads in the THREDDS Gold Copy data from all cruises, unpacks
-%variables, identifies profile numbers, and then grids paired up/down
-%profiles. Currently only the unpacking and profile id steps (in "wfp"
-%outputs are used going forward and the gridded structures (wfpgrid and
-%wfpgrid_therm) are not used.
-
-    depth_grid = [150:5:2600];
-    therm_grid = [1.1:0.05:5.6];
+%variables, identifies profile numbers, and then grids paired up/down profiles.
 
 %https://thredds.dataexplorer.oceanobservatories.org/thredds/catalog/ooigoldcopy/public/GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered/catalog.html
 addpath('C:/Users/palevsky/Dropbox/OOI Irminger Sea/OOI_downloads/THREDDS_updated/HYPM')
@@ -25,9 +15,8 @@ filenames = {'deployment0001_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_
     'deployment0007_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20200825T200205-20210819T060646.nc'...
     'deployment0008_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20210820T000204-20220710T045503.nc'};
 
-addpath('C:/Users/palevsky/Dropbox/MATLAB/OOI data processing/OOI_Irminger_students/common')
 for i = 1:8
-    [wfp{i}, wfpgrid{i}, wfpgrid_therm{i}] = load_HYPM_DOSTA_fun(filenames{i}, depth_grid, therm_grid);
+    [wfp{i}] = load_HYPM_DOSTA_fun(filenames{i});
 end
 
 %% Read in fluorometer data and complete initial processing
@@ -48,11 +37,11 @@ end
 
 %% Lag correction
 %wfp_lag.m %this takes a long time to run, so output is saved
-load lagyr1to8.mat %"wgg" output from wfp_lag.m
+load wfp_lag_output_2Sept2023.mat %"wgg" output from wfp_lag.m
 
 %% Calculate depth intervals of data
 
-figure(1); clf
+figure; clf
 for yr = [8,7,6,5,4,3,2,1]
     A = abs(diff(wgg{yr}.pres'));
     histogram(A(:)); hold on;
@@ -67,7 +56,7 @@ xlabel('Presure (dbar)')
 %% Check lag-corr output for outliers
 
 %Check for outliers/range test
-figure(2); clf
+figure; clf
 for yr = 1:8
     A = wgg{yr}.doxy_lagcorr(:);
     histogram(A); hold on;
@@ -76,13 +65,13 @@ for yr = 1:8
     r(yr,3) = length(find(A < r(yr,1)));
     r(yr,4) = length(find(A > r(yr,2)));
 end
-xlim([220 320])
+xlim([280 390])
 legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8')
-title('Histogram all OOI Irminger WFP L2-oxygen, lag corrected only')
+title('Histogram all OOI Irminger WFP L1-oxygen, lag corrected only')
 
 
 % Check for spikess
-figure(3); clf
+figure; clf
 subplot(311)
 for yr = 1:8
     A = diff(wgg{yr}.doxy_lagcorr');
@@ -90,7 +79,7 @@ for yr = 1:8
 end
 xlim([-4 4])
 legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8')
-title('Histogram of paired sample difference, all OOI Irminger WFP L2-oxygen, lag corrected only')
+title('Histogram of paired sample difference, all OOI Irminger WFP L1-oxygen, lag corrected only')
 
 subplot(312)
 for yr = 1:8
@@ -204,7 +193,7 @@ end
 pres_grid = [150:1:2600];
 S = 5; %points to smooth over
 
-for yr = 1:7 %didn't run on year 8 because error, need to resolve later
+for yr = 1:8
 
     %Number of profile indices
     num_profiles = length(wgg_flord{yr}.updown);
@@ -221,17 +210,19 @@ for yr = 1:7 %didn't run on year 8 because error, need to resolve later
     wgg_flord{yr}.temp_grid = NaN*ones(length(pres_grid),num_profiles);
 
     for i = 1:num_profiles
-        ind = find(~isnan(wgg_flord{yr}.pres(i,:)) & ~isnan(wgg_flord{yr}.backscatter(i,:))); %no nan values for depth or backscatter
-        wgg_flord{yr}.chla_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.chla(i,ind), pres_grid),S);
-        wgg_flord{yr}.backscatter_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.backscatter(i,ind), pres_grid),S);
-        wgg_flord{yr}.spikes_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.filteredspikes(i,ind), pres_grid),S);
-        wgg_flord{yr}.chlspikes_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.filteredchlspikes(i,ind), pres_grid),S);
-        wgg_flord{yr}.pracsal_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.pracsal(i,ind), pres_grid),S);
-        wgg_flord{yr}.temp_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.temp(i,ind), pres_grid),S);
-        wgg_flord{yr}.time_start(i) = nanmin(wgg_flord{yr}.mtime(i,:));
-        wgg_flord{yr}.duration(i) = nanmax(wgg_flord{yr}.mtime(i,:)) - nanmin(wgg_flord{yr}.mtime(i,:));
-        wgg_flord{yr}.lat_profile(i) = nanmean(wgg_flord{yr}.lat(i,:));
-        wgg_flord{yr}.lon_profile(i) = nanmean(wgg_flord{yr}.lon(i,:)); 
+        try
+            ind = find(~isnan(wgg_flord{yr}.pres(i,:)) & ~isnan(wgg_flord{yr}.backscatter(i,:))); %no nan values for depth or backscatter
+            wgg_flord{yr}.chla_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.chla(i,ind), pres_grid),S);
+            wgg_flord{yr}.backscatter_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.backscatter(i,ind), pres_grid),S);
+            wgg_flord{yr}.spikes_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.filteredspikes(i,ind), pres_grid),S);
+            wgg_flord{yr}.chlspikes_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.filteredchlspikes(i,ind), pres_grid),S);
+            wgg_flord{yr}.pracsal_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.pracsal(i,ind), pres_grid),S);
+            wgg_flord{yr}.temp_grid(:,i) = movmean(interp1(wgg_flord{yr}.pres(i,ind), wgg_flord{yr}.temp(i,ind), pres_grid),S);
+            wgg_flord{yr}.time_start(i) = nanmin(wgg_flord{yr}.mtime(i,:));
+            wgg_flord{yr}.duration(i) = nanmax(wgg_flord{yr}.mtime(i,:)) - nanmin(wgg_flord{yr}.mtime(i,:));
+            wgg_flord{yr}.lat_profile(i) = nanmean(wgg_flord{yr}.lat(i,:));
+            wgg_flord{yr}.lon_profile(i) = nanmean(wgg_flord{yr}.lon(i,:)); 
+        end
     end
     
 end
@@ -309,30 +300,5 @@ for yr = 1:8
     
 end
 
-%% Test plots to ensure that all is calculated appropriately
-
-%Time stamps are identical for all of 1st 7 deployments in wfp for
-%fluorometer and oxygen, but different number of profiles removed based on
-%anomalous data, so different sizes in wgg and wgg_flord
-
-wfp_plotting %plots now superceded by irminger_presentation_plotting but still need the merging done in this script
-close all;
-
-%% Extract location of HYPM in each year
-for yr = 1:8
-    HYPMlat(yr) = nanmean(wgg{yr}.lat_profile);
-    HYPMlon(yr) = nanmean(wgg{yr}.lon_profile);
-end
-
-%% Gain corrections with cruise data processed by Kristen
-cruise_oxygen
-close all;
-
-%% Analysis on deep isotherms
-wfp_deepisotherms
-
-%% Save outputs
-%save wfp_analysis_output.mat wggmerge wggmerge_fl wgg HYPMlat HYPMlon
-%save cruise_oxygen_output.mat castsum btlsum
 
 

@@ -1,13 +1,12 @@
-%% Attempt to calculate and correct for lag based on determination of tau
-% Rather than pairing up-down profiles as I have done previously
+%% Calculate and correct for lag based on determination of tau
 % Runs after 1st code block in wfp_analysis.m, which reads in all years of
 % WFP O2 data and passes through load_HYPM_DOSTA_fun
 
-%% Loop over all years - note that this is very time intensive to output saved
-%output is lagyr1to8.mat
+%% Loop over all years - note that this is very time intensive (takes ~4 hours)
+%Output saved in end of script for use without having to re-run
 
+%Loop over first eight years of WFP data
 for yr = 1:8
-
 %% Gordon et al. 2020 version of correction
 % Format WFP output into matrices that match the required argument formats
 % listed in calculate_tau.m and calculate_tau_wTemp.m
@@ -38,7 +37,7 @@ for i = 1:numprofiles
         wgg{yr}.depth(i,1:length(indp)) = wfp{yr}.depth_dosta(indp);
         wgg{yr}.pracsal(i,1:length(indp)) = wfp{yr}.pracsal_dosta(indp);
         wgg{yr}.pres(i,1:length(indp)) = wfp{yr}.pressure_dosta(indp);
-        wgg{yr}.doxy(i,1:length(indp)) = wfp{yr}.oxygen(indp);
+        wgg{yr}.doxy(i,1:length(indp)) = wfp{yr}.oxygen_L1(indp); %modified to input L1 oxygen data
         wgg{yr}.temp(i,1:length(indp)) = wfp{yr}.temperature_dosta(indp);
         wgg{yr}.pdens(i,1:length(indp)) = wfp{yr}.pdens(indp);
         wgg{yr}.updown(i) = wfp{yr}.updown_index(indp(1+tol));
@@ -166,7 +165,7 @@ title(['OOI Irminger WFP lag, Gordon et al. 2020 T-dependent method calc. in den
 smthval = 1;
 M = 4;
 int = 80;
-yr = 6;
+yr = 4;
 figure(1); clf
 for i = 1:4
     subplot(2,2,i)
@@ -200,16 +199,18 @@ figure(2); clf
 % ylabel('RMSD')
 % title('w/ T term, depth aligned')
 %     subplot(224)
-plot(wgg{6}.thickness_constants,wgg{6}.rmsdtd,'.')
+plot(wgg{5}.thickness_constants,wgg{5}.rmsdtd,'.')
 xlabel('thickness (\mum)')
 ylabel('RMSD')
 title('w/ T term, density aligned')
 
 %% Calculate WFP velocity in dbar s-1 to compare with Bittig & Kortzinger 2017
-% v = diff(wfp{testyr}.pressure_dosta)./(diff(wfp{testyr}.time_dosta_mat)*(24*60*60));
-% figure(3); clf
-% histogram(abs(v))
-% title({'WFP Yr 1 velocity histogram, median = ' num2str(nanmedian(abs(v)),3)})
-% xlabel('|dbar s^{-1}|')
+testyr = 1;
+v = diff(wfp{testyr}.pressure_dosta)./(diff(wfp{testyr}.time_dosta_mat)*(24*60*60));
+figure(3); clf
+histogram(abs(v))
+title({'WFP Yr 1 velocity histogram, median = ' num2str(nanmedian(abs(v)),3)})
+xlabel('|dbar s^{-1}|')
 
-
+%% Save output
+save('wfp_lag_output_2Sept2023.mat', 'wgg', '-v7.3')

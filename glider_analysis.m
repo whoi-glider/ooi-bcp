@@ -141,7 +141,6 @@ load GI05MOAS-GL485-D00002.mat %Year 2 - 8/17/2015-11/22/2015
 load GI05MOAS-GL495-D00002.mat %Year 2 - 8/17/2015-5/11/2015
     Yr2.G495 = glider_interpCorrFun(T, 0); clear T
     
-    %%
 %For each glider dataset, reshape data into format for Gordon functions, then apply glider_lagCorrectFun
 [Yr4.glg493] = glider_reshape(Yr4.G493);
 [Yr4.glg493.doxy_lagcorr] = glider_lagCorrectFun(Yr4.glg493, tau_in);
