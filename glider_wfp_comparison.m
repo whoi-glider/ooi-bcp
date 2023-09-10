@@ -1,4 +1,4 @@
-%% Run after wfp_analysis and glider_analysis
+%% Calculate glider gain from intercomparison with deep isotherm corrected WFP
 
 %% Plot glider locations
 M1 = 8; M2 = 5;
@@ -47,7 +47,6 @@ end
 %Then find matching depths and isotherms, and match up
 pt_grid_glider = [1.5:0.02:11];
 [pt_grid_overlap, ind_glider_ptgrid, ind_hypm_ptgrid] = intersect(pt_grid_glider, pt_grid, 'stable');
-    pres_grid_hypm = [150:1:2600];
     pres_grid_glider = [1:1:1000];
 [pres_grid_overlap, ind_glider_presgrid, ind_hypm_presgrid] = intersect(pres_grid_glider, pres_grid_hypm, 'stable');
 
@@ -58,8 +57,7 @@ for i = 1:length(glgmerge)
     glgmerge{i}.HYPMalign_sal_pt = NaN(length(pt_grid_glider),length(ind));
     %Create table to hold stats of alignment comparisons
     vars = {'O2_presA_mean','O2_presA_median','O2_presA_std','T_presA_mean','T_presA_median','T_presA_std','S_presA_mean','S_presA_median','S_presA_std',...
-        'O2_thermA_mean','O2_thermA_median','O2_thermA_std','S_thermA_mean','S_thermA_median','S_thermA_std','O2_presA_deepcor_mean','O2_presA_deepcor_median',...
-        'O2_presA_deepcor_std','O2_thermA_deepcor_mean','O2_thermA_deepcor_median','O2_thermA_deepcor_std'};
+        'O2_thermA_mean','O2_thermA_median','O2_thermA_std','S_thermA_mean','S_thermA_median','S_thermA_std'};
     glgmerge{i}.HYPMalign_stats = array2table(nan(length(ind),length(vars)));
     glgmerge{i}.HYPMalign_stats.Properties.VariableNames = vars;
   
@@ -73,16 +71,12 @@ for i = 1:length(glgmerge)
             end
             %Calculate HYPM-glider align factors for:
             % Lag-corrected O2, pracsal, and potential T for each depth
-            O2depthComp = glgmerge{i}.doxy_lagcorr_grid(ind_glider_presgrid,ind(j))./wggmerge.doxy_lagcorr(ind_hypm_presgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)));
-            O2depthComp_wfpdeepcorr = glgmerge{i}.doxy_lagcorr_grid(ind_glider_presgrid,ind(j))./...
-                (wggmerge.doxy_lagcorr(ind_hypm_presgrid,glgmerge{i}.HYPMdist_align_ind(ind(j))).*wfp_profilegain_interp(glgmerge{i}.HYPMdist_align_ind(ind(j))));
-            TdepthComp = glgmerge{i}.temp_grid(ind_glider_presgrid,ind(j))./wggmerge.temp(ind_hypm_presgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)));
-            SdepthComp = glgmerge{i}.sal_grid(ind_glider_presgrid,ind(j))./wggmerge.pracsal(ind_hypm_presgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)));
+            O2depthComp = wggmerge.doxy(ind_hypm_presgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)))./glgmerge{i}.doxy_lagcorr_grid(ind_glider_presgrid,ind(j));
+            TdepthComp = wggmerge.temp(ind_hypm_presgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)))./glgmerge{i}.temp_grid(ind_glider_presgrid,ind(j));
+            SdepthComp = wggmerge.pracsal(ind_hypm_presgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)))./glgmerge{i}.sal_grid(ind_glider_presgrid,ind(j));
             % Lag-corrected O2 and pracsal for each isotherm
-            O2thermComp = glgmerge{i}.HYPMalign_doxy_lagcorr_pt(ind_glider_ptgrid,j)./wggmerge.doxy_lagcorr_pt(ind_hypm_ptgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)));
-            O2thermComp_wfpdeepcorr = glgmerge{i}.HYPMalign_doxy_lagcorr_pt(ind_glider_ptgrid,j)./...
-                (wggmerge.doxy_lagcorr_pt(ind_hypm_ptgrid,glgmerge{i}.HYPMdist_align_ind(ind(j))).*wfp_profilegain_interp(glgmerge{i}.HYPMdist_align_ind(ind(j))));
-            SthermComp = glgmerge{i}.HYPMalign_sal_pt(ind_glider_ptgrid,j)./wggmerge.pracsal_pt(ind_hypm_ptgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)));
+            O2thermComp = wggmerge.doxy_pt(ind_hypm_ptgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)))./glgmerge{i}.HYPMalign_doxy_lagcorr_pt(ind_glider_ptgrid,j);
+            SthermComp = wggmerge.pracsal_pt(ind_hypm_ptgrid,glgmerge{i}.HYPMdist_align_ind(ind(j)))./glgmerge{i}.HYPMalign_sal_pt(ind_glider_ptgrid,j);
             % Mean, median, and standard deviation for each of those - put in table
             glgmerge{i}.HYPMalign_stats.O2_presA_mean(j) = nanmean(O2depthComp);
             glgmerge{i}.HYPMalign_stats.O2_presA_median(j) = nanmedian(O2depthComp);
@@ -99,12 +93,6 @@ for i = 1:length(glgmerge)
             glgmerge{i}.HYPMalign_stats.S_thermA_mean(j) = nanmean(SthermComp);
             glgmerge{i}.HYPMalign_stats.S_thermA_median(j) = nanmedian(SthermComp);
             glgmerge{i}.HYPMalign_stats.S_thermA_std(j) = nanstd(SthermComp);
-            glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(j) = nanmean(O2depthComp_wfpdeepcorr);
-            glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_median(j) = nanmedian(O2depthComp_wfpdeepcorr);
-            glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_std(j) = nanstd(O2depthComp_wfpdeepcorr);
-            glgmerge{i}.HYPMalign_stats.O2_thermA_deepcor_mean(j) = nanmean(O2thermComp_wfpdeepcorr);
-            glgmerge{i}.HYPMalign_stats.O2_thermA_deepcor_median(j) = nanmedian(O2thermComp_wfpdeepcorr);
-            glgmerge{i}.HYPMalign_stats.O2_thermA_deepcor_std(j) = nanstd(O2thermComp_wfpdeepcorr);
         end
     end
 end
@@ -114,40 +102,40 @@ end
 figure(3); clf
 subplot(231)
 for i = 1:length(glgmerge)
-    histogram(glgmerge{i}.HYPMalign_stats.O2_thermA_mean,[0.9:0.01:1.2]); hold on;
+    histogram(glgmerge{i}.HYPMalign_stats.O2_thermA_mean,[0.8:0.01:1.5]); hold on;
 end
 %legend(glidertitles,'location','NE')
-xlabel('Glider: HYPM oxygen ratio in matchup profiles, aligned on isotherms');
+xlabel('HYPM: Glider oxygen ratio in matchup profiles, aligned on isotherms');
 
 subplot(232)
 for i = 1:length(glgmerge)
-    histogram(glgmerge{i}.HYPMalign_stats.O2_presA_mean,[0.5:0.01:1.]); hold on;
+    histogram(glgmerge{i}.HYPMalign_stats.O2_presA_mean,[0.8:0.01:1.5]); hold on;
 end
 %legend(glidertitles,'location','NE')
-xlabel('Glider: HYPM oxygen ratio in matchup profiles, aligned on pressure surfaces');
+xlabel('HYPM: Glider oxygen ratio in matchup profiles, aligned on pressure surfaces');
 
 subplot(234)
 for i = 1:length(glgmerge)
-    ind = find(glgmerge{i}.HYPMalign_stats.O2_thermA_mean > 0.9 & glgmerge{i}.HYPMalign_stats.O2_thermA_mean < 1.2);
+    ind = find(glgmerge{i}.HYPMalign_stats.O2_thermA_mean > 0.8 & glgmerge{i}.HYPMalign_stats.O2_thermA_mean < 1.5);
     histogram(glgmerge{i}.HYPMalign_stats.O2_thermA_std(ind),[0:0.002:0.05]); hold on;
 end
 %legend(glidertitles,'location','NE')
-xlabel('Stdev of Glider: HYPM matchup profiles, aligned on isotherms');
+xlabel('Stdev of HYPM: Glider matchup profiles, aligned on isotherms');
 
 subplot(235)
 for i = 1:length(glgmerge)
-    ind = find(glgmerge{i}.HYPMalign_stats.O2_presA_mean > 0.9 & glgmerge{i}.HYPMalign_stats.O2_presA_mean < 1.2);
+    ind = find(glgmerge{i}.HYPMalign_stats.O2_presA_mean > 0.8 & glgmerge{i}.HYPMalign_stats.O2_presA_mean < 1.5);
     histogram(glgmerge{i}.HYPMalign_stats.O2_presA_std(ind),[0:0.002:0.05]); hold on;
 end
 %legend(glidertitles,'location','NE')
-xlabel('Stdev of Glider: HYPM matchup profiles, aligned on pressure surfaces');
+xlabel('Stdev of HYPM: Glider matchup profiles, aligned on pressure surfaces');
 
 subplot(233)
 for i = 1:length(glgmerge)
     histogram(glgmerge{i}.HYPMalign_stats.T_presA_mean,[0.9:0.01:1.2]); hold on;
 end
 %legend(glidertitles,'location','NE')
-xlabel('Glider: HYPM temperature ratio in matchup profiles, aligned on pressure surfaces');
+xlabel('HYPM: Glider temperature ratio in matchup profiles, aligned on pressure surfaces');
 
 subplot(236)
 for i = 1:length(glgmerge)
@@ -156,7 +144,7 @@ for i = 1:length(glgmerge)
 end
 legend([{glidertitles{5} glidertitles{8} glidertitles{1} glidertitles{2} glidertitles{3} ...
     glidertitles{4} glidertitles{6} glidertitles{7}}],'location','NE')
-xlabel('Stdev of Glider: HYPM temp matchup profiles, aligned on pressure surfaces');
+xlabel('Stdev of HYPM: Glider temp matchup profiles, aligned on pressure surfaces');
 
 %% Assess "good-quality" matchups based on
 % 1) Stdev of oxygen matchup ratio for profile
@@ -185,15 +173,15 @@ C_gl = C_gl(glg_reorder,:);
 figure(4); clf
 yline(1,'k-'); hold on; box on
 for i = glg_reorder
-    indnoflag = find(glgmerge{i}.HYPMalign_stats.flag == 0 & isnan(glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean) == 0);
+    indnoflag = find(glgmerge{i}.HYPMalign_stats.flag == 0 & isnan(glgmerge{i}.HYPMalign_stats.O2_presA_mean) == 0);
     if length(indnoflag) > 0
         indlist = glgmerge{i}.HYPMdist_align_ind(~isnan(glgmerge{i}.HYPMdist_align_ind));
-        plot(wggmerge.time(indlist), 1./glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean,'.k','markersize',2); hold on;
-        plot(wggmerge.time(indlist(indnoflag)), 1./glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(indnoflag),'ko','markerfacecolor',C_gl(i,:),'markersize',3); hold on;
-        glgmerge{i}.deepisotherm_gains = 1./glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(indnoflag);
+        plot(wggmerge.time(indlist), glgmerge{i}.HYPMalign_stats.O2_presA_mean,'.k','markersize',2); hold on;
+        plot(wggmerge.time(indlist(indnoflag)), glgmerge{i}.HYPMalign_stats.O2_presA_mean(indnoflag),'ko','markerfacecolor',C_gl(i,:),'markersize',3); hold on;
+        glgmerge{i}.deepisotherm_gains = glgmerge{i}.HYPMalign_stats.O2_presA_mean(indnoflag);
         glgmerge{i}.deepisotherm_times = wggmerge.time(indlist(indnoflag));
         t_start = wggmerge.time(indlist(indnoflag(1)));
-        [P(i,:),Sfit{i}] = polyfit(wggmerge.time(indlist(indnoflag)) - t_start, 1./glgmerge{i}.HYPMalign_stats.O2_presA_deepcor_mean(indnoflag),1);
+        [P(i,:),Sfit{i}] = polyfit(wggmerge.time(indlist(indnoflag)) - t_start, glgmerge{i}.HYPMalign_stats.O2_presA_mean(indnoflag),1);
         [y_fit,delta] = polyval(P(i,:),wggmerge.time(indlist(indnoflag)) - t_start, Sfit{i});
         try
             air_corr_slopeset = (glgmerge{i}.Taircal.air_meas_dist(:,10)-slope_pick.*glgmerge{i}.Taircal.ml_o2sat)./(1-slope_pick);
@@ -205,13 +193,14 @@ for i = glg_reorder
         h(i) = plot(wggmerge.time(indlist(indnoflag)), y_fit, '-','linewidth',2.5,'color',C_gl(i,:)); hold on;
         plot(wggmerge.time(indlist(indnoflag)), y_fit - delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
         plot(wggmerge.time(indlist(indnoflag)), y_fit + delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
+        % Calculate oxygen gain from deep isotherms
+        glgmerge{i}.oxygain_deepisotherm_linear = polyval(P(i,:), glgmerge{i}.time_start - t_start);
     else
         h(i) = h(i-1);
+        glgmerge{i}.oxygain_deepisotherm_linear = NaN;
     end
 end
 ylim([0.85 1.39])
-%ylim([0.9 1.1])
-%xlim([min(wgg{5}.time_start)-10 max(wgg{8}.time_start - 150)])
 xlim([min(wgg{1}.time_start)+30 max(wgg{8}.time_start - 150)])
 datetick('x',2,'keeplimits')
 legend(h(glg_reorder), glidertitles(glg_reorder),'location','SW')

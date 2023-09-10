@@ -10,27 +10,13 @@ h1 = plot(ML_DO.DOdn, ML_DO.DO_umolkg_final, 'k.'); hold on;
 %% Glider mixed layer oxygen, deep isotherm-corrected
 mlmax = 5; %depth max to use for extracting glider data
 slope_pick = 0.2; %slope for glider splash correction
-smoothval = 30;
+smoothval = 10;
 
 for i = 1:length(glgmerge)
     glg = glgmerge{i};
     indt = find(isnan(glg.time_start) == 0);
-    glgmerge{i}.doxy_lagcorr_ml = nanmedian(glg.doxy_lagcorr_grid(1:mlmax, indt)); %pulls out surface data, don't have gain yet
-    
-    %Deep Isotherm Gain: interpolate onto glider times
-    try
-         num_isotherm_gains(i) = length(glgmerge{i}.deepisotherm_gains);
-    end
-    if num_isotherm_gains(i) == 0
-        glgmerge{i}.deepisotherm_gains_interptime = NaN;
-    elseif num_isotherm_gains(i) < 10 %too short for a full time series
-        glgmerge{i}.deepisotherm_gains_interptime = median(glgmerge{i}.deepisotherm_gains)*ones(length(indt),1);
-    else %long enough for full time series
-        deepisotherm_movmedian = movmedian(glgmerge{i}.deepisotherm_gains, 10);
-        [uniquetimes, uniquetimeind, ~] = unique(glgmerge{i}.deepisotherm_times);
-        glgmerge{i}.deepisotherm_gains_interptime = interp1(uniquetimes, deepisotherm_movmedian(uniquetimeind), glgmerge{i}.time_start(indt), 'nearest', 'extrap');
-    end
-    
+    glgmerge{i}.doxy_lagcorr_ml = glg.doxy_lagcorr_grid(5, indt); %pulls out surface data before gain is applied
+        
     %Aircal Gain: -- need to interpolate times
     try
         air_corr_slopeset = (glgmerge{i}.Taircal.air_meas_dist(:,10)-slope_pick.*glgmerge{i}.Taircal.ml_o2sat)./(1-slope_pick);
@@ -38,15 +24,16 @@ for i = 1:length(glgmerge)
         glgmerge{i}.aircal_gains_interptime = interp1(glgmerge{i}.Taircal.air_daten, air_corr_gain, glgmerge{i}.time_start(indt), 'nearest', 'extrap');
     catch
         glgmerge{i}.aircal_gains_interptime = NaN;
-    end
-        
+    end        
     h2 = plot(glgmerge{i}.time_start(indt), movmean(glgmerge{i}.doxy_lagcorr_ml,smoothval,'omitnan'), 'b.'); hold on;
-    h3 = plot(glgmerge{i}.time_start(indt), movmean(glgmerge{i}.doxy_lagcorr_ml.*glgmerge{i}.deepisotherm_gains_interptime',smoothval,'omitnan'), 'm.'); hold on;
-    h4 = plot(glgmerge{i}.time_start(indt), movmean(glgmerge{i}.doxy_lagcorr_ml.*glgmerge{i}.aircal_gains_interptime',smoothval,'omitnan'), 'g.'); hold on;
+    h4 = plot(glgmerge{i}.time_start(indt), movmean(glgmerge{i}.doxy_lagcorr_ml.*glgmerge{i}.aircal_gains_interptime',smoothval,'omitnan'), '.','color',nicecolor('cccbw')); hold on;
 end
 
+h3 = plot(glidermerge.time, movmean(glidermerge.doxy(5,:),smoothval,'omitnan'), '.','color',nicecolor('bbbbbrmmww')); hold on;
+
 %% Plot mixed layer winklers
-tol = 12;
+tol = 20;
+winkmin = 270;
 for yr = 1:length(btlsum)
     btlsumyr = btlsum{yr};
     if length(btlsumyr) > 0
@@ -56,16 +43,24 @@ for yr = 1:length(btlsum)
             indsurf = find(btlsumcast{1}.depth < tol);
             %Plot Winkler values
                   try
-                       plot(datenum(btlsumcast{1}.Date(indsurf)), btlsumcast{1}.Winkler1_umolkg(indsurf), 'ko','markerfacecolor','r'); hold on;
+                      %indgood = find(btlsumcast{1}.NLMR_Outlier1 == 2);
+                      %indplot = intersect(indsurf,indgood); 
+                      plot(datenum(btlsumcast{1}.Date(indsurf)), btlsumcast{1}.Winkler1_umolkg(indsurf), 'ko','markerfacecolor','r'); hold on;
                   end
                   try
-                       h5 = plot(datenum(btlsumcast{1}.Date(indsurf)), btlsumcast{1}.Winkler2_umolkg(indsurf), 'ko','markerfacecolor','r'); hold on;
+                      %indgood = find(btlsumcast{1}.NLMR_Outlier2 == 2);
+                      %indplot = intersect(indsurf,indgood);  
+                      h5 = plot(datenum(btlsumcast{1}.Date(indsurf)), btlsumcast{1}.Winkler2_umolkg(indsurf), 'ko','markerfacecolor','r'); hold on;
                   end
                   try
-                      plot(datenum(btlsumcast{1}.Date(indsurf)), btlsumcast{1}.Winkler_umolkg(indsurf), 'ko','markerfacecolor','r'); hold on;
+                      indgood = find(btlsumcast{1}.NLMR_Outlier < 3 & btlsumcast{1}.Winkler_umolkg > winkmin);
+                      indplot = intersect(indsurf,indgood);
+                      plot(datenum(btlsumcast{1}.Date(indplot)), btlsumcast{1}.Winkler_umolkg(indplot), 'ko','markerfacecolor','r'); hold on;
                   end
                   try
-                      plot(datenum(btlsumcast{1}.Date(indsurf)), btlsumcast{1}.Winkler1_HIP_umolkg(indsurf), 'ko','markerfacecolor','r'); hold on;
+                      indgood = find(btlsumcast{1}.NLMR_HIP1_Outlier == 2);
+                      indplot = intersect(indsurf,indgood);
+                      plot(datenum(btlsumcast{1}.Date(indplot)), btlsumcast{1}.Winkler1_HIP_umolkg(indplot), 'ko','markerfacecolor','r'); hold on;
                   end
             end
         end
@@ -74,7 +69,8 @@ end
 
 %% Add labels to plot
 title('OOI Irminger mixed layer dissolved oxygen')
-legend([h1 h2 h3 h4 h5], 'Calibrated buoy/NSIF moored sensors','Uncorrected glider','Deep isotherm-corrected glider','Air cal-corrected glider','Winklers','location','northwest')
-datetick('x',2)
+legend([h1 h2 h3 h4 h5], 'Calibrated buoy/NSIF moored sensors','Uncorrected glider','Deep isotherm-corrected glider, 5m','Aircal-corrected glider, 5m','Winklers','location','northwest')
+xlim([datenum(2014,6,1) datenum(2022, 9, 1)])
+datetick('x',2,'keeplimits')
 ylabel('\mumol/kg')
 
