@@ -86,6 +86,7 @@ Yr7.G365 = glider_interpCorrFun(G365, 0);
 %For each glider dataset, reshape data into format for Gordon functions, then apply glider_lagCorrectFun
 [Yr7.glg515] = glider_reshape(Yr7.G515);
 [Yr7.glg515.doxy_lagcorr] = glider_lagCorrectFun(Yr7.glg515, tau_in);
+Yr7.glg515.doxy_lagcorr(1:64,:) = NaN; %hard coded solution to nonreal values (NaN + num)
 
 [Yr7.glg365] = glider_reshape(Yr7.G365);
 [Yr7.glg365.doxy_lagcorr] = glider_lagCorrectFun(Yr7.glg365, tau_in);

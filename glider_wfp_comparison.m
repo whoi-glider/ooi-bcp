@@ -164,7 +164,7 @@ for i = 1:length(glgmerge)
     glgmerge{i}.HYPMalign_stats.flag(indTabs) = glgmerge{i}.HYPMalign_stats.flag(indTabs) + 100;
 end
 
-%% Plot time series of alignments
+%% Plot time series of oxygen alignments
 C_gl = cmocean('phase',18);
 slope_pick = 0.2;
 glg_reorder = [9:14,1:8];
@@ -205,5 +205,44 @@ xlim([min(wgg{1}.time_start)+30 max(wgg{8}.time_start - 150)])
 datetick('x',2,'keeplimits')
 legend(h(glg_reorder), glidertitles(glg_reorder),'location','SW')
 title('Glider gain corrections: Comparison of deep isotherm (points & linear fits) and air calibration (thick line) approaches');
+
+%% Plot time series of salinity alignments
+C_gl = cmocean('phase',18);
+glg_reorder = [9:14,1:8];
+C_gl = C_gl(glg_reorder,:);
+
+figure(5); clf
+yline(1,'k-'); hold on; box on
+for i = glg_reorder
+    indnoflag = find(glgmerge{i}.HYPMalign_stats.flag == 0 & isnan(glgmerge{i}.HYPMalign_stats.O2_presA_mean) == 0);
+    if length(indnoflag) > 0
+        indlist = glgmerge{i}.HYPMdist_align_ind(~isnan(glgmerge{i}.HYPMdist_align_ind));
+        plot(wggmerge.time(indlist), glgmerge{i}.HYPMalign_stats.S_presA_mean,'.k','markersize',2); hold on;
+        plot(wggmerge.time(indlist(indnoflag)), glgmerge{i}.HYPMalign_stats.S_presA_mean(indnoflag),'ko','markerfacecolor',C_gl(i,:),'markersize',3); hold on;
+        glgmerge{i}.deepisotherm_gains = glgmerge{i}.HYPMalign_stats.S_presA_mean(indnoflag);
+        glgmerge{i}.deepisotherm_times = wggmerge.time(indlist(indnoflag));
+        t_start = wggmerge.time(indlist(indnoflag(1)));
+        %Calculate and plot linear fit
+        % [P(i,:),Sfit{i}] = polyfit(wggmerge.time(indlist(indnoflag)) - t_start, glgmerge{i}.HYPMalign_stats.S_presA_mean(indnoflag),1);
+        % [y_fit,delta] = polyval(P(i,:),wggmerge.time(indlist(indnoflag)) - t_start, Sfit{i});
+        % h(i) = plot(wggmerge.time(indlist(indnoflag)), y_fit, '-','linewidth',2.5,'color',C_gl(i,:)); hold on;
+        % plot(wggmerge.time(indlist(indnoflag)), y_fit - delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
+        % plot(wggmerge.time(indlist(indnoflag)), y_fit + delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
+        %Calculate and plot gain (no drift)
+        G_sal(i,1) = nanmean(glgmerge{i}.HYPMalign_stats.S_presA_mean(indnoflag));
+        G_sal(i,2) = nanstd(glgmerge{i}.HYPMalign_stats.S_presA_mean(indnoflag));
+        errorbar(nanmedian(wggmerge.time(indlist(indnoflag))), G_sal(i,1), G_sal(i,2), 'color',C_gl(i,:), 'linewidth', 3);
+        h(i) = plot(nanmedian(wggmerge.time(indlist(indnoflag))), G_sal(i,1), 'ko', 'markerfacecolor', C_gl(i,:), 'markersize',10);
+    else
+        h(i) = h(i-1);
+        G_sal(i,:) = NaN;
+    end
+end
+ylim([0.9 1.1])
+xlim([min(wgg{1}.time_start)+30 max(wgg{8}.time_start - 150)])
+datetick('x',2,'keeplimits')
+legend(h(glg_reorder), glidertitles(glg_reorder),'location','SW')
+title('Glider salinity gain corrections from WFP deep isotherm approach');
+
 
 

@@ -269,8 +269,6 @@ end
 
 %% Grid on isotherms
 
-%Select depth resolution and smoothing - current setting is 1 m resolution
-%w/ 5-m smoothing
 pt_grid = [1.5:0.02:5]; %Izi did 1.5-2.9 at intervals of 0.1, as potential temperature
 S = 5; %points to smooth over
 
