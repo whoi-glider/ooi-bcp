@@ -1,7 +1,17 @@
 %% Recalculate oxygen using corrected salinity
+%Also calculate optode-specific pressure compensation coefficient
 
+D_emp = NaN*ones(8,1);
+num2align = [2 2 2 2 3 2 2 8]; %select earliest full depth WFP upcast in dataset to align with calcast (down for #7 to get deep enough)
+calcasts = [5 13 28 41 49 75 96 116]; %hand selection casts for comparison
 for yr = 1:8
-    wgg{yr}.doxy_lagcorr_salcorr_uM = aaoptode_salpresscorr(wgg{yr}.doxy_lagcorr, wgg{yr}.temp, wgg{yr}.pracsal_corr, wgg{yr}.pres, 0); %Oxygen concentration in uM
+    %Pull out cal cast closest to HYPM at deployment
+    %yrind = find(casts.year == yr);
+    %[~,hypmind] = min(casts.HYPMdist(yrind));
+    %casttbl = castsum{casts.year(yrind(hypmind))}(casts.castnum(yrind(hypmind)));
+    casttbl = castsum{casts.year(calcasts(yr))}(casts.castnum(calcasts(yr)));
+    [wgg{yr}.doxy_lagcorr_salcorr_uM, D_emp(yr)] = aaoptode_salpresscorr_empiricalD(wgg{yr}.doxy_lagcorr, wgg{yr}.temp, wgg{yr}.pracsal_corr, wgg{yr}.pres, 0, ...
+        casttbl{1}.prs, casttbl{1}.DOcorr_umolkg./(casttbl{1}.prho/1000), num2align(yr)); %Oxygen concentration in uM
     wgg{yr}.doxy_lagcorr_salcorr_umolkg = wgg{yr}.doxy_lagcorr_salcorr_uM./(wgg{yr}.pdens/1000); %Divide by potential density to get oxygen in umol/kg
 end
 
