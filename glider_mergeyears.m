@@ -13,8 +13,8 @@ glidermerge.deploy_yr = yr*ones(length(ind),1);
 
 %Data gridded on pressure surfaces
 glidermerge.temp = glgmerge{glgstart}.temp_grid(:,ind);
-glidermerge.pracsal = glgmerge{glgstart}.sal_grid(:,ind).*G_sal(glgstart,1);
-glidermerge.SA = glgmerge{glgstart}.SA_grid(:,ind).*G_sal(glgstart,1);
+glidermerge.pracsal = glgmerge{glgstart}.sal_grid(:,ind); %salinity correction makes worse, and uncertainty crosses zero, so not doing
+glidermerge.SA = glgmerge{glgstart}.SA_grid(:,ind); %salinity correction makes worse, and uncertainty crosses zero, so not doing
 glidermerge.CT = glgmerge{glgstart}.CT_grid(:,ind);
 glidermerge.pdens = glgmerge{glgstart}.pdens_grid(:,ind);
 glidermerge.doxy = glgmerge{glgstart}.doxy_lagcorr_grid(:,ind).*glgmerge{glgstart}.oxygain_deepisotherm_linear(ind)';
@@ -30,8 +30,8 @@ for glgid = [13 14 1 3 5 8] %set to pull longest record each year - in years 2, 
     glidermerge.lon = [glidermerge.lon; glgmerge{glgid}.lon_profile(ind)];
     glidermerge.deploy_yr = [glidermerge.deploy_yr; yr*ones(length(ind),1)];
     glidermerge.temp = [glidermerge.temp glgmerge{glgid}.temp_grid(:,ind)];
-    glidermerge.pracsal = [glidermerge.pracsal glgmerge{glgid}.sal_grid(:,ind).*G_sal(glgid,1)];
-    glidermerge.SA = [glidermerge.SA glgmerge{glgid}.SA_grid(:,ind).*G_sal(glgid,1)];
+    glidermerge.pracsal = [glidermerge.pracsal glgmerge{glgid}.sal_grid(:,ind)];
+    glidermerge.SA = [glidermerge.SA glgmerge{glgid}.SA_grid(:,ind)];
     glidermerge.CT = [glidermerge.CT glgmerge{glgid}.CT_grid(:,ind)];
     glidermerge.pdens = [glidermerge.pdens glgmerge{glgid}.pdens_grid(:,ind)];
     glidermerge.doxy = [glidermerge.doxy glgmerge{glgid}.doxy_lagcorr_grid(:,ind).*glgmerge{glgid}.oxygain_deepisotherm_linear(ind)'];
