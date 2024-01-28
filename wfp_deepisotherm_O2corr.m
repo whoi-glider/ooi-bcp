@@ -10,8 +10,17 @@ for yr = 1:8
     %[~,hypmind] = min(casts.HYPMdist(yrind));
     %casttbl = castsum{casts.year(yrind(hypmind))}(casts.castnum(yrind(hypmind)));
     casttbl = castsum{casts.year(calcasts(yr))}(casts.castnum(calcasts(yr)));
-    [wgg{yr}.doxy_lagcorr_salcorr_uM, D_emp(yr)] = aaoptode_salpresscorr_empiricalD(wgg{yr}.doxy_lagcorr, wgg{yr}.temp, wgg{yr}.pracsal_corr, wgg{yr}.pres, 0, ...
+    [~, D_emp(yr)] = aaoptode_salpresscorr_empiricalD(wgg{yr}.doxy_lagcorr, wgg{yr}.temp, wgg{yr}.pracsal_corr, wgg{yr}.pres, 0, ...
         casttbl{1}.prs, casttbl{1}.DOcorr_umolkg./(casttbl{1}.prho/1000), num2align(yr)); %Oxygen concentration in uM
+end
+close all
+
+%Calculate overall mean pressure coefficient from years with good data
+indgoodD = find(D_emp > 0.01);
+D_overall = mean(D_emp(indgoodD));
+
+for i = 1:8
+    wgg{yr}.doxy_lagcorr_salcorr_uM = aaoptode_salpresscorr_fixedD(wgg{yr}.doxy_lagcorr, wgg{yr}.temp, wgg{yr}.pracsal_corr, wgg{yr}.pres, 0,D_overall);
     wgg{yr}.doxy_lagcorr_salcorr_umolkg = wgg{yr}.doxy_lagcorr_salcorr_uM./(wgg{yr}.pdens/1000); %Divide by potential density to get oxygen in umol/kg
 end
 

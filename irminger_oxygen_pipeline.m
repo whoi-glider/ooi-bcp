@@ -45,12 +45,7 @@ irminger_presentation_plotting
 %% Compare all measurements in the mixed layer
 ml_oxygen_compare
 
-%% Remaining steps
-% Check original glider gain to see if air cal vs deep isotherm better
-% matches initial casts (build on cruise_oxygen)
-% Check salinity and pressure correction by looking at O2 uniformity over
-% deeply convecting layers, as in Wolf et al. 2018
-
 %% Earlier scripts no longer used here but with pieces to use in finalizing pipeline
 % cruise_oxygen
 % wfp_deepisotherms
+% WFP_Pc_evalplots - checks pressure correction by looking at O2 uniformity over deeply convecting layers, as in Wolf et al. 2018
