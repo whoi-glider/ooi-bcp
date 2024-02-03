@@ -19,7 +19,7 @@ close all
 indgoodD = find(D_emp > 0.01);
 D_overall = mean(D_emp(indgoodD));
 
-for i = 1:8
+for yr = 1:8
     wgg{yr}.doxy_lagcorr_salcorr_uM = aaoptode_salpresscorr_fixedD(wgg{yr}.doxy_lagcorr, wgg{yr}.temp, wgg{yr}.pracsal_corr, wgg{yr}.pres, 0,D_overall);
     wgg{yr}.doxy_lagcorr_salcorr_umolkg = wgg{yr}.doxy_lagcorr_salcorr_uM./(wgg{yr}.pdens/1000); %Divide by potential density to get oxygen in umol/kg
 end

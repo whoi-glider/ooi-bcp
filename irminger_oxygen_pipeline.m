@@ -31,13 +31,17 @@ glider_analysis
 %Plots gain corrections from WFP swim-by points as compared with air-cal, where available
 glider_wfp_comparison
 
-%% Create a merged glider product
+%% Create merged glider products
 %Synthesizes gridded, deep isotherm oxygen-calibrated data, picking best glider from each year
 glider_mergeyears
+
+%Create gridded, deep isotherm oxygen-calibrated dataset for all gliders
+glider_gridall
 
 %% Save glider merged output
 %save('glidermerge_output.mat', 'glidermerge', 'pres_grid_glider', '-v7.3');
 %save('glider_all_output.mat', 'glgmerge', '-v7.3');
+%save('glider_griddall.mat', 'glidergrid', 'pres_grid_glider', '-v7.3');
 
 %% Plot output merging glider, wfp, and fixed depth data
 irminger_presentation_plotting
