@@ -1,6 +1,8 @@
 %% Recalculate oxygen using corrected salinity
 %Also calculate optode-specific pressure compensation coefficient
 
+figure(100); clf
+C_yrs = cmocean('phase',9);
 D_emp = NaN*ones(8,1);
 num2align = [2 2 2 2 3 2 2 8]; %select earliest full depth WFP upcast in dataset to align with calcast (down for #7 to get deep enough)
 calcasts = [5 13 28 41 49 75 96 116]; %hand selection casts for comparison
@@ -10,17 +12,43 @@ for yr = 1:8
     %[~,hypmind] = min(casts.HYPMdist(yrind));
     %casttbl = castsum{casts.year(yrind(hypmind))}(casts.castnum(yrind(hypmind)));
     casttbl = castsum{casts.year(calcasts(yr))}(casts.castnum(calcasts(yr)));
-    [~, D_emp(yr)] = aaoptode_salpresscorr_empiricalD(wgg{yr}.doxy_lagcorr, wgg{yr}.temp, wgg{yr}.pracsal_corr, wgg{yr}.pres, 0, ...
+    [wgg{yr}.doxy_lagcorr_salcorr_uM, D_emp(yr), optodecalcast{yr}.O2salcorr, minerrval(yr)] = aaoptode_salpresscorr_empiricalD(wgg{yr}.doxy_lagcorr, wgg{yr}.temp, wgg{yr}.pracsal_corr, wgg{yr}.pres, 0, ...
         casttbl{1}.prs, casttbl{1}.DOcorr_umolkg./(casttbl{1}.prho/1000), num2align(yr)); %Oxygen concentration in uM
+
+%Plot calcast along with 1st cast in dataset
+plot(casttbl{1}.DOcorr_umolkg./(casttbl{1}.prho/1000), casttbl{1}.prs, '-','linewidth',2,'color',C_yrs(yr,:)); hold on;
+
 end
-close all
+%close all
+
+axis ij
+ylabel('Pressure (db)')
+xlabel('Oxygen (\muM)')
+legend('2014','2015','2016','2017','2018','2019','2020','2021')
+xlim([260 310])
+title('Calibrated SBE43 cal-cast profiles for P compensation')
+
+figure(101); clf
+for yr = 1:8
+    casttbl = castsum{casts.year(calcasts(yr))}(casts.castnum(calcasts(yr)));
+    plot(optodecalcast{yr}.O2salcorr,casttbl{1}.prs,'-','linewidth',2,'color',C_yrs(yr,:)); hold on;
+end
+axis ij
+ylabel('Pressure (db)')
+xlabel('Oxygen (\muM)')
+legend('2014','2015','2016','2017','2018','2019','2020','2021','location','SE')
+%xlim([260 310])
+title('S-corrected WFP optode cal-cast profiles prior to P compensation')
 
 %Calculate overall mean pressure coefficient from years with good data
 indgoodD = find(D_emp > 0.01);
 D_overall = mean(D_emp(indgoodD));
 
 for yr = 1:8
-    wgg{yr}.doxy_lagcorr_salcorr_uM = aaoptode_salpresscorr_fixedD(wgg{yr}.doxy_lagcorr, wgg{yr}.temp, wgg{yr}.pracsal_corr, wgg{yr}.pres, 0,D_overall);
+    if yr == 1 | yr == 4
+        wgg{yr}.doxy_lagcorr_salcorr_uM = aaoptode_salpresscorr_fixedD(wgg{yr}.doxy_lagcorr, wgg{yr}.temp, wgg{yr}.pracsal_corr, wgg{yr}.pres, 0,D_overall);
+        yr
+    end
     wgg{yr}.doxy_lagcorr_salcorr_umolkg = wgg{yr}.doxy_lagcorr_salcorr_uM./(wgg{yr}.pdens/1000); %Divide by potential density to get oxygen in umol/kg
 end
 

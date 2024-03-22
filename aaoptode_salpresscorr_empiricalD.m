@@ -1,4 +1,4 @@
-function [O2corr, D] = aaoptode_salpresscorr_empiricalD(O2raw,temp,sal,press,S0,calcast_press,calcast_O2uM,numcalcastalign)
+function [O2corr, D, O2salcorr_init_regrid, minerrval] = aaoptode_salpresscorr_empiricalD(O2raw,temp,sal,press,S0,calcast_press,calcast_O2uM,numcalcastalign)
 
 % AAOPTODE_SALPRESSCORR:  Calculates oxygen concentration in uM from raw O2
 % concentration, correcting for temperature and salinity. Uses Salinity
@@ -18,8 +18,10 @@ function [O2corr, D] = aaoptode_salpresscorr_empiricalD(O2raw,temp,sal,press,S0,
 % O2raw_calcastalign    O2 concentration profile to compare with calcast
 %
 % OUTPUT:
-% O2corr:       Oxygen concentration in uM
-% D:            Empirically determined pressure coefficient
+% O2corr:               Oxygen concentration in uM
+% D:                    Empirically determined pressure coefficient
+% O2salcorr_init_regrid: Original not-P-corrected optode profile used to compare with calcast
+% minerrval:            Minimum error (standard deviation of optode vs SBE43) at D
 
 
 temps = log((298.15-temp)./(273.15+temp)); %scaled temperature
@@ -38,34 +40,34 @@ O2salcorr_init_regrid = interp1(press(numcalcastalign,indnonan), O2salcorr(numca
 
 %Test range of possible pressure coefficients & calculate standard deviation between calcast and P-corrected profiles
 Pc_grid = [0.001:0.001:0.1];
-inddeep = find(calcast_press > 300);
+inddeep = find(calcast_press > 1600);
 M = NaN*ones(length(calcast_press),length(Pc_grid)); %initialize array
 err = NaN*ones(1,length(Pc_grid));
 for i = 1:length(Pc_grid)
     M(:,i) = O2salcorr_init_regrid.*(1+calcast_press.*Pc_grid(i)./1000);
     err(i) = nanstdev(M(inddeep,i) - calcast_O2uM(inddeep));
 end
-[~,indPc_opt] = min(err); %calculate minimum
+[minerrval,indPc_opt] = min(err); %calculate minimum
 D = Pc_grid(indPc_opt);
 
 %Plot relationship between stdev and and pressure coefficients
-figure; clf
-plot(Pc_grid, err, 'k.'); hold on;
-xline(D)
-xlim([min(Pc_grid) max(Pc_grid)])
-xlabel('Pressure coefficients')
-ylabel('Stdev between optode and CTD oxygen')
-title(['Optimal Pc for this optode is ' num2str(D)])
-
-%Plot calcast along with 1st cast in dataset
-figure; clf;
-plot(calcast_O2uM, calcast_press, 'k.'); hold on;
-plot(O2salcorr_init_regrid, calcast_press,'b.'); hold on;
-plot(M(:,indPc_opt), calcast_press, 'r.');
-axis ij
-legend('SBE43 calcast','Optode profile, no P corr','Optode profile, P-compensated')
-ylabel('Pressure (db)')
-xlabel('Oxygen (\muM)')
+% figure; clf
+% plot(Pc_grid, err, 'k.'); hold on;
+% xline(D)
+% xlim([min(Pc_grid) max(Pc_grid)])
+% xlabel('Pressure coefficients')
+% ylabel('Stdev between optode and CTD oxygen')
+% title(['Optimal Pc for this optode is ' num2str(D)])
+% 
+% %Plot calcast along with 1st cast in dataset
+% figure; clf;
+% plot(calcast_O2uM, calcast_press, 'k.'); hold on;
+% plot(O2salcorr_init_regrid, calcast_press,'b.'); hold on;
+% plot(M(:,indPc_opt), calcast_press, 'r.');
+% axis ij
+% legend('SBE43 calcast','Optode profile, no P corr','Optode profile, P-compensated')
+% ylabel('Pressure (db)')
+% xlabel('Oxygen (\muM)')
 
 %Calculate pressure-compensated oxygen over full dataset
 O2corr = O2salcorr.*(1+press.*D./1000);
