@@ -95,30 +95,37 @@ end
 
 %% Plot to check correction
 figure; clf
-    subplot(411)
+    %subplot(411)
 for yr = 1:8
     plot(wgg{yr}.time_start, wgg{yr}.doxy_lagcorr_ptgrid(iso_ind,:),'.'); hold on;
-    plot(wgg{yr}.time_start, wgg{yr}.doxy_lagcorr_ptgrid(iso_ind,:).*wgg{yr}.oxy_gain,'k.'); hold on;
+    %plot(wgg{yr}.time_start, wgg{yr}.doxy_lagcorr_ptgrid(iso_ind,:).*wgg{yr}.oxy_gain,'k.'); hold on;
 end
-datetick('x'); ylabel('Oxygen, \mumol/kg'); title(['OOI Irminger WFP data on the ' num2str(ISO) ' \theta isotherm'])
+plot(casts.time(ind_ISOno2020), casts.ISO_DOcorr_umolkg(ind_ISOno2020),'k.','markersize',20); hold on;
+datetick('x'); ylabel('Oxygen, \mumol/kg'); title(['Wire-following profiler L2-equivalent data on the ' num2str(ISO) ' \theta isotherm'])
+xlim([datenum(2014,5,1) datenum(2022,10,1)])
 ylim([230 290])
-    subplot(413)
+%     subplot(413)
+% for yr = 1:8
+%     plot(wgg{yr}.time_start, wgg{yr}.pracsal_ptgrid(iso_ind,:),'.'); hold on;
+% end
+% datetick('x'); ylabel('Prac. salinity')
+%    subplot(414)
 for yr = 1:8
-    plot(wgg{yr}.time_start, wgg{yr}.pracsal_ptgrid(iso_ind,:),'.'); hold on;
+    %plot(wgg{yr}.time_start, wgg{yr}.pres_ptgrid(iso_ind,:),'.'); hold on;
+    if yr == 1
+        A = wgg{yr}.pres_ptgrid(iso_ind,:);
+    else
+        A = [A, wgg{yr}.pres_ptgrid(iso_ind,:)];
+    end
 end
-datetick('x'); ylabel('Prac. salinity')
-    subplot(414)
-for yr = 1:8
-    plot(wgg{yr}.time_start, wgg{yr}.pres_ptgrid(iso_ind,:),'.'); hold on;
-end
-datetick('x'); ylabel('Pressure, db')
-    subplot(412)
-for yr = 1:8
-    plot(wgg{yr}.time_start, wgg{yr}.oxy_gain,'k.'); hold on;
-end
-datetick('x'); 
-ylabel('Oxygen gain')
-ylim([0.98 1.2])
+%datetick('x'); ylabel('Pressure, db')
+%    subplot(412)
+% for yr = 1:8
+%     plot(wgg{yr}.time_start, wgg{yr}.oxy_gain,'k.'); hold on;
+% end
+% datetick('x'); 
+% ylabel('Oxygen gain')
+% ylim([0.98 1.2])
 
 %% Apply oxygen correction to all wfp data
 for yr = 1:8

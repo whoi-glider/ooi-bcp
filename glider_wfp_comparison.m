@@ -165,34 +165,34 @@ for i = 1:length(glgmerge)
 end
 
 %% Plot time series of oxygen alignments
-C_gl = cmocean('phase',18);
+C_gl = cmocean('phase',14);
 slope_pick = 0.2;
 glg_reorder = [9:14,1:8];
 C_gl = C_gl(glg_reorder,:);
 
-figure(4); clf
+figure(40); clf
 yline(1,'k-'); hold on; box on
-for i = glg_reorder
+for i = glg_reorder(([3,5,6,7,9,11,14]))
     indnoflag = find(glgmerge{i}.HYPMalign_stats.flag == 0 & isnan(glgmerge{i}.HYPMalign_stats.O2_presA_mean) == 0);
     if length(indnoflag) > 0
         indlist = glgmerge{i}.HYPMdist_align_ind(~isnan(glgmerge{i}.HYPMdist_align_ind));
-        plot(wggmerge.time(indlist), glgmerge{i}.HYPMalign_stats.O2_presA_mean,'.k','markersize',2); hold on;
+        %plot(wggmerge.time(indlist), glgmerge{i}.HYPMalign_stats.O2_presA_mean,'.k','markersize',2); hold on;
         plot(wggmerge.time(indlist(indnoflag)), glgmerge{i}.HYPMalign_stats.O2_presA_mean(indnoflag),'ko','markerfacecolor',C_gl(i,:),'markersize',3); hold on;
         glgmerge{i}.deepisotherm_gains = glgmerge{i}.HYPMalign_stats.O2_presA_mean(indnoflag);
         glgmerge{i}.deepisotherm_times = wggmerge.time(indlist(indnoflag));
         t_start = wggmerge.time(indlist(indnoflag(1)));
         [P(i,:),Sfit{i}] = polyfit(wggmerge.time(indlist(indnoflag)) - t_start, glgmerge{i}.HYPMalign_stats.O2_presA_mean(indnoflag),1);
         [y_fit,delta] = polyval(P(i,:),wggmerge.time(indlist(indnoflag)) - t_start, Sfit{i});
-        try
-            air_corr_slopeset = (glgmerge{i}.Taircal.air_meas_dist(:,10)-slope_pick.*glgmerge{i}.Taircal.ml_o2sat)./(1-slope_pick);
-%             plot(glgmerge{i}.Taircal.ml_daten, movmean(glgmerge{i}.Taircal.met_o2sat./glgmerge{i}.Taircal.air_corr, 60),...
-%                 '-','linewidth',3,'color',C_gl(i,:).*[0.9 0.9 0.9]); hold on; %empirical slope
-            plot(glgmerge{i}.Taircal.ml_daten, movmean(glgmerge{i}.Taircal.met_o2sat./air_corr_slopeset, 60),...
-                '-','linewidth',5,'color',C_gl(i,:).*[0.7 0.7 0.7]); hold on; %slope set by slope pick
-        end
+%         try
+%             air_corr_slopeset = (glgmerge{i}.Taircal.air_meas_dist(:,10)-slope_pick.*glgmerge{i}.Taircal.ml_o2sat)./(1-slope_pick);
+% %             plot(glgmerge{i}.Taircal.ml_daten, movmean(glgmerge{i}.Taircal.met_o2sat./glgmerge{i}.Taircal.air_corr, 60),...
+% %                 '-','linewidth',3,'color',C_gl(i,:).*[0.9 0.9 0.9]); hold on; %empirical slope
+%             plot(glgmerge{i}.Taircal.ml_daten, movmean(glgmerge{i}.Taircal.met_o2sat./air_corr_slopeset, 60),...
+%                 '-','linewidth',5,'color',C_gl(i,:).*[0.7 0.7 0.7]); hold on; %slope set by slope pick
+%         end
         h(i) = plot(wggmerge.time(indlist(indnoflag)), y_fit, '-','linewidth',2.5,'color',C_gl(i,:)); hold on;
-        plot(wggmerge.time(indlist(indnoflag)), y_fit - delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
-        plot(wggmerge.time(indlist(indnoflag)), y_fit + delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
+        %plot(wggmerge.time(indlist(indnoflag)), y_fit - delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
+        %plot(wggmerge.time(indlist(indnoflag)), y_fit + delta, '--','linewidth',1,'color',C_gl(i,:)); hold on;
         % Calculate oxygen gain from deep isotherms
         glgmerge{i}.oxygain_deepisotherm_linear = polyval(P(i,:), glgmerge{i}.time_start - t_start);
     else
@@ -200,11 +200,12 @@ for i = glg_reorder
         glgmerge{i}.oxygain_deepisotherm_linear = NaN;
     end
 end
-ylim([0.85 1.39])
-xlim([min(wgg{1}.time_start)+30 max(wgg{8}.time_start - 150)])
+ylim([0.85 1.45])
 datetick('x',2,'keeplimits')
-legend(h(glg_reorder), glidertitles(glg_reorder),'location','SW')
-title('Glider gain corrections: Comparison of deep isotherm (points & linear fits) and air calibration (thick line) approaches');
+xlim([min(wgg{1}.time_start)+220 max(wgg{8}.time_start - 150)])
+%legend(h(glg_reorder), glidertitles(glg_reorder),'location','SW')
+%title('Glider gain corrections: Comparison of deep isotherm (points & linear fits) and air calibration (thick line) approaches');
+title('Glider gain corrections, determined by profile matchups with the wire-following profiler');
 
 %% Plot time series of salinity alignments
 C_gl = cmocean('phase',18);
