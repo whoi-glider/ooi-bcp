@@ -3,38 +3,38 @@ sal_iso = mean(casts.ISO_SP(ind_ISOno2020)); %Salinity to pin to, from cruise ca
 iso_ind = find(pt_grid == ISO); %Index of deep isotherm in gridded wfp data
 
 %Apply correction to data prior to creating merged data product to avoid seams across years
-for yr = 1:8
+for yr = 1:10
     wgg{yr}.pracsal_gain = sal_iso./wgg{yr}.pracsal_ptgrid(iso_ind,:);
 end
 
 %% Plot to check correction
 figure; clf
     subplot(411)
-for yr = 1:8
+for yr = 1:10
     plot(wgg{yr}.time_start, wgg{yr}.doxy_lagcorr_ptgrid(iso_ind,:),'.'); hold on;
 end
 datetick('x'); ylabel('L1 oxygen, \mumol/kg'); title(['OOI Irminger WFP data on the ' num2str(ISO) ' \theta isotherm'])
 ylim([280 350])
     subplot(412)
-for yr = 1:8
+for yr = 1:10
     plot(wgg{yr}.time_start, wgg{yr}.pracsal_ptgrid(iso_ind,:),'.'); hold on;
     plot(wgg{yr}.time_start, wgg{yr}.pracsal_ptgrid(iso_ind,:).*wgg{yr}.pracsal_gain,'k.'); hold on;
 end
 datetick('x'); ylabel('Prac. salinity')
     subplot(414)
-for yr = 1:8
+for yr = 1:10
     plot(wgg{yr}.time_start, wgg{yr}.pres_ptgrid(iso_ind,:),'.'); hold on;
 end
 datetick('x'); ylabel('Pressure, db')
     subplot(413)
-for yr = 1:8
+for yr = 1:10
     plot(wgg{yr}.time_start, wgg{yr}.pracsal_gain,'k.'); hold on;
 end
 datetick('x'); 
 ylabel('Salinity gain')
 
 %% Apply salinity correction to all wfp data
-for yr = 1:8
+for yr = 1:10
     [~,len] = size(wgg{yr}.mtime);
     % Calculate corrected practical salinity based on gain
     wgg{yr}.pracsal_corr = wgg{yr}.pracsal.*repmat(wgg{yr}.pracsal_gain, len, 1)';

@@ -17,8 +17,16 @@ function [wfp] = load_HYPM_DOSTA_fun(filename_DOSTA)
    wfp.time_dosta = ncread(filename_DOSTA,'time');
    wfp.lon_dosta = ncread(filename_DOSTA,'lon');
    wfp.lat_dosta = ncread(filename_DOSTA,'lat');
-   wfp.temperature_dosta = ncread(filename_DOSTA,'ctdpf_ckl_seawater_temperature'); %standard_name = 'sea_water_temperature' units = 'deg_C'
-   wfp.pracsal_dosta = ncread(filename_DOSTA,'practical_salinity'); %standard_name = 'sea_water_practical_salinity'
+   try
+        wfp.temperature_dosta = ncread(filename_DOSTA,'ctdpf_ckl_seawater_temperature'); %standard_name = 'sea_water_temperature' units = 'deg_C'
+   catch
+       wfp.temperature_dosta = ncread(filename_DOSTA,'sea_water_temperature'); %standard_name = 'sea_water_temperature' units = 'deg_C'
+   end
+   try
+        wfp.pracsal_dosta = ncread(filename_DOSTA,'practical_salinity'); %standard_name = 'sea_water_practical_salinity'
+   catch
+       wfp.pracsal_dosta = ncread(filename_DOSTA,'sea_water_practical_salinity'); %standard_name = 'sea_water_practical_salinity'
+   end
    wfp.pressure_dosta = ncread(filename_DOSTA,'int_ctd_pressure'); %standard_name = 'sea_water_pressure' units = 'dbar'
        %Optode data
    wfp.oxygen_L1 = ncread(filename_DOSTA,'estimated_oxygen_concentration');%data_product_identifier = 'DOCONCS_L1'

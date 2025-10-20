@@ -6,7 +6,7 @@
 %Output saved in end of script for use without having to re-run
 
 %Loop over first eight years of WFP data
-for yr = 1:8
+for yr = 9:10
 %% Gordon et al. 2020 version of correction
 % Format WFP output into matrices that match the required argument formats
 % listed in calculate_tau.m and calculate_tau_wTemp.m
@@ -135,12 +135,12 @@ end
 figure(100); clf
     smthval = 60;
 subplot(211)
-for yr = 1:8
+for yr = 1:10
     ind = find(isnan(wgg{yr}.thicknessd) == 0);
 plot(wgg{yr}.mtime(wgg{yr}.rng(ind),1), wgg{yr}.thicknessd(ind),'k.'); hold on;
 plot(wgg{yr}.mtime(wgg{yr}.rng(ind),1), movmean(wgg{yr}.thicknessd(ind),smthval),'r.'); hold on;
 end
-xlim([datenum(2014,8,15) datenum(2022,8,1)])
+xlim([datenum(2014,8,15) datenum(2024,8,1)])
 ylim([0 120])
 datetick('x','keeplimits')
 ylabel('Thickness (\mum)')
@@ -148,12 +148,12 @@ legend('Individual points','60-pt moving mean')
 title(['OOI Irminger WFP lag, Gordon et al. 2020 T-dependent method calc. in density space'])
 
 subplot(212)
-for yr = 1:8
+for yr = 1:10
     ind = find(isnan(wgg{yr}.tau_Trefd) == 0);
 plot(wgg{yr}.mtime(wgg{yr}.rng(ind),1), wgg{yr}.tau_Trefd(ind),'k.'); hold on;
 plot(wgg{yr}.mtime(wgg{yr}.rng(ind),1), movmean(wgg{yr}.tau_Trefd(ind),smthval),'r.'); hold on;
 end
-xlim([datenum(2014,8,15) datenum(2022,8,1)])
+xlim([datenum(2014,8,15) datenum(2024,8,1)])
 ylim([0 80])
 datetick('x','keeplimits')
 ylabel('\tau (s) at 4^oC')
@@ -199,18 +199,18 @@ figure(2); clf
 % ylabel('RMSD')
 % title('w/ T term, depth aligned')
 %     subplot(224)
-plot(wgg{5}.thickness_constants,wgg{5}.rmsdtd,'.')
+plot(wgg{9}.thickness_constants,wgg{9}.rmsdtd,'.')
 xlabel('thickness (\mum)')
 ylabel('RMSD')
 title('w/ T term, density aligned')
 
 %% Calculate WFP velocity in dbar s-1 to compare with Bittig & Kortzinger 2017
-testyr = 1;
+testyr = 9;
 v = diff(wfp{testyr}.pressure_dosta)./(diff(wfp{testyr}.time_dosta_mat)*(24*60*60));
 figure(3); clf
 histogram(abs(v))
-title({'WFP Yr 1 velocity histogram, median = ' num2str(nanmedian(abs(v)),3)})
+title({'WFP Yr 9 velocity histogram, median = ' num2str(nanmedian(abs(v)),3)})
 xlabel('|dbar s^{-1}|')
 
 %% Save output
-save('wfp_lag_output_2Sept2023.mat', 'wgg', '-v7.3')
+save('wfp_lag_output_20Oct2025.mat', 'wgg', '-v7.3')

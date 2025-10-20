@@ -13,9 +13,11 @@ filenames = {'deployment0001_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_
     'deployment0005_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20180610T000207-20190630T071452.nc',...
     'deployment0006_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20190807T000205-20200509T172910.nc'...
     'deployment0007_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20200825T200205-20210819T060646.nc'...
-    'deployment0008_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20210820T000204-20220710T045503.nc'};
+    'deployment0008_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20210820T000204-20220710T045503.nc'...
+    'deployment0009_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20220702T000208-20230611T104311.nc'...
+    'deployment0010_GI02HYPM-WFP02-03-DOSTAL000-recovered_wfp-dosta_ln_wfp_instrument_recovered_20230905T000209-20240625T090554.nc'};
 
-for i = 1:8
+for i = 1:10
     [wfp{i}] = load_HYPM_DOSTA_fun(filenames{i});
 end
 
@@ -27,29 +29,32 @@ filenames_flord = {'deployment0001_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flo
     'deployment0005_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20180610T000207-20190630T071452.nc',...
     'deployment0006_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20190807T000205-20200509T172910.nc'...
     'deployment0007_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20200825T200205-20210819T060646.nc'...
-    'deployment0008_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20210814T000210-20220710T045503.nc'};
+    'deployment0008_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20210814T000210-20220710T045503.nc'...
+    'deployment0009_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20220702T000208-20230611T104311.nc' ...
+    'deployment0010_GI02HYPM-WFP02-01-FLORDL000-recovered_wfp-flord_l_wfp_instrument_recovered_20230905T000209-20240625T090554.nc'};
 
 filterres = 11; %choose number of points to use in running min/max filter for backscatter spike analysis
 max_tol = 0.005;
-for i = 1:8
+for i = 1:10
     [wfp_flord{i}] = load_HYPM_FLORD_fun(filenames_flord{i}, filterres, max_tol);
 end
 
 %% Lag correction
 %wfp_lag.m %this takes a long time to run, so output is saved
-load wfp_lag_output_2Sept2023.mat %"wgg" output from wfp_lag.m
+%load wfp_lag_output_2Sept2023.mat %"wgg" output from wfp_lag.m
+load wfp_lag_output_20Oct2025.mat %updated version with years 9 and 10
 
 %% Calculate depth intervals of data
 
 figure; clf
-for yr = [8,7,6,5,4,3,2,1]
+for yr = [10,9,8,7,6,5,4,3,2,1]
     A = abs(diff(wgg{yr}.pres'));
     histogram(A(:)); hold on;
     a(yr) = nanmean(A(:));
     b(yr) = nanstd(A(:));
 end
 xlim([0 4.5])
-legend('Year 8','Year 7','Year 6', 'Year 5', 'Year 4', 'Year 3', 'Year 2','Year 1')
+legend('Year 10','Year 9','Year 8','Year 7','Year 6', 'Year 5', 'Year 4', 'Year 3', 'Year 2','Year 1')
 title('Histogram all depth intervals in raw WFP measurements')
 xlabel('Presure (dbar)')
 
@@ -57,7 +62,7 @@ xlabel('Presure (dbar)')
 
 %Check for outliers/range test
 figure; clf
-for yr = 1:8
+for yr = 1:10
     A = wgg{yr}.doxy_lagcorr(:);
     histogram(A); hold on;
     r(yr,1) = nanmean(A) - 4*nanstd(A);
@@ -66,37 +71,37 @@ for yr = 1:8
     r(yr,4) = length(find(A > r(yr,2)));
 end
 xlim([280 390])
-legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8')
+legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8','Year 9','Year 10')
 title('Histogram all OOI Irminger WFP L1-oxygen, lag corrected only')
 
 
 % Check for spikess
 figure; clf
 subplot(311)
-for yr = 1:8
+for yr = 1:10
     A = diff(wgg{yr}.doxy_lagcorr');
     histogram((A(:))); hold on;
 end
 xlim([-4 4])
-legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8')
+legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8', 'Year 9','Year 10')
 title('Histogram of paired sample difference, all OOI Irminger WFP L1-oxygen, lag corrected only')
 
 subplot(312)
-for yr = 1:8
+for yr = 1:10
     A = diff(wgg{yr}.temp');
     histogram((A(:))); hold on;
 end
 xlim([-0.05 0.05])
-legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8')
+legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8', 'Year 9','Year 10')
 title('Histogram of paired sample difference, all OOI Irminger temperature')
 
 subplot(313)
-for yr = 1:8
+for yr = 1:10
     A = diff(wgg{yr}.pracsal');
     histogram((A(:))); hold on;
 end
 xlim([-0.01 0.01])
-legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8')
+legend('Year 1','Year 2','Year 3', 'Year 4', 'Year 5', 'Year 6', 'Year 7','Year 8', 'Year 9','Year 10')
 title('Histogram of paired sample difference, all OOI Irminger salinity')
 
 %% Flag outlier/spike samples
@@ -107,7 +112,7 @@ tempspike = 0.05;
 salspike = 0.005;
 c = 0; %counter to keep track of # datapoints flagged
 
-for yr = 1:8
+for yr = 1:10
 
     %Number of profiles
     num_profiles = length(wgg{yr}.updown);
@@ -136,7 +141,7 @@ end
 %% Reformat fluorometer data following same structure as oxygen data
 tol = 50; %only use profiles with at least 50 points
 
-for yr = 1:8
+for yr = 1:10
 numprofiles = max(wfp_flord{yr}.profile_index);
     wgg_flord{yr}.mtime = NaN(numprofiles,2000);
     wgg_flord{yr}.lon = NaN(numprofiles,2000);
@@ -193,7 +198,7 @@ end
 pres_grid = [150:1:2600];
 S = 5; %points to smooth over
 
-for yr = 1:8
+for yr = 1:10
 
     %Number of profile indices
     num_profiles = length(wgg_flord{yr}.updown);
@@ -235,7 +240,7 @@ pres_grid = [150:1:2600];
 pres_grid_hypm = pres_grid;
 S = 5; %points to smooth over
 
-for yr = 1:8
+for yr = 1:10
 
     %Number of profile indices
     num_profiles = length(wgg{yr}.updown);
@@ -259,7 +264,8 @@ for yr = 1:8
         wgg{yr}.pracsal_grid(:,i) = movmean(interp1(wgg{yr}.pres(i,ind), wgg{yr}.pracsal(i,ind), pres_grid),S);
         wgg{yr}.temp_grid(:,i) = movmean(interp1(wgg{yr}.pres(i,ind), wgg{yr}.temp(i,ind), pres_grid),S);
         wgg{yr}.pdens_grid(:,i) = movmean(interp1(wgg{yr}.pres(i,ind), wgg{yr}.pdens(i,ind), pres_grid),S);
-        wgg{yr}.time_start(i) = nanmin(wgg{yr}.mtime(i,:));
+            ind_pos = find(wgg{yr}.mtime(i,:) > 0);
+        wgg{yr}.time_start(i) = nanmin(wgg{yr}.mtime(i,ind_pos));
         wgg{yr}.duration(i) = nanmax(wgg{yr}.mtime(i,:)) - nanmin(wgg{yr}.mtime(i,:));
         wgg{yr}.lat_profile(i) = nanmean(wgg{yr}.lat(i,:));
         wgg{yr}.lon_profile(i) = nanmean(wgg{yr}.lon(i,:)); 
@@ -272,7 +278,7 @@ end
 pt_grid = [1.5:0.02:5]; %Izi did 1.5-2.9 at intervals of 0.1, as potential temperature
 S = 5; %points to smooth over
 
-for yr = 1:8
+for yr = 1:10
     
     %Calculate potential temperature
     wgg{yr}.ptemp = gsw_pt0_from_t(wgg{yr}.SA,wgg{yr}.temp,wgg{yr}.pres);

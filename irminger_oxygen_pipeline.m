@@ -21,7 +21,7 @@ wfp_mergeyears
 %number of profiles removed based on anomalous data, so different sizes
 
 %% Save wfp merged output
-%save('wfpmerge_output.mat', 'wggmerge', 'wggmerge_fl', 'HYPMlat', 'HYPMlon', 'pres_grid_hypm', '-v7.3');
+save('wfpmerge_output_Y1-10.mat', 'wggmerge', 'wggmerge_fl', 'HYPMlat', 'HYPMlon', 'pres_grid_hypm', '-v7.3');
 
 %% Read in and process glider data (all deployments, years 2-8)
 %Includes air calibration calculations and assessment when gliders were configured for air oxygen measurements (year 5 on)

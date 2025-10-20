@@ -44,8 +44,8 @@ title('S-corrected WFP optode cal-cast profiles prior to P compensation')
 indgoodD = find(D_emp > 0.01);
 D_overall = mean(D_emp(indgoodD));
 
-for yr = 1:8
-    if yr == 1 | yr == 4
+for yr = 1:10
+    if yr == 1 | yr == 4 | yr > 8
         wgg{yr}.doxy_lagcorr_salcorr_uM = aaoptode_salpresscorr_fixedD(wgg{yr}.doxy_lagcorr, wgg{yr}.temp, wgg{yr}.pracsal_corr, wgg{yr}.pres, 0,D_overall);
         yr
     end
@@ -57,7 +57,7 @@ end
 pres_grid = pres_grid_hypm;
 S = 5; %points to smooth over
 
-for yr = 1:8
+for yr = 1:10
     %Number of profile indices
     num_profiles = length(wgg{yr}.updown);
     %Calculate potential temperature
@@ -89,20 +89,20 @@ iso_ind = find(pt_grid == ISO); %Index of deep isotherm in gridded wfp data
 smoothval = 5; %moving median over 5 profiles
 
 %Apply correction to data prior to creating merged data product to avoid seams across years
-for yr = 1:8
+for yr = 1:10
     wgg{yr}.oxy_gain = movmedian(oxy_iso./wgg{yr}.doxy_lagcorr_ptgrid(iso_ind,:),smoothval,'omitnan');
 end
 
 %% Plot to check correction
 figure; clf
     %subplot(411)
-for yr = 1:8
+for yr = 1:10
     plot(wgg{yr}.time_start, wgg{yr}.doxy_lagcorr_ptgrid(iso_ind,:),'.'); hold on;
     %plot(wgg{yr}.time_start, wgg{yr}.doxy_lagcorr_ptgrid(iso_ind,:).*wgg{yr}.oxy_gain,'k.'); hold on;
 end
 plot(casts.time(ind_ISOno2020), casts.ISO_DOcorr_umolkg(ind_ISOno2020),'k.','markersize',20); hold on;
 datetick('x'); ylabel('Oxygen, \mumol/kg'); title(['Wire-following profiler L2-equivalent data on the ' num2str(ISO) ' \theta isotherm'])
-xlim([datenum(2014,5,1) datenum(2022,10,1)])
+xlim([datenum(2014,5,1) datenum(2024,10,1)])
 ylim([230 290])
 %     subplot(413)
 % for yr = 1:8
@@ -128,7 +128,7 @@ end
 % ylim([0.98 1.2])
 
 %% Apply oxygen correction to all wfp data
-for yr = 1:8
+for yr = 1:10
     [~,len] = size(wgg{yr}.mtime);
     % Calculate corrected oxygen concentration based on gain
     wgg{yr}.doxy_gaincorr = wgg{yr}.doxy_lagcorr_salcorr_umolkg.*repmat(wgg{yr}.oxy_gain, len, 1)';

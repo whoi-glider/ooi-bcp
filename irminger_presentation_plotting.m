@@ -37,14 +37,14 @@ doxy_scat_gl = glidermerge.doxy(:,1:skipval:end);
 
     subplot(311)
 scatter(Xg(:),Yg(:),5,doxy_scat_gl(:),'filled'); hold on;
-axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2022,1,1)]); ylim([0 ymax]);
+axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2024,9,1)]); ylim([0 ymax]);
 colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside'); caxis([cmin cmax]);
 datetick('x',2,'keeplimits');
 title('OOI Irminger glider oxygen concentration (\mumol/kg)', 'Fontsize', 12)
 
     subplot(312)
 scatter(Xw(:),Yw(:),5,doxy_scat_wfp(:),'filled'); hold on;
-axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2022,1,1)]); ylim([0 ymax]);
+axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2024,9,1)]); ylim([0 ymax]);
 colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside'); caxis([cmin cmax]);
 datetick('x',2,'keeplimits');
 title('OOI Irminger WFP oxygen concentration (\mumol/kg)', 'Fontsize', 12)
@@ -54,7 +54,7 @@ scatter(Xg(:),Yg(:),5,doxy_scat_gl(:),'filled'); hold on;
 scatter(Xw(:),Yw(:),5,doxy_scat_wfp(:),'filled'); hold on;
 scatter(ML_DO.DOdn, 5*ones(length(ML_DO.DOdn),1), 5, ML_DO.DO_umolkg_final,'filled');
 plot(chldt_mat, chlmld, 'k.','markersize',5); hold on; %Kristen's MLD calcs from spring 2023
-axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2022,1,1)]); ylim([0 ymax]);
+axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2024,9,1)]); ylim([0 ymax]);
 colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside'); caxis([cmin cmax]);
 datetick('x',2,'keeplimits');
 title('Merged OOI Irminger glider, WFP, and fixed depth oxygen concentration (\mumol/kg)', 'Fontsize', 12)
@@ -70,7 +70,7 @@ scatter(Xw(:),Yw(:),5,temp_scat_wfp(:),'filled'); hold on;
 scatter(ML_DO.DOdn, 5*ones(length(ML_DO.DOdn),1), 5, ML_DO.sea_water_temperature,'filled');
 plot(chldt_mat, chlmld, 'k.','markersize',5); hold on; %Kristen's MLD calcs from spring 2023
 
-axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2022,1,1)]); ylim([0 ymax]);
+axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2024,9,1)]); ylim([0 ymax]);
 colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside'); caxis([1.5 10.5]);
 datetick('x',2,'keeplimits');
 title('Merged OOI Irminger glider, WFP, and fixed depth potential temperature (^oC)', 'Fontsize', 12)
@@ -85,7 +85,7 @@ scatter(Xw(:),Yw(:),5,sal_scat_wfp(:),'filled'); hold on;
 scatter(ML_DO.DOdn, 5*ones(length(ML_DO.DOdn),1), 5, ML_DO.sea_water_practical_salinity,'filled');
 plot(chldt_mat, chlmld, 'k.','markersize',5); hold on; %Kristen's MLD calcs from spring 2023
 
-axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2022,1,1)]); ylim([0 ymax]);
+axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2024,9,1)]); ylim([0 ymax]);
 colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside'); caxis([34.6 35.05])
 datetick('x',2,'keeplimits');
 title('Merged OOI Irminger glider, WFP, and fixed depth practical salinity', 'Fontsize', 12)
@@ -101,7 +101,7 @@ scatter(Xg(:),Yg(:),5,chl_scat_gl(:),'filled'); hold on;
 scatter(Xw_fl(:),Yw_fl(:),5,chl_scat_wfp(:),'filled'); hold on;
 plot(chldt_mat, chlmld, 'k.','markersize',5); hold on; %Kristen's MLD calcs from spring 2023
 
-axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2022,1,1)]); ylim([0 ymax]);
+axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2024,9,1)]); ylim([0 ymax]);
 colormap(C); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside'); caxis([-3 0.5])
 datetick('x',2,'keeplimits');
 title('Merged OOI Irminger glider and WFP log10 chlorophyll', 'Fontsize', 12)
@@ -116,7 +116,7 @@ scatter(Xw(:),Yw(:),5,O2sat_scat_wfp(:),'filled'); hold on;
 scatter(ML_DO.DOdn, 5*ones(length(ML_DO.DOdn),1), 5, (ML_DO.DO_umolkg_final./ML_DO.O2sol_umolkg - 1)*100,'filled');
 plot(chldt_mat, chlmld, 'k.','markersize',5); hold on; %Kristen's MLD calcs from spring 2023
 
-axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2022,1,1)]); ylim([0 ymax]);
+axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2024,9,1)]); ylim([0 ymax]);
 colormap(cmocean('Balance','pivot',0)); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
 datetick('x',2,'keeplimits');
 title('Merged OOI Irminger glider, WFP, and fixed depth oxygen saturation (%)', 'Fontsize', 12)
@@ -127,30 +127,30 @@ spike_scat = wggmerge_fl.spikes(:,1:skipval:end);
 scatter(Xw_fl(:),Yw_fl(:),5,spike_scat(:),'filled'); hold on;
 plot(chldt_mat, chlmld, 'k.','markersize',8); hold on; %Kristen's MLD calcs from spring 2023
 
-axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2022,1,1)]); ylim([0 ymax]); caxis([0 7E-5]);
+axis ij; axis tight; xlim([datenum(2014,9,10) datenum(2024,9,1)]); ylim([0 ymax]); caxis([0 7E-5]);
 colormap(cmocean('Algae')); ylabel('Pressure (db)', 'Fontsize', 10); hcb = colorbar; set(hcb,'location','eastoutside')
 datetick('x',2,'keeplimits');
 title('OOI Irminger WFP backscatter spikes (large particles)', 'Fontsize', 12)
 
 %% Plot Meg's DIC figure
-addpath 'C:\Users\palevsky\Documents\GitHub\CANYON-B-MFY\For Hilary review'
-load workspace20230321.mat %Meg's workspace from analysis
-addpath(genpath('C:\Users\palevsky\Documents\GitHub\boundedline-pkg'))
-
-colorlist = [nicecolor('rrry'); nicecolor('ryyym'); nicecolor('yyyyyym');  nicecolor('ggyc'); nicecolor('ggbb'); nicecolor('bccc'); nicecolor('ccbb'); nicecolor('bbbbb'); nicecolor('m'); nicecolor('rrmmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb')];
-red = nicecolor('rrryb'); cruise1 = nicecolor('ggycc'); cruise2 = nicecolor('gbbb'); 
-  figure(7); clf; hold on 
-for yr = 2:8
-    castsumyr = castsum{yr};
-    castlistyr = castlist{yr};  
-            v = b_shift{yr};
-            bl_er = 7.5*ones(length(deep{yr}.longdic), 1);
-            bl = boundedline(deployment_dates{yr}, dic_mean{yr}.dic+v,dic_mean{yr}.dic_u+nanmean(bl_er), 'nan', 'gap', 'alpha'); 
-            h1 = plot(deployment_dates{yr}, dic_mean{yr}.dic+v,'.','markersize',6,'color',nicecolor('bbckkkw'));         
-end  
-%formatting 
-ylabel('DIC (\mumol/kg)')
-xlim([datenum(2015,6,10) datenum(2022,8,1)]); 
-datetick('x',2,'keeplimits');
-title('OOI Irminger mixed layer DIC, Deployments 2-8','Fontsize',12)
-ylim([2020 2200]) 
+% addpath 'C:\Users\palevsky\Documents\GitHub\CANYON-B-MFY\For Hilary review'
+% load workspace20230321.mat %Meg's workspace from analysis
+% addpath(genpath('C:\Users\palevsky\Documents\GitHub\boundedline-pkg'))
+% 
+% colorlist = [nicecolor('rrry'); nicecolor('ryyym'); nicecolor('yyyyyym');  nicecolor('ggyc'); nicecolor('ggbb'); nicecolor('bccc'); nicecolor('ccbb'); nicecolor('bbbbb'); nicecolor('m'); nicecolor('rrmmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb'); nicecolor('mmbb')];
+% red = nicecolor('rrryb'); cruise1 = nicecolor('ggycc'); cruise2 = nicecolor('gbbb'); 
+%   figure(7); clf; hold on 
+% for yr = 2:8
+%     castsumyr = castsum{yr};
+%     castlistyr = castlist{yr};  
+%             v = b_shift{yr};
+%             bl_er = 7.5*ones(length(deep{yr}.longdic), 1);
+%             bl = boundedline(deployment_dates{yr}, dic_mean{yr}.dic+v,dic_mean{yr}.dic_u+nanmean(bl_er), 'nan', 'gap', 'alpha'); 
+%             h1 = plot(deployment_dates{yr}, dic_mean{yr}.dic+v,'.','markersize',6,'color',nicecolor('bbckkkw'));         
+% end  
+% %formatting 
+% ylabel('DIC (\mumol/kg)')
+% xlim([datenum(2015,6,10) datenum(2022,8,1)]); 
+% datetick('x',2,'keeplimits');
+% title('OOI Irminger mixed layer DIC, Deployments 2-8','Fontsize',12)
+% ylim([2020 2200]) 

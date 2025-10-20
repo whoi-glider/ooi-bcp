@@ -1,5 +1,5 @@
 %% Extract location of HYPM in each year
-for yr = 1:8
+for yr = 1:10
     HYPMlat(yr) = nanmean(wgg{yr}.lat_profile);
     HYPMlon(yr) = nanmean(wgg{yr}.lon_profile);
 end
@@ -29,7 +29,7 @@ wggmerge.pres_pt = wgg{1}.pres_ptgrid;
 wggmerge.temp_pt = wgg{1}.temp_ptgrid;
 wggmerge.pdens_pt = wgg{1}.pdens_ptgrid;
 
-for yr = 2:8
+for yr = 2:10
     wggmerge.time = [wggmerge.time; wgg{yr}.time_start];
     wggmerge.duration = [wggmerge.duration; wgg{yr}.duration];
     wggmerge.lat = [wggmerge.lat; wgg{yr}.lat_profile];
@@ -66,7 +66,7 @@ wggmerge_fl.backscatter = wgg_flord{1}.backscatter_grid;
 wggmerge_fl.spikes = wgg_flord{1}.spikes_grid;
 wggmerge_fl.chlspikes = wgg_flord{1}.chlspikes_grid;
 
-for yr = 2:8
+for yr = 2:10
     wggmerge_fl.time = [wggmerge_fl.time; wgg_flord{yr}.time_start];
     wggmerge_fl.duration = [wggmerge_fl.duration; wgg_flord{yr}.duration];
     wggmerge_fl.lat = [wggmerge_fl.lat; wgg_flord{yr}.lat_profile];
