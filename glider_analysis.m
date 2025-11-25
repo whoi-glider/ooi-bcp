@@ -263,6 +263,20 @@ legend(glidertitles,'location','NW')
 xlabel('Salinity (PSU)');
 xlim([salmin + 2.5 salmax])
 
+%% Assess depth resolution
+figure(10); clf
+for i = 1:length(glgmerge) %[11 13 14 1 3 5 8]
+    A = abs(diff(glgmerge{i}.pres,1,2));
+    histogram(A(:)); hold on;
+    a(i) = nanmean(A(:));
+    aa(i) = nanmedian(A(:));
+    b(i) = nanstd(A(:));
+end
+legend(glidertitles(6:14),'location','NW')
+xlabel('Depth interval (dbar)');
+xlim([0 4])
+
+
 %% Assess sensitivity to selection of air measurement value from distribution within each surface interval
 figure(2); clf
 n = 7; %number of gliders in glgmerge with aircal data
